@@ -1,4 +1,7 @@
 import View from '../View';
+import template from '../../templates/body/treeView.pug';
+
+import '../../stylesheets/body/treeView.styl';
 
 const TreeView = View.extend({
     events: {
@@ -6,7 +9,7 @@ const TreeView = View.extend({
     initialize() {
     },
     render() {
-        this.$el.html("hello vaui");
+        this.$el.html(template(this));
         return this;
     }
 });

@@ -6,7 +6,7 @@ import View from '../View';
 import router from '../../router';
 // import LayoutHeaderUserView from './HeaderUserView';
 import template from '../../templates/layout/headerView.pug';
-import logoImage from '../../assets/Minerva_Logo.png';
+import logoImage from '../../assets/logo.png';
 
 const HeaderView = View.extend({
     events: {

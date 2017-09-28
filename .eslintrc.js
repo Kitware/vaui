@@ -5,7 +5,7 @@ module.exports = {
         'underscore/prefer-invoke': 0
     },
     globals: {
-        minerva: true,
+        vaui: true,
         geo: true,
         jsonPath: true,
         colorbrewer: true,
