@@ -27,6 +27,7 @@ const ViewerView = View.extend({
         this.playing = false;
         this.nativeVideoWidget = null;
         this.slider = null;
+        this.draggingSlider = false;
         restRequest({
             method: 'GET',
             url: '/file/59caaf931d0e5c4e0b9d94a1'
@@ -43,12 +44,16 @@ const ViewerView = View.extend({
                 el: this.$('.video'),
                 model: this.fileModel,
                 onPause: () => {
-                    this.playing = false;
-                    this.render();
+                    if (!this.draggingSlider) {
+                        this.playing = false;
+                        this.render();
+                    }
                 },
                 onProgress: (currentTime, duration) => {
-                    this.slider.setAttribute('max', parseInt(duration * 100));
-                    this.slider.setValue(parseInt(currentTime * 100));
+                    if (!this.draggingSlider) {
+                        this.slider.setAttribute('max', parseInt(duration * 100));
+                        this.slider.setValue(parseInt(currentTime * 100));
+                    }
                 }
             })
                 .render();
@@ -56,7 +61,20 @@ const ViewerView = View.extend({
         if (!this.slider) {
             this.slider = new Slider(this.$('.frame-slider')[0], {
                 tooltip: 'hide'
-            });
+            })
+                .on('slideStart', () => {
+                    this.draggingSlider = true;
+                    if (this.playing) {
+                        this.nativeVideoWidget.pause();
+                    }
+                }).on('slideStop', () => {
+                    this.draggingSlider = false;
+                    if (this.playing) {
+                        this.nativeVideoWidget.play();
+                    }
+                }).on('change', (e) => {
+                    this.nativeVideoWidget.setTime(e.newValue / 100);
+                })
         }
         return this;
     }

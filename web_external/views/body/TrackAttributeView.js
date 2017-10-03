@@ -8,6 +8,7 @@ const TrackAttributeView = View.extend({
     events: {
     },
     initialize() {
+        this.trackAttributes = trackAttributes;
     },
     render() {
         this.$el.html(template(this));

@@ -3,4 +3,13 @@
     .panel-heading
       | Track Attribute
     .panel-body
-      | Content
+      ul
+        each attributes, category in trackAttributes
+          li=category
+            ul
+              each attribute in attributes
+                li
+                  .checkbox
+                    label
+                      input(type='checkbox')
+                      =attribute

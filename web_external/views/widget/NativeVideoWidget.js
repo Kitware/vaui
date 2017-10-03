@@ -41,6 +41,9 @@ const NativeVideoWidget = View.extend({
         if (this.onProgress) {
             this.onProgress(this.video.currentTime, this.video.duration);
         }
+    },
+    setTime(time) {
+        this.video.currentTime = time;
     }
 });
 export default NativeVideoWidget;

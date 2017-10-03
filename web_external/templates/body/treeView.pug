@@ -3,4 +3,28 @@
     .panel-heading
       | Tree View
     .panel-body
-      | Content
+      ul.nav.nav-tabs
+        li
+          a(data-toggle="tab", href="#activities") Activities
+        li
+          a(data-toggle="tab", href="#events") Events
+        li.active
+          a(data-toggle="tab", href="#tracks") Tracks
+        li
+          a(data-toggle="tab", href="#scene-elements") Scene Elements
+
+      .tab-content
+        #activities.tab-pane
+          | 1
+        #events.tab-pane
+          | 2
+        #tracks.tab-pane.active
+          ul.item-list
+            each track in tracks
+              li
+                .checkbox
+                    label
+                      input(type='checkbox', checked)
+                      =track
+        #scene-elements.tab-pane
+          | 4
