@@ -1,9 +1,14 @@
 import $ from 'jquery';
 import { registerPluginNamespace } from 'girder/pluginUtils';
+import girderRouter from 'girder/router';
 
 import App from './App.js';
 import events from './events';
-import router from './router';
+
+girderRouter.enabled(false);
+
+girderRouter.route('', 'index', function () {
+});
 
 $(function () {
     events.trigger('g:appload.before');

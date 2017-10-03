@@ -1,6 +1,9 @@
 import App from 'girder/views/App';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
-import HeaderView from './views/layout/HeaderView';
+import AppContainer from './AppContainer.jsx';
+
 import template from './templates/layout.pug';
 import './stylesheets/layout.styl';
 
@@ -8,10 +11,12 @@ const VauiApp = App.extend({
 
     render() {
         this.$el.html(template());
-        new HeaderView({
-            el: this.$('#v-app-header-container'),
-            parentView: this
-        }).render();
+        
+        ReactDOM.render(
+            <AppContainer/>,
+            document.getElementById('g-app-body-container')
+        );
+
         return this;
     }
 
