@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 
+import IndexView from './IndexView';
+
 class AppContainer extends Component {
     render() {
-        return <div>hello world</div>;
+        return <IndexView />;
     }
 }
 

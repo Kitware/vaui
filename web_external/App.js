@@ -11,9 +11,9 @@ const VauiApp = App.extend({
 
     render() {
         this.$el.html(template());
-        
+
         ReactDOM.render(
-            <AppContainer/>,
+            <AppContainer />,
             document.getElementById('g-app-body-container')
         );
 

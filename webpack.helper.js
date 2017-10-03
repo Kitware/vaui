@@ -7,6 +7,8 @@ module.exports = (config) => {
             presets: ['es2015', 'react']
         }
     });
-    console.log(JSON.stringify(config.module));
+    config.resolve = {
+        extensions: ['.js', '.jsx']
+    }
     return config;
 };
