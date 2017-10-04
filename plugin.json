@@ -1,0 +1,22 @@
+{
+    "name": "Vaui",
+    "description": "",
+    "version": "0.1.0",
+    "dependencies": [
+        "video"
+    ],
+    "npm": {
+        "file": "package.json",
+        "fields": [
+            "dependencies"
+        ],
+        "localNodeModules": false
+    },
+    "webpack": {
+        "main": {
+            "plugin": "web_client/main.js",
+            "vaui": "web_external/main.js"
+        },
+        "configHelper": "webpack.helper.js"
+    }
+}
