@@ -40,6 +40,9 @@ class VideoWidgetWrapper extends Component {
         })
             .render();
     }
+    componentWillUnmount(){
+        this.nativeVideoWidget.destroy();
+    }
     render() {
         return <div className={this.props.className}></div>;
     }
