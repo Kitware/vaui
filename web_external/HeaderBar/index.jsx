@@ -43,7 +43,8 @@ class HeaderBar extends Component {
                         </div>
                     </div> :
                     <div className='v-login-link-wrapper'>
-                        <a className='g-register'>Register</a>
+                        <a className='g-register' onClick={(e) =>
+                            events.trigger('g:registerUi')}>Register</a>
                         or
                         <a className='g-login' onClick={(e) => events.trigger('g:loginUi')}>
                             Log In

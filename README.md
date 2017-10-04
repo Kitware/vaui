@@ -15,3 +15,13 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+# Setup
+Have the latest [girder](http://girder.readthedocs.io/en/latest/installation.html#install-from-git-repository) up and running
+Clone this repo to e.g. ~/vaui
+Execute `girder-install plugin -s ~/vaui` within the girder virtualenv
+Execute `girder-install web --dev --plugins vaui`
+Run `girder-server`
+Navigate to `localhost:8080` and create a user and a file assetstore and enable plugin Vaui
+Upload a compatible video like [this](https://www.w3schools.com/html/mov_bbb.mp4) to a Restart server with `girder-server`
+Navigate to `localhost:8080` to see the video
