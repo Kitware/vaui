@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 import 'bootstrap-slider/dist/css/bootstrap-slider.min.css';
-import { restRequest } from 'girder/rest';
-import FileModel from 'girder/models/FileModel';
+// import FileModel from 'girder/models/FileModel';
 import events from 'girder/events';
 
-import VideoWidgetWrapper from './VideoWidgetWrapper';
+import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 
 import './style.styl';
 
@@ -15,22 +14,15 @@ class Viewer extends Component {
         this.state = {
             playing: false,
             videoPlaying: false,
-            videoCurrentTime: 0,
-            sliderMax: 10,
-            sliderCurrentValue: 5,
-            fileModel: null
+            videoCurrentFrame: 0,
+            sliderMax: 100,
+            itemModel: null
         };
         this.draggingSlider = false;
-
     }
     componentDidMount() {
         events.on('v:item_selected', (itemModel) => {
-            restRequest({
-                method: 'GET',
-                url: `/item/${itemModel.id}/files`
-            }).done((files) => {
-                this.setState({ fileModel: new FileModel(files[0]) });
-            });
+            this.setState({ ready: false, itemModel });
         })
     }
     componentDidUpdate(prevProps, prevState) {
@@ -40,11 +32,11 @@ class Viewer extends Component {
             <div className='panel panel-default'>
                 <div className='panel-heading'><br /></div>
                 <div className='panel-body'>
-                    {this.state.fileModel &&
-                        [<VideoWidgetWrapper className='video'
-                            fileModel={this.state.fileModel}
+                    {this.state.itemModel &&
+                        [<ImageViewerWidgetWrapper className='video'
+                            itemModel={this.state.itemModel}
                             playing={this.state.videoPlaying}
-                            currentTime={this.state.videoCurrentTime}
+                            currentFrame={this.state.videoCurrentFrame}
                             onPause={() => {
                                 if (!this.draggingSlider) {
                                     this.setState({
@@ -53,50 +45,74 @@ class Viewer extends Component {
                                     });
                                 }
                             }}
-                            onProgress={(currentTime, duration) => {
+                            onProgress={(currentFrame, numberOfFrames) => {
                                 if (!this.draggingSlider) {
                                     this.setState({
-                                        sliderMax: parseInt(duration * 100),
-                                        sliderCurrentValue: parseInt(currentTime * 100)
+                                        sliderMax: numberOfFrames,
+                                        videoCurrentFrame: currentFrame
                                     });
                                 }
-                            }} key='video-widget-wrapper' />,
+                            }}
+                            onReady={() => {
+                                this.setState({
+                                    ready: true
+                                });
+                            }} key={this.state.itemModel.id} />,
                         <div className='control' key='control'>
-                            <div className='buttons'>
-                                <button className='fast-backword'>
+                            <div className='buttons btn-group'>
+                                <button className='fast-backword btn btn-default'>
                                     <i className='icon-fast-bw'></i>
                                 </button>
-                                <button className='reverse'>
+                                <button className='reverse btn btn-default'>
                                     <i className='icon-play'></i>
                                 </button>
-                                <button className='previous-frame'>
+                                <button className='previous-frame btn btn-default' disabled={!this.state.ready}
+                                    onClick={() => {
+                                        this.setState({
+                                            playing: false,
+                                            videoPlaying: false,
+                                            videoCurrentFrame: this.state.videoCurrentFrame - 1
+                                        });
+                                    }}>
                                     <i className='icon-to-start'></i>
                                 </button>
                                 {!this.state.playing ?
-                                    <button className='play' onClick={() => {
-                                        this.setState({ playing: true, videoPlaying: true });
-                                    }}>
+                                    <button className='play btn btn-default'
+                                        onClick={() => {
+                                            this.setState({ playing: true, videoPlaying: true });
+                                        }}
+                                        disabled={!this.state.ready}>
                                         <i className='icon-play'></i>
                                     </button> :
-                                    <button className='pause' onClick={() => {
+                                    <button className='pause btn btn-default' onClick={() => {
                                         this.setState({ playing: false, videoPlaying: false });
                                     }}>
                                         <i className='icon-pause'></i>
                                     </button>}
-                                <button className='next-frame'>
+                                <button className='next-frame btn btn-default'
+                                    disabled={!this.state.ready}
+                                    onClick={() => {
+                                        this.setState({
+                                            playing: false,
+                                            videoPlaying: false,
+                                            videoCurrentFrame: this.state.videoCurrentFrame + 1
+                                        });
+                                    }}>
                                     <i className='icon-to-end'></i>
                                 </button>
-                                <button className='fast-forward'>
+                                <button className='fast-forward btn btn-default'>
                                     <i className='icon-fast-fw'></i>
                                 </button>
                             </div>
                             <ReactBootstrapSlider
-                                value={this.state.sliderCurrentValue}
+                                value={this.state.videoCurrentFrame}
                                 max={this.state.sliderMax}
+                                tooltip='hide'
+                                disabled={this.state.ready ? 'enabled' : 'disabled'}
                                 slideStop={(e) => {
                                     this.draggingSlider = false;
                                     if (this.state.playing) {
-                                        this.setState({ videoPlaying: true });
+                                        this.setState({ videoPlaying: true })
                                     }
                                 }}
                                 change={(e) => {
@@ -105,8 +121,7 @@ class Viewer extends Component {
                                         this.setState({ videoPlaying: false });
                                     }
                                     this.setState({
-                                        videoCurrentTime: e.target.value / 100,
-                                        sliderCurrentValue: e.target.value
+                                        videoCurrentFrame: e.target.value
                                     });
                                 }} />
                         </div>]

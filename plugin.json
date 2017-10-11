@@ -3,6 +3,7 @@
     "description": "",
     "version": "0.1.0",
     "dependencies": [
+        "large_image"
     ],
     "npm": {
         "file": "package.json",
