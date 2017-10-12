@@ -1,10 +1,12 @@
 
-import GeoJSImageViewerWidget from 'girder_plugins/large_image/views/imageViewerWidget/geojs';
+import GeojsImageViewerWidget from 'girder_plugins/large_image/views/imageViewerWidget/geojs';
 import ItemCollection from 'girder/collections/ItemCollection';
 
-var DivaGeoJSImageViewer = GeoJSImageViewerWidget.extend({
+var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
+
     render() {
-        GeoJSImageViewerWidget.prototype.render.call(this);
+        GeojsImageViewerWidget.prototype.render.call(this);
+        var map = this.viewer;
         var ids = [this.itemId];
         var siblings = new ItemCollection();
         siblings.pageLimit = 0;
@@ -14,8 +16,6 @@ var DivaGeoJSImageViewer = GeoJSImageViewerWidget.extend({
                     ids.push(model.id);
                 });
                 console.log('Got ' + ids.length + ' frame ids');
-
-                var map = this.viewer;
 
                 // change from our default of only allowing to zoom to 1 pixel is 1 pixel
                 // to allow 1 pixel to be 8x8.
@@ -37,19 +37,17 @@ var DivaGeoJSImageViewer = GeoJSImageViewerWidget.extend({
                             //  'encoding=PNG'
                             //  'encoding=JPEG&jpegQuality=70&jpegSubsampling=2'
                             var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}';
-                            // use this to set the default quary parameters or pull them from a
-                            // global for testing.
-                            var opts = window.divaopts || '';
-                            if (opts) {
-                                url += '?' + opts;
-                            }
                             l1.url(url);
                             // encoding could also be PNG
                             map.onIdle(() => {
                                 // onIdle is called when all of our tiles are loaded.  Move the
                                 // back layer to the top and swap our layer references
-                                l1.moveToTop();
+                                var l1zIndex = l1.zIndex();
+                                l1.zIndex(l2.zIndex());
+                                l2.zIndex(l1zIndex);
                                 var ltemp = l1; l1 = l2; l2 = ltemp;
+
+                                this._drawAnnotation(frame);
 
                                 resolve();
 
@@ -96,16 +94,47 @@ var DivaGeoJSImageViewer = GeoJSImageViewerWidget.extend({
                     if (newFrame >= 0
                         && newFrame <= ids.length - 1) {
                         frame = newFrame;
-                        updateFrame();
-                        this.trigger('progress', frame, ids.length);
+                        updateFrame()
+                            .then(() => {
+                                this.trigger('progress', frame, ids.length);
+                            });
                     }
-
                 }
 
                 this.trigger('ready');
                 this.trigger('progress', frame, ids.length);
             });
 
+        // var layer = map.createLayer('annotation', {
+        //     // renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
+        //     annotations: ['point', 'line', 'rectangle', 'polygon'],
+        //     showLabels: false
+        // });
+
+        this.setAnnotationFrames = (annotationFrames) => {
+            var featureFrames = [];
+            this.featureFrames = featureFrames;
+            console.log('start reading');
+            annotationFrames.forEach((annotationFrame) => {
+                window.geo.createFileReader('jsonReader', { layer: this.featureLayer })
+                    .read(annotationFrame, (features) => {
+                        _.each(features || [], (feature) => {
+                            featureFrames.push(feature);
+                            feature.visible(false);
+                        });
+                    });
+            });
+            console.log('finished reading');
+            this.viewer.draw();
+        }
+
+        this._drawAnnotation = (frame) => {
+            if (this.lastFeatureFrame) {
+                this.lastFeatureFrame.visible(false);
+            }
+            this.lastFeatureFrame = this.featureFrames[frame].visible(true);
+            this.viewer.draw();
+        }
     }
 });
-export default DivaGeoJSImageViewer;
+export default VauiGeoJSImageViewer;

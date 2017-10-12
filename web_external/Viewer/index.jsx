@@ -3,7 +3,7 @@ import ReactBootstrapSlider from 'react-bootstrap-slider';
 import 'bootstrap-slider/dist/css/bootstrap-slider.min.css';
 // import FileModel from 'girder/models/FileModel';
 import events from 'girder/events';
-
+import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 
 import './style.styl';
@@ -16,14 +16,31 @@ class Viewer extends Component {
             videoPlaying: false,
             videoCurrentFrame: 0,
             sliderMax: 100,
-            itemModel: null
+            itemModel: null,
+            annotationFrames: null
         };
         this.draggingSlider = false;
     }
     componentDidMount() {
         events.on('v:item_selected', (itemModel) => {
             this.setState({ ready: false, itemModel });
-        })
+            restRequest({
+                url: '/item',
+                data: {
+                    folderId: itemModel.get('folderId'),
+                    name: 'annotation.json'
+                }
+            }).then((items) => {
+                return restRequest({
+                    url: `/item/${items[0]._id}/download`,
+                    dataType: 'json'
+                });
+            })
+                .then((annotationFrames) => {
+                    this.setState({ annotationFrames });
+                })
+        });
+        
     }
     componentDidUpdate(prevProps, prevState) {
     }
@@ -37,6 +54,7 @@ class Viewer extends Component {
                             itemModel={this.state.itemModel}
                             playing={this.state.videoPlaying}
                             currentFrame={this.state.videoCurrentFrame}
+                            annotationFrames={this.state.annotationFrames}
                             onPause={() => {
                                 if (!this.draggingSlider) {
                                     this.setState({
@@ -57,7 +75,8 @@ class Viewer extends Component {
                                 this.setState({
                                     ready: true
                                 });
-                            }} key={this.state.itemModel.id} />,
+                            }}
+                            key={this.state.itemModel.id} />,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
                                 <button className='fast-backword btn btn-default'>

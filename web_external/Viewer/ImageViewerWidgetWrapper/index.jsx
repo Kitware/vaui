@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import DivaGeoJSImageViewer from './DivaGeoJSImageViewer';
+import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
 class ImageViewerWidgetWrapper extends Component {
     constructor(props) {
@@ -22,10 +22,13 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.currentFrame !== nextProps.currentFrame) {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
+        if (this.props.annotationFrames !== nextProps.annotationFrames) {
+            this.geojsViewer.setAnnotationFrames(nextProps.annotationFrames)
+        }
     }
 
     componentDidMount() {
-        this.geojsViewer = new DivaGeoJSImageViewer({
+        this.geojsViewer = new VauiGeoJSImageViewer({
             parentView: null,
             el: ReactDOM.findDOMNode(this),
             itemId: this.props.itemModel.id,
