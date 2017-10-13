@@ -1,4 +1,3 @@
-
 import GeojsImageViewerWidget from 'girder_plugins/large_image/views/imageViewerWidget/geojs';
 import ItemCollection from 'girder/collections/ItemCollection';
 
@@ -47,12 +46,11 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 l2.zIndex(l1zIndex);
                                 var ltemp = l1; l1 = l2; l2 = ltemp;
 
-                                this._drawAnnotation(frame);
+                                map.onIdle(() => {
+                                    this._drawAnnotation(frame);
+                                });
 
                                 resolve();
-
-                                // log what frame we just showed and when we did it
-                                // console.log(frame, (new Date()).valueOf() - start);
                             });
                         });
                     });
@@ -101,39 +99,58 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     }
                 }
 
+                this._drawAnnotation = () => {
+                    if (!this.featureFrames) {
+                        return;
+                    }
+                    if (this.lastFeatureFrame) {
+                        this.lastFeatureFrame.visible(false);
+                    }
+                    this.lastFeatureFrame = this.featureFrames[frame].visible(true);
+                    console.log("before draw");
+                    this.viewer.draw();
+                    console.log("after draw");
+                }
+
+                updateFrame();
+
                 this.trigger('ready');
                 this.trigger('progress', frame, ids.length);
             });
 
-        // var layer = map.createLayer('annotation', {
-        //     // renderer: query.renderer ? (query.renderer === 'html' ? null : query.renderer) : undefined,
-        //     annotations: ['point', 'line', 'rectangle', 'polygon'],
-        //     showLabels: false
-        // });
-
         this.setAnnotationFrames = (annotationFrames) => {
             var featureFrames = [];
             this.featureFrames = featureFrames;
-            console.log('start reading');
+            console.log("start");
             annotationFrames.forEach((annotationFrame) => {
-                window.geo.createFileReader('jsonReader', { layer: this.featureLayer })
-                    .read(annotationFrame, (features) => {
-                        _.each(features || [], (feature) => {
-                            featureFrames.push(feature);
-                            feature.visible(false);
-                        });
-                    });
+                var feature = this.featureLayer.createFeature('polygon');
+                feature.data(annotationFrame.features);
+                feature.polygon((d) => {
+                    var coord = d.geometry.coordinates[0];
+                    return {
+                        outer: [{ x: coord[0][0], y: coord[0][1] },
+                        { x: coord[1][0], y: coord[1][1] },
+                        { x: coord[2][0], y: coord[2][1] },
+                        { x: coord[3][0], y: coord[3][1] }]
+                    }
+                });
+                feature.style({
+                    fill: true,
+                    fillColor: { r: 1.0, g: 0.839, b: 0.439 },
+                    fillOpacity: 0.4,
+                    radius: 5.0,
+                    stroke: true,
+                    strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+                    strokeWidth: 1.25,
+                    strokeOpacity: 0.8
+                })
+                feature.visible(false);
+                featureFrames.push(feature);
             });
-            console.log('finished reading');
-            this.viewer.draw();
-        }
-
-        this._drawAnnotation = (frame) => {
-            if (this.lastFeatureFrame) {
-                this.lastFeatureFrame.visible(false);
+            console.log("end");
+            if (this._drawAnnotation) {
+                this._drawAnnotation();
             }
-            this.lastFeatureFrame = this.featureFrames[frame].visible(true);
-            this.viewer.draw();
         }
     }
 });
