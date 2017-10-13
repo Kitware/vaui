@@ -22,7 +22,6 @@ class HeaderBar extends Component {
             <div className='load-button-container'>
                 <button className='btn btn-primary' onClick={(e) => this.openClicked(e)}>Load</button>
             </div>
-            <div className='v-logo-wrapper'>VPView Web</div>
             <div className='v-current-user-text'></div>
             <div className='v-current-user-wrapper'>
                 {user ?

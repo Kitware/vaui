@@ -30,7 +30,6 @@ class Viewer extends Component {
     render() {
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
-                <div className='panel-heading'><br /></div>
                 <div className='panel-body'>
                     {this.state.itemModel &&
                         [<ImageViewerWidgetWrapper className='video'
