@@ -19,11 +19,11 @@ class HeaderBar extends Component {
     render() {
         let user = this.state.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
-            <div className='load-button-container'>
+            <div className='toolbutton'>
                 <button className='btn btn-primary' onClick={(e) => this.openClicked(e)}>Load</button>
             </div>
             <div className='v-current-user-text'></div>
-            <div className='v-current-user-wrapper'>
+            <div className='v-current-user-wrapper toolbutton'>
                 {user ?
                     <div className='v-user-link-wrapper'>
                         <a className='v-user-link' data-toggle='dropdown' data-target='#g-user-action-menu'>

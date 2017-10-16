@@ -4,6 +4,7 @@
   height $headerHeight
   background-color $headerColor
   transition background-color 0.4s ease-in-out
+  padding 1px
 
   .v-logo-wrapper
     display flex
@@ -65,9 +66,13 @@
 
       &:active
         background linear-gradient(bottom, white 60%, #f6f6f6 100%)
-    
-  .load-button-container
-    button.btn
-      padding 3px 4px
-      margin-top 1px
 
+  div.toolbutton
+    a
+    button.btn
+      display inline-block
+      vertical-align center
+      padding 3px 4px
+
+    a
+      border 1px solid transparent
