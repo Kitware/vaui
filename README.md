@@ -23,5 +23,6 @@ Execute `girder-install plugin -s ~/vaui` within the girder virtualenv
 Execute `girder-install web --dev --plugins vaui`  
 Run `girder-server`  
 Navigate to `localhost:8080` and create a user and a file assetstore and enable this Vaui plugin  
-Upload a compatible video like [this](https://www.w3schools.com/html/mov_bbb.mp4) to a Restart server with `girder-server`  
+Stop and restart the server  
+Upload a compatible video like [this](https://www.w3schools.com/html/mov_bbb.mp4)
 Navigate to `localhost:8080` to see the video  

@@ -17,13 +17,16 @@ class Viewer extends Component {
             videoCurrentFrame: 0,
             sliderMax: 100,
             itemModel: null,
-            annotationFrames: null
+            annotationFrames: null,
+            ready: false
         };
         this.draggingSlider = false;
     }
     componentDidMount() {
         events.on('v:item_selected', (itemModel) => {
-            this.setState({ ready: false, itemModel });
+            this.setState({ ready: true, itemModel });
+            // This is a workaround for react bootstrap slider disabled at init but
+            setTimeout(() => this.setState({ ready: false }), 0);
             restRequest({
                 url: '/item',
                 data: {
@@ -40,11 +43,12 @@ class Viewer extends Component {
                     this.setState({ annotationFrames });
                 })
         });
-        
+
     }
     componentDidUpdate(prevProps, prevState) {
     }
     render() {
+        var playDisabled = !this.state.ready || !this.state.annotationFrames;
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-heading'><br /></div>
@@ -85,7 +89,7 @@ class Viewer extends Component {
                                 <button className='reverse btn btn-default'>
                                     <i className='icon-play'></i>
                                 </button>
-                                <button className='previous-frame btn btn-default' disabled={!this.state.ready}
+                                <button className='previous-frame btn btn-default' disabled={playDisabled}
                                     onClick={() => {
                                         this.setState({
                                             playing: false,
@@ -100,7 +104,7 @@ class Viewer extends Component {
                                         onClick={() => {
                                             this.setState({ playing: true, videoPlaying: true });
                                         }}
-                                        disabled={!this.state.ready}>
+                                        disabled={playDisabled}>
                                         <i className='icon-play'></i>
                                     </button> :
                                     <button className='pause btn btn-default' onClick={() => {
@@ -109,7 +113,7 @@ class Viewer extends Component {
                                         <i className='icon-pause'></i>
                                     </button>}
                                 <button className='next-frame btn btn-default'
-                                    disabled={!this.state.ready}
+                                    disabled={playDisabled}
                                     onClick={() => {
                                         this.setState({
                                             playing: false,
@@ -127,7 +131,7 @@ class Viewer extends Component {
                                 value={this.state.videoCurrentFrame}
                                 max={this.state.sliderMax}
                                 tooltip='hide'
-                                disabled={this.state.ready ? 'enabled' : 'disabled'}
+                                disabled={playDisabled ? 'disabled' : 'enabled'}
                                 slideStop={(e) => {
                                     this.draggingSlider = false;
                                     if (this.state.playing) {

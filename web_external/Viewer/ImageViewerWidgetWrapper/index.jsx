@@ -53,7 +53,7 @@ class ImageViewerWidgetWrapper extends Component {
     }
 
     render() {
-        return <div className={this.props.className}></div>;
+        return <div className={['v-viewer-wrapper', this.props.className].join(' ')}></div>;
     }
 }
 export default ImageViewerWidgetWrapper;
