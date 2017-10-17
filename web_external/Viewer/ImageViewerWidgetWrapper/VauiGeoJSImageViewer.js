@@ -27,9 +27,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 l1.zIndex(9);
                 l1.moveToBottom();
                 var frame = 0;
-                var stopflag = 1;
+                var playing = false;
+                var pendingNext = false;
 
-                var updateFrame = () => {
+                var updateFrame = (frame) => {
                     this._updating = true;
                     return new Promise((resolve, reject) => {
                         map.onIdle(() => {
@@ -38,16 +39,16 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             // format and size by adding query parameters.  For example,
                             //  'encoding=PNG'
                             //  'encoding=JPEG&jpegQuality=70&jpegSubsampling=2'
-                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}';
+                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}?encoding=JPEG&jpegQuality=50';
                             l1.url(url);
                             // encoding could also be PNG
                             map.onIdle(() => {
                                 // onIdle is called when all of our tiles are loaded.  Move the
                                 // back layer to the top and swap our layer references
+                                this._drawAnnotation(frame);
                                 var l1zIndex = l1.zIndex();
                                 l1.zIndex(l2.zIndex(), true);
                                 l2.zIndex(l1zIndex);
-                                this._drawAnnotation();
                                 var ltemp = l1; l1 = l2; l2 = ltemp;
 
                                 resolve();
@@ -58,6 +59,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 }
 
                 var next = () => {
+                    if (this.pendingFrame) {
+                        frame = this.pendingFrame;
+                        this.pendingFrame = null;
+                    }
                     // wait until we are done loading.  Unless there is manual
                     // intervention, this should get called immediately
                     if (++frame >= ids.length - 1) {
@@ -65,12 +70,16 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.trigger('pause');
                     }
                     else {
-                        updateFrame()
+                        pendingNext = true;
+                        updateFrame(frame)
                             .then(() => {
-                                this.trigger('progress', frame, ids.length);
+                                pendingNext = false;
+                                if (!this.pendingFrame) {
+                                    this.trigger('progress', frame, ids.length);
+                                }
                                 // if we haven't asked to stop, go to the next frame as soon as
                                 // possible.
-                                if (!stopflag) {
+                                if (playing) {
                                     next();
                                 }
                             });
@@ -79,27 +88,34 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
 
 
                 this.stop = () => {
-                    stopflag = 1;
+                    playing = false;
                 }
 
                 this.play = () => {
-                    if (stopflag) {
-                        stopflag = 0;
-                        next();
+                    if (!playing) {
+                        playing = true;
+                        if (!pendingNext) {
+                            next();
+                        }
                     }
                 }
 
                 this.setFrame = (newFrame) => {
+                    if (playing) {
+                        return;
+                    }
                     if (newFrame >= 0
                         && newFrame <= ids.length - 1) {
                         if (!this._updating) {
-                            this.pendingFrame = null;
                             frame = newFrame;
-                            updateFrame()
+                            updateFrame(frame)
                                 .then(() => {
-                                    this.trigger('progress', frame, ids.length);
                                     if (this.pendingFrame) {
                                         this.setFrame(this.pendingFrame);
+                                        this.pendingFrame = null;
+                                    }
+                                    else {
+                                        this.trigger('progress', frame, ids.length);
                                     }
                                 });
                         }
@@ -109,7 +125,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     }
                 }
 
-                this._drawAnnotation = () => {
+                this._drawAnnotation = (frame) => {
                     if (!this.annotationFrames) {
                         return;
                     }
@@ -117,6 +133,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.featureLayer.deleteFeature(this.lastFeatureFrame);
                     }
                     var annotationFrame = this.annotationFrames[frame];
+                    // Only needed if the frames of image and annotation has difference
+                    if (!annotationFrame) {
+                        return;
+                    }
                     var feature = this.featureLayer.createFeature('polygon');
                     feature.data(annotationFrame.features);
                     feature.polygon((d) => {
@@ -142,18 +162,17 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     this.viewer.draw();
                 }
 
-                updateFrame();
+                this.setAnnotationFrames = (annotationFrames) => {
+                    this.annotationFrames = annotationFrames;
+                    this._drawAnnotation(frame);
+                }
+
+                updateFrame(frame);
 
                 this.trigger('ready');
                 this.trigger('progress', frame, ids.length);
             });
 
-        this.setAnnotationFrames = (annotationFrames) => {
-            this.annotationFrames = annotationFrames;
-            if (this._drawAnnotation) {
-                this._drawAnnotation();
-            }
-        }
     }
 });
 export default VauiGeoJSImageViewer;

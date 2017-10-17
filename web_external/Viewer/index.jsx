@@ -70,7 +70,7 @@ class Viewer extends Component {
                             onProgress={(currentFrame, numberOfFrames) => {
                                 if (!this.draggingSlider) {
                                     this.setState({
-                                        sliderMax: numberOfFrames,
+                                        sliderMax: numberOfFrames - 1,
                                         videoCurrentFrame: currentFrame
                                     });
                                 }
