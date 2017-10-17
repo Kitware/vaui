@@ -14,14 +14,10 @@ class TreeView extends Component {
     render() {
         return <div className={['v-treeview', this.props.className].join(' ')}>
             <div className='panel panel-default'>
-                <div className='panel-heading'>Tree View</div>
-                <div className='panel-body'>
+                <div className='panel-heading'>
                     <ul className='nav nav-tabs'>
                         <li>
                             <a data-toggle='tab' href='#activities'>Activities</a>
-                        </li>
-                        <li>
-                            <a data-toggle='tab' href='#events'>Events</a>
                         </li>
                         <li className='active'>
                             <a data-toggle='tab' href='#tracks'>Tracks</a>
@@ -30,9 +26,10 @@ class TreeView extends Component {
                             <a data-toggle='tab' href='#scene-elements'>Scene Elements</a>
                         </li>
                     </ul>
+                </div>
+                <div className='panel-body'>
                     <div className='tab-content'>
                         <div id='activities' className='tab-pane'>1</div>
-                        <div id='events' className='tab-pane'>2</div>
                         <div id='tracks' className='tab-pane active'>
                             <ul className='item-list'>
                                 {this.state.tracks.map((track, index) => {

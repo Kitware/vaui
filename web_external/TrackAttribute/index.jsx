@@ -12,7 +12,7 @@ class TrackAttribute extends Component {
     render() {
         return <div className={['v-trackattribute', this.props.className].join(' ')}>
             <div className='panel panel-default'>
-                <div className='panel-heading'>Track Attribute</div>
+                <div className='panel-heading'>Attributes</div>
                 <div className='panel-body'>
                     <ul>
                         {Object.entries(this.state.trackAttributes).map(([category, attributes], index) => {
