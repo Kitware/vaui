@@ -173,7 +173,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     setAnnotationFrames(annotationFrames) {
         this.annotationFrames = annotationFrames;
         if (this._drawAnnotation) {
-            this._drawAnnotation();
+            this._drawAnnotation(0);
         }
     }
 });

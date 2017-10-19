@@ -38,10 +38,22 @@ class Viewer extends Component {
                     url: `/item/${items[0]._id}/download`,
                     dataType: 'json'
                 });
+            }).catch(() => {
+                this.setState({
+                    ready: false,
+                    itemModel: null
+                });
+                events.trigger('g:alert', {
+                    icon: 'ok',
+                    text: 'Didn\'t find annotation.json file',
+                    type: 'danger',
+                    timeout: 4000
+                });
             })
                 .then((annotationFrames) => {
                     this.setState({ annotationFrames });
                 })
+
         });
 
     }
