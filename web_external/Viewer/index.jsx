@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 import 'bootstrap-slider/dist/css/bootstrap-slider.min.css';
-// import FileModel from 'girder/models/FileModel';
 import events from 'girder/events';
 import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
+import SpinBox from '../SpinBox';
 
 import './style.styl';
 
@@ -15,7 +15,7 @@ class Viewer extends Component {
             playing: false,
             videoPlaying: false,
             videoCurrentFrame: 0,
-            sliderMax: 100,
+            videoMaxFrame: 100,
             itemModel: null,
             annotationFrames: null,
             ready: false
@@ -69,7 +69,7 @@ class Viewer extends Component {
                             onProgress={(currentFrame, numberOfFrames) => {
                                 if (!this.draggingSlider) {
                                     this.setState({
-                                        sliderMax: numberOfFrames - 1,
+                                        videoMaxFrame: numberOfFrames - 1,
                                         videoCurrentFrame: currentFrame
                                     });
                                 }
@@ -88,13 +88,16 @@ class Viewer extends Component {
                                 <button className='reverse btn btn-default'>
                                     <i className='icon-play'></i>
                                 </button>
-                                <button className='previous-frame btn btn-default' disabled={playDisabled}
+                                <button className='previous-frame btn btn-default'
+                                    disabled={playDisabled || this.state.videoCurrentFrame <= 0}
                                     onClick={() => {
-                                        this.setState({
-                                            playing: false,
-                                            videoPlaying: false,
-                                            videoCurrentFrame: this.state.videoCurrentFrame - 1
-                                        });
+                                        if (this.state.videoCurrentFrame > 0) {
+                                            this.setState({
+                                                playing: false,
+                                                videoPlaying: false,
+                                                videoCurrentFrame: this.state.videoCurrentFrame - 1
+                                            });
+                                        }
                                     }}>
                                     <i className='icon-to-start'></i>
                                 </button>
@@ -112,13 +115,15 @@ class Viewer extends Component {
                                         <i className='icon-pause'></i>
                                     </button>}
                                 <button className='next-frame btn btn-default'
-                                    disabled={playDisabled}
+                                    disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
                                     onClick={() => {
-                                        this.setState({
-                                            playing: false,
-                                            videoPlaying: false,
-                                            videoCurrentFrame: this.state.videoCurrentFrame + 1
-                                        });
+                                        if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
+                                            this.setState({
+                                                playing: false,
+                                                videoPlaying: false,
+                                                videoCurrentFrame: this.state.videoCurrentFrame + 1
+                                            });
+                                        }
                                     }}>
                                     <i className='icon-to-end'></i>
                                 </button>
@@ -126,26 +131,39 @@ class Viewer extends Component {
                                     <i className='icon-fast-fw'></i>
                                 </button>
                             </div>
-                            <ReactBootstrapSlider
-                                value={this.state.videoCurrentFrame}
-                                max={this.state.sliderMax}
-                                tooltip='hide'
-                                disabled={playDisabled ? 'disabled' : 'enabled'}
-                                slideStop={(e) => {
-                                    this.draggingSlider = false;
-                                    if (this.state.playing) {
-                                        this.setState({ videoPlaying: true })
-                                    }
-                                }}
-                                change={(e) => {
-                                    this.draggingSlider = true;
-                                    if (this.state.playing) {
-                                        this.setState({ videoPlaying: false });
-                                    }
-                                    this.setState({
-                                        videoCurrentFrame: e.target.value
-                                    });
-                                }} />
+                            <div className='time-control'>
+                                <ReactBootstrapSlider
+                                    value={this.state.videoCurrentFrame}
+                                    max={this.state.videoMaxFrame}
+                                    tooltip='hide'
+                                    disabled={playDisabled ? 'disabled' : 'enabled'}
+                                    slideStop={(e) => {
+                                        this.draggingSlider = false;
+                                        if (this.state.playing) {
+                                            this.setState({ videoPlaying: true })
+                                        }
+                                    }}
+                                    change={(e) => {
+                                        this.draggingSlider = true;
+                                        if (this.state.playing) {
+                                            this.setState({ videoPlaying: false });
+                                        }
+                                        this.setState({
+                                            videoCurrentFrame: e.target.value
+                                        });
+                                    }} />
+                                <SpinBox
+                                    suffix={' / ' + this.state.videoMaxFrame}
+                                    min={0}
+                                    max={this.state.videoMaxFrame}
+                                    value={this.state.videoCurrentFrame}
+                                    disabled={playDisabled}
+                                    change={(e) => {
+                                        this.setState({
+                                            videoCurrentFrame: parseInt(e.target.value)
+                                        });
+                                    }} />
+                            </div>
                         </div>]
                     }
                 </div>
