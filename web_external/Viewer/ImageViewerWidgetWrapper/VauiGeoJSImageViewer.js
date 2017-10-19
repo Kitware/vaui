@@ -162,17 +162,19 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     this.viewer.draw();
                 }
 
-                this.setAnnotationFrames = (annotationFrames) => {
-                    this.annotationFrames = annotationFrames;
-                    this._drawAnnotation(frame);
-                }
-
                 updateFrame(frame);
 
                 this.trigger('ready');
                 this.trigger('progress', frame, ids.length);
             });
 
+    },
+
+    setAnnotationFrames(annotationFrames) {
+        this.annotationFrames = annotationFrames;
+        if (this._drawAnnotation) {
+            this._drawAnnotation();
+        }
     }
 });
 export default VauiGeoJSImageViewer;

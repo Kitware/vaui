@@ -23,9 +23,7 @@ class ImageViewerWidgetWrapper extends Component {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
         if (this.props.annotationFrames !== nextProps.annotationFrames) {
-            if (this.geojsViewer.setAnnotationFrames) {
-                this.geojsViewer.setAnnotationFrames(nextProps.annotationFrames)
-            }
+            this.geojsViewer.setAnnotationFrames(nextProps.annotationFrames);
         }
     }
 
