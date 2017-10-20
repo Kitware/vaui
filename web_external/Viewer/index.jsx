@@ -38,29 +38,23 @@ class Viewer extends Component {
                     url: `/item/${items[0]._id}/download`,
                     dataType: 'json'
                 });
-            }).catch(() => {
-                this.setState({
-                    ready: false,
-                    itemModel: null
-                });
-                events.trigger('g:alert', {
-                    icon: 'ok',
-                    text: 'Didn\'t find annotation.json file',
-                    type: 'danger',
-                    timeout: 4000
-                });
             })
                 .then((annotationFrames) => {
                     this.setState({ annotationFrames });
-                })
-
+                }).catch(() => {
+                    events.trigger('g:alert', {
+                        icon: 'ok',
+                        text: 'Didn\'t find annotation.json file',
+                        type: 'danger',
+                        timeout: 4000
+                    });
+                    this.setState({ annotationFrames: [] })
+                });
         });
 
     }
-    componentDidUpdate(prevProps, prevState) {
-    }
     render() {
-        var playDisabled = !this.state.ready || !this.state.annotationFrames;
+        var playDisabled = !this.state.ready;
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
@@ -92,6 +86,8 @@ class Viewer extends Component {
                                 });
                             }}
                             key={this.state.itemModel.id} />,
+                        <div class='no-annotation-message' key='no-annotation-message'>{this.state.annotationFrames && this.state.annotationFrames.length === 0 && <span>No annotation</span>}
+                        </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
                                 <button className='fast-backword btn btn-default'>
