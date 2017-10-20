@@ -23,7 +23,7 @@ class ImageViewerWidgetWrapper extends Component {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
         if (this.props.annotationFrames !== nextProps.annotationFrames) {
-            this.geojsViewer.setAnnotationFrames(nextProps.annotationFrames);
+            this.geojsViewer.redrawAnnotation();
         }
     }
 
@@ -32,7 +32,8 @@ class ImageViewerWidgetWrapper extends Component {
             parentView: null,
             el: ReactDOM.findDOMNode(this),
             itemId: this.props.itemModel.id,
-            model: this.props.itemModel
+            model: this.props.itemModel,
+            getAnnotation: this.props.getAnnotation
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
                 this.props.onProgress(currentFrame, numberOfFrames);

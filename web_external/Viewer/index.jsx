@@ -11,6 +11,7 @@ import './slider.styl';
 class Viewer extends Component {
     constructor(props) {
         super(props);
+        this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
         this.state = {
             playing: false,
             videoPlaying: false,
@@ -35,6 +36,7 @@ class Viewer extends Component {
                 }
             }).then((items) => {
                 return restRequest({
+                    contentType: "application/json",
                     url: `/item/${items[0]._id}/download`,
                     dataType: 'json'
                 });
@@ -62,8 +64,9 @@ class Viewer extends Component {
                         [<ImageViewerWidgetWrapper className='video'
                             itemModel={this.state.itemModel}
                             playing={this.state.videoPlaying}
-                            currentFrame={this.state.videoCurrentFrame}
                             annotationFrames={this.state.annotationFrames}
+                            currentFrame={this.state.videoCurrentFrame}
+                            getAnnotation={this.getAnnotationForAFrame}
                             onPause={() => {
                                 if (!this.draggingSlider) {
                                     this.setState({
@@ -86,7 +89,7 @@ class Viewer extends Component {
                                 });
                             }}
                             key={this.state.itemModel.id} />,
-                        <div class='no-annotation-message' key='no-annotation-message'>{this.state.annotationFrames && this.state.annotationFrames.length === 0 && <span>No annotation</span>}
+                        <div className='no-annotation-message' key='no-annotation-message'>{this.state.annotationFrames && this.state.annotationFrames.length === 0 && <span>No annotation</span>}
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
@@ -177,6 +180,40 @@ class Viewer extends Component {
                 </div>
             </div>
         </div>
+    }
+
+    getAnnotationForAFrame(frame) {
+        if (!this.state.annotationFrames) {
+            return;
+        }
+        var featureCollection = this.state.annotationFrames[frame];
+        if (!featureCollection) {
+            return;
+        }
+        var data = featureCollection.features.map((feature) => {
+            var coord = feature.geometry.coordinates[0];
+            var type = Math.random() < 0.5 ? 'a' : 'b';
+            return {
+                coord,
+                type
+            }
+        });
+        var style = {
+            fill: true,
+            fillColor(d) {
+                return { r: 1.0, g: 0.839, b: 0.439 };
+            },
+            fillOpacity(a, b, d) {
+                return d.type === 'a' ? 0 : 0.4;
+            },
+            radius: 5.0,
+            stroke: true,
+            strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+            strokeWidth: 1.25,
+            strokeOpacity: 0.8,
+            uniform: true
+        }
+        return [data, style];
     }
 }
 export default Viewer;
