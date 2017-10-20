@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
-import 'bootstrap-slider/dist/css/bootstrap-slider.min.css';
 import events from 'girder/events';
 import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
 import './style.styl';
+import './slider.styl';
 
 class Viewer extends Component {
     constructor(props) {
