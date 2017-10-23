@@ -50,6 +50,9 @@ if __name__ == '__main__':
     client = get_girder_client(vars(args))
     folder = client.resourceLookup(args.folder)
     for item in client.listItem(folder['_id']):
+        if item['name'].endswith('.json'):
+            continue
+
         try:
             client.post('item/%s/tiles' % item['_id'])
         except girder_client.HttpError as exc:
