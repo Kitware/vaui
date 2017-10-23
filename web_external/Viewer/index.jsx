@@ -25,9 +25,7 @@ class Viewer extends Component {
     }
     componentDidMount() {
         events.on('v:item_selected', (itemModel) => {
-            this.setState({ ready: true, itemModel });
-            // This is a workaround for react bootstrap slider disabled at init but
-            setTimeout(() => this.setState({ ready: false }), 0);
+            this.setState({ ready: false, itemModel });
             restRequest({
                 url: '/item',
                 data: {
