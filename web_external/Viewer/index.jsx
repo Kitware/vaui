@@ -4,7 +4,7 @@ import events from 'girder/events';
 import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
-import kpfGeometryParser from '../util/kpfGeometryParser';
+import annotationGeometryParser from '../util/annotationGeometryParser';
 
 import './style.styl';
 import './slider.styl';
@@ -31,15 +31,15 @@ class Viewer extends Component {
                 url: '/item',
                 data: {
                     folderId: itemModel.get('folderId'),
-                    name: 'geom.kpf'
+                    name: 'geom.yml'
                 }
             }).then((items) => {
                 return restRequest({
                     url: `/item/${items[0]._id}/download`,
                     dataType: 'text'
                 });
-            }).then((kpfGeometryFile) => {
-                var geometryCotnainer = kpfGeometryParser(kpfGeometryFile);
+            }).then((annotationGeometryFile) => {
+                var geometryCotnainer = annotationGeometryParser(annotationGeometryFile);
                 this.setState({ geometryCotnainer });
             }).catch(() => {
                 this.setState({ geometryCotnainer: false })
