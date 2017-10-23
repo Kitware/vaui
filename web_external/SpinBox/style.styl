@@ -1,0 +1,20 @@
+.spinbox
+  border 1px solid #ccc
+  border-radius 3px
+  padding 0 4px
+  margin 1px
+
+  input[type="number"]::-webkit-outer-spin-button
+  input[type="number"]::-webkit-inner-spin-button
+    -webkit-appearance none
+    margin 0
+
+  input[type="number"]
+    -moz-appearance textfield
+    cursor text
+    border none
+    background none
+    text-align right
+
+.spinbox.disabled
+  opacity 0.65

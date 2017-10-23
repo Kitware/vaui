@@ -1,0 +1,113 @@
+/*
+ * Style rules based on bootstrap-slider.js
+ * Copyright (c) 2017 Kyle Kemp, Rohit Kalkur, and contributors
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
+.slider
+  display inline-block
+  vertical-align middle
+  position relative
+  height 20px
+  margin 0 8px
+
+  .slider-track
+    height 10px
+    width 100%
+    margin-top -5px
+    top 50%
+    left 0
+    right 0
+
+  .slider-selection
+  .slider-track-low
+  .slider-track-high
+    position absolute
+    top 0
+    bottom 0
+    margin -1px
+    box-sizing border-box
+
+  input
+    display none
+
+  .tooltip.top
+    margin-top -36px
+
+  .tooltip-inner
+    white-space nowrap
+    max-width none
+
+  .hide
+    display none
+
+  .slider-track
+    position absolute
+    cursor pointer
+    background #fff
+    border 1px solid #ccc
+    border-radius 4px
+
+  .slider-selection
+    background #337ab7
+    border 1px solid #2e6da4
+    border-radius 4px
+    opacity 0.65
+
+  .slider-track-low
+  .slider-track-high
+    background none
+    border-radius 3px
+
+  .slider-handle
+    position absolute
+    top 50%
+    width 16px
+    height 16px
+    margin-top -8px
+    margin-left -8px
+    background #337ab7
+    border 1px solid #2e6da4
+    border-radius 50%
+
+.slider:hover:not(.slider-disabled)
+  .slider-track
+    background #e6e6e6
+    border-color #adadad
+
+  .slider-handle
+    background #286090
+    border-color #204d74
+
+  .slider-selection
+    background #286090
+    border-color #204d74
+
+.slider.slider-disabled
+  opacity 0.65
+  cursor not-allowed
+
+  .slider-handle
+    background #fff
+    border-color #ccc

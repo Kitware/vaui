@@ -10,12 +10,12 @@
       flex 1
       display flex
       flex-direction column
-    
+
       .video
         flex 1
 
   .control
-    padding 10px
+    padding-top 3px
 
     .buttons
       width auto
@@ -35,5 +35,12 @@
           &::before
             transform rotate(180deg)
 
-    .slider
-      width 100%
+    .time-control
+      display flex
+      align-items center
+
+      .slider
+        flex 1
+
+      .spinbox
+        margin-left 4px
