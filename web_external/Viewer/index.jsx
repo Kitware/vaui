@@ -4,6 +4,7 @@ import events from 'girder/events';
 import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
+import kpfGeometryParser from '../util/kpfGeometryParser';
 
 import './style.styl';
 import './slider.styl';
@@ -18,38 +19,37 @@ class Viewer extends Component {
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
             itemModel: null,
-            annotationFrames: null,
+            geometryCotnainer: null,
             ready: false
         };
         this.draggingSlider = false;
     }
     componentDidMount() {
         events.on('v:item_selected', (itemModel) => {
-            this.setState({ ready: false, itemModel });
+            this.setState({ ready: false, itemModel, geometryCotnainer: null });
             restRequest({
                 url: '/item',
                 data: {
                     folderId: itemModel.get('folderId'),
-                    name: 'annotation.json'
+                    name: 'geom.kpf'
                 }
             }).then((items) => {
                 return restRequest({
-                    contentType: "application/json",
                     url: `/item/${items[0]._id}/download`,
-                    dataType: 'json'
+                    dataType: 'text'
                 });
-            })
-                .then((annotationFrames) => {
-                    this.setState({ annotationFrames });
-                }).catch(() => {
-                    events.trigger('g:alert', {
-                        icon: 'ok',
-                        text: 'Didn\'t find annotation.json file',
-                        type: 'danger',
-                        timeout: 4000
-                    });
-                    this.setState({ annotationFrames: [] })
+            }).then((kpfGeometryFile) => {
+                var geometryCotnainer = kpfGeometryParser(kpfGeometryFile);
+                this.setState({ geometryCotnainer });
+            }).catch(() => {
+                this.setState({ geometryCotnainer: false })
+                events.trigger('g:alert', {
+                    icon: 'ok',
+                    text: 'Didn\'t find annotation.json file',
+                    type: 'danger',
+                    timeout: 4000
                 });
+            });
         });
 
     }
@@ -62,7 +62,7 @@ class Viewer extends Component {
                         [<ImageViewerWidgetWrapper className='video'
                             itemModel={this.state.itemModel}
                             playing={this.state.videoPlaying}
-                            annotationFrames={this.state.annotationFrames}
+                            geometryCotnainer={this.state.geometryCotnainer}
                             currentFrame={this.state.videoCurrentFrame}
                             getAnnotation={this.getAnnotationForAFrame}
                             onPause={() => {
@@ -87,7 +87,7 @@ class Viewer extends Component {
                                 });
                             }}
                             key={this.state.itemModel.id} />,
-                        <div className='no-annotation-message' key='no-annotation-message'>{this.state.annotationFrames && this.state.annotationFrames.length === 0 && <span>No annotation</span>}
+                        <div className='no-annotation-message' key='no-annotation-message'>{this.state.itemModel && !this.state.geometryCotnainer && <span>No annotation</span>}
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
@@ -181,18 +181,17 @@ class Viewer extends Component {
     }
 
     getAnnotationForAFrame(frame) {
-        if (!this.state.annotationFrames) {
+        if (!this.state.geometryCotnainer) {
             return;
         }
-        var featureCollection = this.state.annotationFrames[frame];
-        if (!featureCollection) {
+        var annotationGeometries = this.state.geometryCotnainer.getFrame(frame);
+        if (!annotationGeometries) {
             return;
         }
-        var data = featureCollection.features.map((feature) => {
-            var coord = feature.geometry.coordinates[0];
+        var data = annotationGeometries.map((geometry) => {
             var type = Math.random() < 0.5 ? 'a' : 'b';
             return {
-                coord,
+                g0: geometry.g0,
                 type
             }
         });

@@ -142,12 +142,12 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     var feature = this.featureLayer.createFeature('polygon');
                     feature.data(data);
                     feature.polygon((d) => {
-                        var coord = d.coord;
+                        var g0 = d.g0;
                         return {
-                            outer: [{ x: coord[0][0], y: coord[0][1] },
-                            { x: coord[1][0], y: coord[1][1] },
-                            { x: coord[2][0], y: coord[2][1] },
-                            { x: coord[3][0], y: coord[3][1] }]
+                            outer: [{ x: g0[0][0], y: g0[0][1] },
+                            { x: g0[1][0], y: g0[0][1] },
+                            { x: g0[1][0], y: g0[1][1] },
+                            { x: g0[0][0], y: g0[1][1] }]
                         }
                     });
                     for (let key in style) {
