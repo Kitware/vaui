@@ -2,23 +2,23 @@ import YAML from 'yamljs';
 
 class AnnotationGeometryCotainer {
     constructor() {
-        this.frameMap = new Map();
+        this._frameMap = new Map();
     }
 
     add(geometry) {
-        var frameMap = this.frameMap;
+        var frameMap = this._frameMap;
         if (!frameMap.has(geometry.ts0)) {
             frameMap.set(geometry.ts0, []);
         }
-        this.frameMap.get(geometry.ts0).push(geometry);
+        frameMap.get(geometry.ts0).push(geometry);
     }
 
     getFrame(frame) {
-        return this.frameMap.get(frame);
+        return this._frameMap.get(frame);
     }
 
     get length() {
-        return this.frameMap.size;
+        return this._frameMap.size;
     }
 }
 

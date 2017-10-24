@@ -51,7 +51,6 @@ class Viewer extends Component {
                 });
             });
         });
-
     }
     render() {
         var playDisabled = !this.state.ready;
@@ -63,6 +62,7 @@ class Viewer extends Component {
                             itemModel={this.state.itemModel}
                             playing={this.state.videoPlaying}
                             geometryCotnainer={this.state.geometryCotnainer}
+                            annotationActivityContainer={this.props.annotationActivityContainer}
                             currentFrame={this.state.videoCurrentFrame}
                             getAnnotation={this.getAnnotationForAFrame}
                             onPause={() => {
@@ -181,7 +181,7 @@ class Viewer extends Component {
     }
 
     getAnnotationForAFrame(frame) {
-        if (!this.state.geometryCotnainer) {
+        if (!this.state.geometryCotnainer || !this.props.annotationActivityContainer) {
             return;
         }
         var annotationGeometries = this.state.geometryCotnainer.getFrame(frame);
@@ -189,7 +189,8 @@ class Viewer extends Component {
             return;
         }
         var data = annotationGeometries.map((geometry) => {
-            var type = Math.random() < 0.5 ? 'a' : 'b';
+            var activities = this.props.annotationActivityContainer.getActivities(geometry.id1, frame);
+            var type = activities ? 'activity' : 'track';
             return {
                 g0: geometry.g0,
                 type
@@ -201,7 +202,7 @@ class Viewer extends Component {
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
             fillOpacity(a, b, d) {
-                return d.type === 'a' ? 0 : 0.4;
+                return d.type === 'activity' ? 0.4 : 0;
             },
             radius: 5.0,
             stroke: true,
