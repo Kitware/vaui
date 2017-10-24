@@ -63,6 +63,7 @@ class Viewer extends Component {
                             playing={this.state.videoPlaying}
                             geometryCotnainer={this.state.geometryCotnainer}
                             annotationActivityContainer={this.props.annotationActivityContainer}
+                            annotationTrackContainer={this.props.annotationTrackContainer}
                             currentFrame={this.state.videoCurrentFrame}
                             getAnnotation={this.getAnnotationForAFrame}
                             onPause={() => {
@@ -91,10 +92,10 @@ class Viewer extends Component {
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
-                                <button className='fast-backword btn btn-default'>
+                                <button className='fast-backword btn btn-default' disabled={true}>
                                     <i className='icon-fast-bw'></i>
                                 </button>
-                                <button className='reverse btn btn-default'>
+                                <button className='reverse btn btn-default' disabled={true}>
                                     <i className='icon-play'></i>
                                 </button>
                                 <button className='previous-frame btn btn-default'
@@ -136,7 +137,7 @@ class Viewer extends Component {
                                     }}>
                                     <i className='icon-to-end'></i>
                                 </button>
-                                <button className='fast-forward btn btn-default'>
+                                <button className='fast-forward btn btn-default' disabled={true}>
                                     <i className='icon-fast-fw'></i>
                                 </button>
                             </div>
@@ -181,15 +182,18 @@ class Viewer extends Component {
     }
 
     getAnnotationForAFrame(frame) {
-        if (!this.state.geometryCotnainer || !this.props.annotationActivityContainer) {
+        if (!this.state.geometryCotnainer || !this.props.annotationActivityContainer ||
+            !this.props.annotationTrackContainer) {
             return;
         }
         var annotationGeometries = this.state.geometryCotnainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
-        var data = annotationGeometries.map((geometry) => {
-            var activities = this.props.annotationActivityContainer.getActivities(geometry.id1, frame);
+        var data = annotationGeometries.filter((geometry) => {
+            return this.props.annotationTrackContainer.getEnableState(geometry.id1);
+        }).map((geometry) => {
+            var activities = this.props.annotationActivityContainer.getEnabledActivities(geometry.id1, frame);
             var type = activities ? 'activity' : 'track';
             return {
                 g0: geometry.g0,
