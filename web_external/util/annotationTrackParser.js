@@ -7,17 +7,17 @@ class AnnotationTrackContainer {
     }
 
     add(track) {
-        var mapper = this._mapper;
         var id = track.id1;
-        if (!mapper.has(id)) {
-            mapper.set(id, []);
-        }
+        this._mapper.set(id, track);
         this._enableState.set(id, true);
-        mapper.get(id).push(track);
     }
 
     getAllItems() {
-        return [].concat(...this._mapper.values());
+        return Array.from(this._mapper.values());
+    }
+
+    getItem(id1) {
+        return this._mapper.get(id1);
     }
 
     getEnableState(id1) {

@@ -29,6 +29,7 @@ class TreeView extends Component {
                                 annotationActivityContainer={this.props.annotationActivityContainer
                                 }
                                 toggleActivity={this.props.toggleActivity}
+                                annotationTrackContainer={this.props.annotationTrackContainer}
                             />
                         </div>
                         <div id='tracks' className='tab-pane'>
