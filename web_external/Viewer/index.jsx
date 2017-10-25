@@ -4,7 +4,6 @@ import events from 'girder/events';
 import { restRequest } from 'girder/rest';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
-import annotationGeometryParser from '../util/annotationGeometryParser';
 
 import './style.styl';
 import './slider.styl';
@@ -18,50 +17,25 @@ class Viewer extends Component {
             videoPlaying: false,
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
-            itemModel: null,
-            geometryCotnainer: null,
             ready: false
         };
         this.draggingSlider = false;
     }
-    componentDidMount() {
-        events.on('v:item_selected', (itemModel) => {
-            this.setState({ ready: false, itemModel, geometryCotnainer: null });
-            restRequest({
-                url: '/item',
-                data: {
-                    folderId: itemModel.get('folderId'),
-                    name: 'geom.yml'
-                }
-            }).then((items) => {
-                return restRequest({
-                    url: `/item/${items[0]._id}/download`,
-                    dataType: 'text'
-                });
-            }).then((annotationGeometryFile) => {
-                var geometryCotnainer = annotationGeometryParser(annotationGeometryFile);
-                this.setState({ geometryCotnainer });
-            }).catch(() => {
-                this.setState({ geometryCotnainer: false })
-                events.trigger('g:alert', {
-                    icon: 'ok',
-                    text: 'Didn\'t find annotation.json file',
-                    type: 'danger',
-                    timeout: 4000
-                });
-            });
-        });
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.itemModel !== this.props.itemModel) {
+            this.setState({ ready: false });
+        }
     }
     render() {
         var playDisabled = !this.state.ready;
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
-                    {this.state.itemModel &&
+                    {this.props.itemModel &&
                         [<ImageViewerWidgetWrapper className='video'
-                            itemModel={this.state.itemModel}
+                            itemModel={this.props.itemModel}
                             playing={this.state.videoPlaying}
-                            geometryCotnainer={this.state.geometryCotnainer}
+                            geometryCotnainer={this.props.annotationGeometryContainer}
                             annotationActivityContainer={this.props.annotationActivityContainer}
                             annotationTrackContainer={this.props.annotationTrackContainer}
                             currentFrame={this.state.videoCurrentFrame}
@@ -87,8 +61,8 @@ class Viewer extends Component {
                                     ready: true
                                 });
                             }}
-                            key={this.state.itemModel.id} />,
-                        <div className='no-annotation-message' key='no-annotation-message'>{this.state.itemModel && !this.state.geometryCotnainer && <span>No annotation</span>}
+                            key={this.props.itemModel.id} />,
+                        <div className='no-annotation-message' key='no-annotation-message'>{this.props.itemModel && !this.props.annotationGeometryContainer && <span>No annotation</span>}
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
@@ -182,11 +156,12 @@ class Viewer extends Component {
     }
 
     getAnnotationForAFrame(frame) {
-        if (!this.state.geometryCotnainer || !this.props.annotationActivityContainer ||
+        if (!this.props.annotationGeometryContainer ||
+            !this.props.annotationActivityContainer ||
             !this.props.annotationTrackContainer) {
             return;
         }
-        var annotationGeometries = this.state.geometryCotnainer.getFrame(frame);
+        var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
