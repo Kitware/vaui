@@ -1,8 +1,8 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
 import NativeVideoWidget from '../../views/widget/NativeVideoWidget';
 
-class VideoWidgetWrapper extends Component {
+class VideoWidgetWrapper extends PureComponent {
     constructor(props) {
         super(props);
         this.nativeVideoWidget = false;

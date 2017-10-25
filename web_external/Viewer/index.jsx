@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 import events from 'girder/events';
 import { restRequest } from 'girder/rest';
@@ -8,7 +8,7 @@ import SpinBox from '../SpinBox';
 import './style.styl';
 import './slider.styl';
 
-class Viewer extends Component {
+class Viewer extends PureComponent {
     constructor(props) {
         super(props);
         this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);

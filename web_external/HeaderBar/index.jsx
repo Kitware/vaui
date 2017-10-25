@@ -1,12 +1,12 @@
 import $ from 'jquery';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { logout, getCurrentUser } from 'girder/auth';
 import events from 'girder/events';
 import BrowserWidget from 'girder/views/widgets/BrowserWidget';
 
 import './style.styl';
 
-class HeaderBar extends Component {
+class HeaderBar extends PureComponent {
     constructor(props) {
         super(props);
         this.state = { user: getCurrentUser() };

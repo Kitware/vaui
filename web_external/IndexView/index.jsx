@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import events from 'girder/events';
 
 import TreeView from '../TreeView';
@@ -11,7 +11,7 @@ import Viewer from '../Viewer';
 
 import './style.styl';
 
-class IndexView extends Component {
+class IndexView extends PureComponent {
     constructor(props) {
         super(props);
         this.toggleActivity = this.toggleActivity.bind(this);
