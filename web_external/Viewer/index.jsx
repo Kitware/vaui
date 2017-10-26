@@ -63,7 +63,7 @@ class Viewer extends Component {
                             }}
                             key={this.props.itemModel.id} />,
                         this.state.ready && !this.props.annotationGeometryContainer
-                        && <div className='no-annotation-message alert alert-danger' key='no-annotation-message'>
+                        && <div className='no-annotation-message' key='no-annotation-message'>
                             <span>No annotation</span>
                         </div>,
                         <div className='control' key='control'>
