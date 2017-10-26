@@ -29,9 +29,7 @@ class AnnotationGeometry {
         this.ts0 = 0;
         this.ts1 = 0;
         this.g0 = null;
-        this.keyValues = {
-
-        };
+        this.keyValues = {};
     }
     set(key, value) {
         switch (key) {
@@ -42,8 +40,14 @@ class AnnotationGeometry {
                     [parseInt(values[2]), parseInt(values[3])]
                 ];
                 break;
-            default:
+            case 'id0':
+            case 'id1':
+            case 'ts0':
+            case 'ts1':
                 this[key] = value;
+                break;
+            default:
+                this.keyValues[key] = value;
                 break;
         }
     }

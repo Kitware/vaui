@@ -2,12 +2,12 @@ import React, { PureComponent } from 'react';
 import events from 'girder/events';
 
 import TreeView from '../TreeView';
-import TrackAttribute from '../TrackAttribute';
+import Viewer from '../Viewer';
+import InfoView from '../InfoView';
 import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTrackParser from '../util/annotationTrackParser';
 import { restRequest } from 'girder/rest';
-import Viewer from '../Viewer';
 
 import './style.styl';
 
@@ -16,6 +16,7 @@ class IndexView extends PureComponent {
         super(props);
         this.toggleActivity = this.toggleActivity.bind(this);
         this.toggleTrack = this.toggleTrack.bind(this);
+        this.onAnnotationsSelect = this.onAnnotationsSelect.bind(this);
         this.state = {
             annotationActivityContainer: null,
             annotationTrackContainer: null,
@@ -23,7 +24,7 @@ class IndexView extends PureComponent {
         }
     }
     componentDidMount() {
-        // the states would be lift to redux store
+        // the states would be lifted to redux store
         events.on('v:item_selected', (itemModel) => {
             this.setState({
                 itemModel,
@@ -69,6 +70,10 @@ class IndexView extends PureComponent {
         this.setState({ annotationTrackContainer });
     }
 
+    onAnnotationsSelect(annotations) {
+        this.setState({ selectedAnnotations: annotations })
+    }
+
     render() {
         return <div className='v-index clearbox'>
             <TreeView className='left-sidebar'
@@ -82,6 +87,10 @@ class IndexView extends PureComponent {
                 annotationGeometryContainer={this.state.annotationGeometryContainer}
                 annotationActivityContainer={this.state.annotationActivityContainer}
                 annotationTrackContainer={this.state.annotationTrackContainer}
+                annotationsSelect={this.onAnnotationsSelect}
+            />
+            <InfoView className='right-sidebar'
+                annotations={this.state.selectedAnnotations}
             />
         </div>
     }
