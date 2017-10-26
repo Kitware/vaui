@@ -44,7 +44,7 @@ class IndexView extends Component {
                     this.setState({ annotationGeometryContainer: false })
                     events.trigger('g:alert', {
                         icon: 'ok',
-                        text: 'Didn\'t find annotation files',
+                        text: 'Annotation files were not found',
                         type: 'danger',
                         timeout: 4000
                     });

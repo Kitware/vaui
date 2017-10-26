@@ -7,6 +7,7 @@
     flex-direction column
 
     .panel-body
+      position relative
       flex 1
       display flex
       flex-direction column
@@ -15,8 +16,11 @@
         flex 1
 
   .no-annotation-message
-    text-align right
-    margin 0 10px
+    position absolute
+    top 4px
+    left 4px
+    z-index 1
+    padding 5px
   
   .control
     padding-top 3px
