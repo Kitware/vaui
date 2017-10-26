@@ -31,9 +31,11 @@ class ActivityPanel extends BasePane {
 
     componentWillReceiveProps(nextProps) {
         if (this.props.annotationActivityContainer !== nextProps.annotationActivityContainer) {
-            var activities = nextProps.annotationActivityContainer.getAllItems();
-            var groupedActivities = _.groupBy(activities, (activity) => activity.act2);
-            this.setState({ groupedActivities })
+            if (nextProps.annotationActivityContainer) {
+                var activities = nextProps.annotationActivityContainer.getAllItems();
+                var groupedActivities = _.groupBy(activities, (activity) => activity.act2);
+                this.setState({ groupedActivities })
+            }
         }
     }
 

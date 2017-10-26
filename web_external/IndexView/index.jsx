@@ -25,7 +25,12 @@ class IndexView extends Component {
     componentDidMount() {
         // the states would be lift to redux store
         events.on('v:item_selected', (itemModel) => {
-            this.setState({ itemModel });
+            this.setState({
+                itemModel,
+                annotationActivityContainer: null,
+                annotationTrackContainer: null,
+                annotationGeometryContainer: null
+            });
             downloadItemByName(itemModel.get('folderId'), 'activities.yml')
                 .then((raw) => {
                     var annotationActivityContainer = annotationActivityParser(raw);
