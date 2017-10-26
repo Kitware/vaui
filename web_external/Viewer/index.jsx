@@ -62,7 +62,10 @@ class Viewer extends Component {
                                 });
                             }}
                             key={this.props.itemModel.id} />,
-                        this.state.ready && this.props.itemModel && !this.props.annotationGeometryContainer && <div className='no-annotation-message alert alert-danger' key='no-annotation-message'><span>No annotation</span></div>,
+                        this.state.ready && !this.props.annotationGeometryContainer
+                        && <div className='no-annotation-message alert alert-danger' key='no-annotation-message'>
+                            <span>No annotation</span>
+                        </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
                                 {/* <button className='fast-backword btn btn-default' disabled={true}>
