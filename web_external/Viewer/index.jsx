@@ -65,12 +65,12 @@ class Viewer extends Component {
                         this.state.ready && this.props.itemModel && !this.props.annotationGeometryContainer && <div className='no-annotation-message alert alert-danger' key='no-annotation-message'><span>No annotation</span></div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
-                                <button className='fast-backword btn btn-default' disabled={true}>
+                                {/* <button className='fast-backword btn btn-default' disabled={true}>
                                     <i className='icon-fast-bw'></i>
                                 </button>
                                 <button className='reverse btn btn-default' disabled={true}>
                                     <i className='icon-play'></i>
-                                </button>
+                                </button> */}
                                 <button className='previous-frame btn btn-default'
                                     disabled={playDisabled || this.state.videoCurrentFrame <= 0}
                                     onClick={() => {
@@ -110,9 +110,9 @@ class Viewer extends Component {
                                     }}>
                                     <i className='icon-to-end'></i>
                                 </button>
-                                <button className='fast-forward btn btn-default' disabled={true}>
+                                {/* <button className='fast-forward btn btn-default' disabled={true}>
                                     <i className='icon-fast-fw'></i>
-                                </button>
+                                </button> */}
                             </div>
                             <div className='time-control'>
                                 <ReactBootstrapSlider
