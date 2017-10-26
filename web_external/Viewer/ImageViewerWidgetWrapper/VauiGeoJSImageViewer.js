@@ -161,8 +161,12 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     this.viewer.draw();
                 }
 
+                map.geoOn(geo.event.mouseclick, () => this._triggerAnnotationEvent());
+
                 this._triggerAnnotationEvent = (annotation) => {
-                    this._annotationClicks.push(annotation);
+                    if (annotation) {
+                        this._annotationClicks.push(annotation);
+                    }
                     clearTimeout(this._annotationEventHandle);
                     this._annotationEventHandle = setTimeout(() => {
                         this.trigger('annotationsClick', this._annotationClicks);
