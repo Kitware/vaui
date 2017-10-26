@@ -68,9 +68,9 @@ class HeaderBar extends Component {
                 pageLimit: 50
             },
             validate: function (item) {
-                // if (!item.has('largeImage')) {
-                //     return $.Deferred().reject('Please select a "large image" item.').promise();
-                // }
+                if (!item.has('largeImage')) {
+                    return $.Deferred().reject('Please select a video frame image.').promise();
+                }
                 return $.Deferred().resolve().promise();
             }
         })

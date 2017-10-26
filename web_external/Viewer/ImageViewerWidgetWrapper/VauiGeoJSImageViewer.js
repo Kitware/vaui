@@ -2,6 +2,10 @@ import GeojsImageViewerWidget from 'girder_plugins/large_image/views/imageViewer
 import ItemCollection from 'girder/collections/ItemCollection';
 
 var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
+    initialize(settings) {
+        GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
+        this.getAnnotation = settings.getAnnotation;
+    },
 
     render() {
         GeojsImageViewerWidget.prototype.render.call(this);
@@ -126,40 +130,35 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 }
 
                 this._drawAnnotation = (frame) => {
-                    if (!this.annotationFrames) {
-                        return;
-                    }
                     if (this.lastFeatureFrame) {
                         this.featureLayer.deleteFeature(this.lastFeatureFrame);
                     }
-                    var annotationFrame = this.annotationFrames[frame];
+                    var result = this.getAnnotation(frame);
                     // Only needed if the frames of image and annotation has difference
-                    if (!annotationFrame) {
+                    if (!result) {
                         return;
                     }
+                    var [data, style] = result;
                     var feature = this.featureLayer.createFeature('polygon');
-                    feature.data(annotationFrame.features);
+                    feature.data(data);
                     feature.polygon((d) => {
-                        var coord = d.geometry.coordinates[0];
+                        var g0 = d.g0;
                         return {
-                            outer: [{ x: coord[0][0], y: coord[0][1] },
-                            { x: coord[1][0], y: coord[1][1] },
-                            { x: coord[2][0], y: coord[2][1] },
-                            { x: coord[3][0], y: coord[3][1] }]
+                            outer: [{ x: g0[0][0], y: g0[0][1] },
+                            { x: g0[1][0], y: g0[0][1] },
+                            { x: g0[1][0], y: g0[1][1] },
+                            { x: g0[0][0], y: g0[1][1] }]
                         }
                     });
-                    feature.style({
-                        fill: true,
-                        fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-                        fillOpacity: 0.4,
-                        radius: 5.0,
-                        stroke: true,
-                        strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
-                        strokeWidth: 1.25,
-                        strokeOpacity: 0.8
-                    });
+                    for (let key in style) {
+                        feature.style(key, style[key]);
+                    }
                     this.lastFeatureFrame = feature;
                     this.viewer.draw();
+                }
+
+                this._redrawAnnotation = () => {
+                    this._drawAnnotation(frame);
                 }
 
                 updateFrame(frame);
@@ -170,10 +169,9 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
 
     },
 
-    setAnnotationFrames(annotationFrames) {
-        this.annotationFrames = annotationFrames;
-        if (this._drawAnnotation) {
-            this._drawAnnotation();
+    redrawAnnotation() {
+        if (this._redrawAnnotation) {
+            this._redrawAnnotation();
         }
     }
 });

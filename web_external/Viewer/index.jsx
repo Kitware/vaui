@@ -11,53 +11,35 @@ import './slider.styl';
 class Viewer extends Component {
     constructor(props) {
         super(props);
+        this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
         this.state = {
             playing: false,
             videoPlaying: false,
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
-            itemModel: null,
-            annotationFrames: null,
             ready: false
         };
         this.draggingSlider = false;
     }
-    componentDidMount() {
-        events.on('v:item_selected', (itemModel) => {
-            this.setState({ ready: true, itemModel });
-            // This is a workaround for react bootstrap slider disabled at init but
-            setTimeout(() => this.setState({ ready: false }), 0);
-            restRequest({
-                url: '/item',
-                data: {
-                    folderId: itemModel.get('folderId'),
-                    name: 'annotation.json'
-                }
-            }).then((items) => {
-                return restRequest({
-                    url: `/item/${items[0]._id}/download`,
-                    dataType: 'json'
-                });
-            })
-                .then((annotationFrames) => {
-                    this.setState({ annotationFrames });
-                })
-        });
-
-    }
-    componentDidUpdate(prevProps, prevState) {
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.itemModel !== this.props.itemModel) {
+            this.setState({ ready: false });
+        }
     }
     render() {
-        var playDisabled = !this.state.ready || !this.state.annotationFrames;
+        var playDisabled = !this.state.ready;
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
-                    {this.state.itemModel &&
+                    {this.props.itemModel &&
                         [<ImageViewerWidgetWrapper className='video'
-                            itemModel={this.state.itemModel}
+                            itemModel={this.props.itemModel}
                             playing={this.state.videoPlaying}
+                            geometryCotnainer={this.props.annotationGeometryContainer}
+                            annotationActivityContainer={this.props.annotationActivityContainer}
+                            annotationTrackContainer={this.props.annotationTrackContainer}
                             currentFrame={this.state.videoCurrentFrame}
-                            annotationFrames={this.state.annotationFrames}
+                            getAnnotation={this.getAnnotationForAFrame}
                             onPause={() => {
                                 if (!this.draggingSlider) {
                                     this.setState({
@@ -79,15 +61,19 @@ class Viewer extends Component {
                                     ready: true
                                 });
                             }}
-                            key={this.state.itemModel.id} />,
+                            key={this.props.itemModel.id} />,
+                        this.state.ready && !this.props.annotationGeometryContainer
+                        && <div className='no-annotation-message alert alert-danger' key='no-annotation-message'>
+                            <span>No annotation</span>
+                        </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
-                                <button className='fast-backword btn btn-default'>
+                                {/* <button className='fast-backword btn btn-default' disabled={true}>
                                     <i className='icon-fast-bw'></i>
                                 </button>
-                                <button className='reverse btn btn-default'>
+                                <button className='reverse btn btn-default' disabled={true}>
                                     <i className='icon-play'></i>
-                                </button>
+                                </button> */}
                                 <button className='previous-frame btn btn-default'
                                     disabled={playDisabled || this.state.videoCurrentFrame <= 0}
                                     onClick={() => {
@@ -127,9 +113,9 @@ class Viewer extends Component {
                                     }}>
                                     <i className='icon-to-end'></i>
                                 </button>
-                                <button className='fast-forward btn btn-default'>
+                                {/* <button className='fast-forward btn btn-default' disabled={true}>
                                     <i className='icon-fast-fw'></i>
-                                </button>
+                                </button> */}
                             </div>
                             <div className='time-control'>
                                 <ReactBootstrapSlider
@@ -169,6 +155,44 @@ class Viewer extends Component {
                 </div>
             </div>
         </div>
+    }
+
+    getAnnotationForAFrame(frame) {
+        if (!this.props.annotationGeometryContainer ||
+            !this.props.annotationActivityContainer ||
+            !this.props.annotationTrackContainer) {
+            return;
+        }
+        var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
+        if (!annotationGeometries) {
+            return;
+        }
+        var data = annotationGeometries.filter((geometry) => {
+            return this.props.annotationTrackContainer.getEnableState(geometry.id1);
+        }).map((geometry) => {
+            var activities = this.props.annotationActivityContainer.getEnabledActivities(geometry.id1, frame);
+            var type = activities ? 'activity' : 'track';
+            return {
+                g0: geometry.g0,
+                type
+            }
+        });
+        var style = {
+            fill: true,
+            fillColor(d) {
+                return { r: 1.0, g: 0.839, b: 0.439 };
+            },
+            fillOpacity(a, b, d) {
+                return d.type === 'activity' ? 0.4 : 0;
+            },
+            radius: 5.0,
+            stroke: true,
+            strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+            strokeWidth: 1.25,
+            strokeOpacity: 0.8,
+            uniform: true
+        }
+        return [data, style];
     }
 }
 export default Viewer;
