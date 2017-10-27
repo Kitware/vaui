@@ -189,11 +189,29 @@ class Viewer extends PureComponent {
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
             fillOpacity(a, b, d) {
-                return d.activities ? 0.4 : 0;
+                return d.activities ? 0.3 : 0;
             },
-            radius: 5.0,
             stroke: true,
-            strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+            strokeColor(a, b, d) {
+                var attributes = d.geometry.keyValues;
+                if (attributes.src === 'truth') {
+                    if (attributes.eval0 === 'tp') {
+                        return { r: 0, g: 1, b: 0.0 }
+                    }
+                    else if (attributes.eval0 === 'fn') {
+                        return { r: 1, g: 1, b: 0.0 }
+                    }
+                }
+                else if (attributes.src === 'computed') {
+                    if (attributes.eval0 === 'tp') {
+                        return { r: 0, g: 0, b: 1 }
+                    }
+                    else if (attributes.eval0 === 'fp') {
+                        return { r: 1, g: 0, b: 0.0 }
+                    }
+                }
+                return { r: 0.851, g: 0.604, b: 0.0 };
+            },
             strokeWidth: 1.25,
             strokeOpacity: 0.8,
             uniform: true
