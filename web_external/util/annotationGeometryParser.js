@@ -1,8 +1,9 @@
 import YAML from 'yamljs';
 
-class AnnotationGeometryCotainer {
+class AnnotationGeometryContainer {
     constructor() {
         this._frameMap = new Map();
+        this._trackIds = new Set();
     }
 
     add(geometry) {
@@ -11,6 +12,7 @@ class AnnotationGeometryCotainer {
             frameMap.set(geometry.ts0, []);
         }
         frameMap.get(geometry.ts0).push(geometry);
+        this._trackIds.add(geometry.id1);
     }
 
     getFrame(frame) {
@@ -19,6 +21,41 @@ class AnnotationGeometryCotainer {
 
     get length() {
         return this._frameMap.size;
+    }
+
+    getAllTrackId() {
+        return Array.from(this._trackIds);
+    }
+}
+
+class AnnotationTrackContainer {
+    constructor() {
+        this._trackIds = new Set();
+        this._enableState = new Map();
+    }
+
+    add(geometry) {
+        if (!this._trackIds.has(geometry.id1)) {
+            this._trackIds.add(geometry.id1);
+            this._enableState.set(geometry.id1, true);
+        }
+    }
+
+    getAllItems() {
+        return Array.from(this._trackIds);
+    }
+
+    getEnableState(id1) {
+        return this._enableState.get(id1);
+    }
+
+    toggleState(id1, enabled) {
+        this._enableState.set(id1, enabled);
+        return this.copy();
+    }
+
+    copy() {
+        return Object.assign(new this.constructor(), this);
     }
 }
 
@@ -55,7 +92,8 @@ class AnnotationGeometry {
 
 function annotationGeometryParser(raw) {
     var lines = YAML.parse(raw);
-    var annotationGeometryCotainer = new AnnotationGeometryCotainer();
+    var annotationGeometryContainer = new AnnotationGeometryContainer();
+    var annotationTrackContainer = new AnnotationTrackContainer();
     for (let line of lines) {
         if ('meta' in line) {
             continue;
@@ -64,15 +102,16 @@ function annotationGeometryParser(raw) {
         for (let key in line) {
             annotationGeometry.set(key, line[key]);
         }
-        annotationGeometryCotainer.add(annotationGeometry);
+        annotationGeometryContainer.add(annotationGeometry);
+        annotationTrackContainer.add(annotationGeometry);
     }
-    return annotationGeometryCotainer;
+    return { annotationGeometryContainer, annotationTrackContainer };
 }
 
 
 
 export {
     AnnotationGeometry,
-    AnnotationGeometryCotainer
+    AnnotationGeometryContainer
 }
 export default annotationGeometryParser;

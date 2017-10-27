@@ -161,26 +161,26 @@ class Viewer extends PureComponent {
     getAnnotationForAFrame(frame) {
         if (!this.props.annotationGeometryContainer ||
             !this.props.annotationActivityContainer ||
-            !this.props.annotationTrackContainer) {
+            !this.props.annotationTrackContainer ||
+            !this.props.annotationTypeContainer) {
             return;
         }
-        var tracksContainer = this.props.annotationTrackContainer;
+        var typeContainer = this.props.annotationTypeContainer;
+        var trackContainer = this.props.annotationTrackContainer;
         var activityContainer = this.props.annotationActivityContainer;
         var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
         var data = annotationGeometries.filter((geometry) => {
-            return tracksContainer.getEnableState(geometry.id1);
+            return trackContainer.getEnableState(geometry.id1);
         }).map((geometry) => {
             var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
-            var type = activities ? 'activity' : 'track';
             return {
                 g0: geometry.g0,
-                type,
                 activities,
                 geometry,
-                track:tracksContainer.getItem(geometry.id1)
+                type: typeContainer.getItem(geometry.id1)
             }
         });
         var style = {
@@ -189,7 +189,7 @@ class Viewer extends PureComponent {
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
             fillOpacity(a, b, d) {
-                return d.type === 'activity' ? 0.4 : 0;
+                return d.activities ? 0.4 : 0;
             },
             radius: 5.0,
             stroke: true,

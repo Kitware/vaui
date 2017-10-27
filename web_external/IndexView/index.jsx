@@ -6,7 +6,7 @@ import Viewer from '../Viewer';
 import InfoView from '../InfoView';
 import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
-import annotationTrackParser from '../util/annotationTrackParser';
+import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 import { restRequest } from 'girder/rest';
 
 import './style.styl';
@@ -19,7 +19,7 @@ class IndexView extends PureComponent {
         this.onAnnotationsSelect = this.onAnnotationsSelect.bind(this);
         this.state = {
             annotationActivityContainer: null,
-            annotationTrackContainer: null,
+            annotationTypeContainer: null,
             annotationGeometryContainer: null
         }
     }
@@ -29,7 +29,7 @@ class IndexView extends PureComponent {
             this.setState({
                 itemModel,
                 annotationActivityContainer: null,
-                annotationTrackContainer: null,
+                annotationTypeContainer: null,
                 annotationGeometryContainer: null
             });
             downloadItemByName(itemModel.get('folderId'), 'activities.yml')
@@ -39,13 +39,16 @@ class IndexView extends PureComponent {
                 });
             downloadItemByName(itemModel.get('folderId'), 'types.yml')
                 .then((raw) => {
-                    var annotationTrackContainer = annotationTrackParser(raw);
-                    this.setState({ annotationTrackContainer });
-                });
+                    return annotationTypeParser(raw);
+                })
+                .catch(() => {
+                    return new AnnotationTypeContainer();
+                })
+                .then((annotationTypeContainer) => this.setState({ annotationTypeContainer }));
             downloadItemByName(itemModel.get('folderId'), 'geom.yml')
                 .then((raw) => {
-                    var annotationGeometryContainer = annotationGeometryParser(raw);
-                    this.setState({ annotationGeometryContainer });
+                    var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
+                    this.setState({ annotationGeometryContainer, annotationTrackContainer });
                 }).catch(() => {
                     this.setState({ annotationGeometryContainer: false })
                     events.trigger('g:alert', {
@@ -64,9 +67,9 @@ class IndexView extends PureComponent {
         this.setState({ annotationActivityContainer });
     }
 
-    toggleTrack(track, enabled) {
+    toggleTrack(trackId, enabled) {
         var annotationTrackContainer = this.state.annotationTrackContainer;
-        var annotationTrackContainer = annotationTrackContainer.toggleState(track.id1, enabled);
+        var annotationTrackContainer = annotationTrackContainer.toggleState(trackId, enabled);
         this.setState({ annotationTrackContainer });
     }
 
@@ -77,9 +80,10 @@ class IndexView extends PureComponent {
     render() {
         return <div className='v-index clearbox'>
             <TreeView className='left-sidebar'
+                annotationTrackContainer={this.state.annotationTrackContainer}
                 annotationActivityContainer={this.state.annotationActivityContainer}
                 toggleActivity={this.toggleActivity}
-                annotationTrackContainer={this.state.annotationTrackContainer}
+                annotationTypeContainer={this.state.annotationTypeContainer}
                 toggleTrack={this.toggleTrack}
             />
             <Viewer className='main'
@@ -87,6 +91,7 @@ class IndexView extends PureComponent {
                 annotationGeometryContainer={this.state.annotationGeometryContainer}
                 annotationActivityContainer={this.state.annotationActivityContainer}
                 annotationTrackContainer={this.state.annotationTrackContainer}
+                annotationTypeContainer={this.state.annotationTypeContainer}
                 annotationsSelect={this.onAnnotationsSelect}
             />
             <InfoView className='right-sidebar'

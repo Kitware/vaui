@@ -15,7 +15,7 @@ class TrackPane extends BasePane {
     }
 
     getItemId(item) {
-        return item.id1;
+        return item;
     }
 
     toggleItem(item, enabled) {
@@ -23,11 +23,28 @@ class TrackPane extends BasePane {
     }
 
     render() {
-        if (!this.props.annotationTrackContainer) {
+        if (!this.props.annotationTypeContainer || !this.props.annotationTrackContainer) {
             return null;
         }
-        var container = this.props.annotationTrackContainer;
-        var tracks = _.sortBy(_.sortBy(container.getAllItems(), (track) => track.id1), (track) => track.obj_type.toLowerCase());
+        var typeContainer = this.props.annotationTypeContainer;
+        var trackContainer = this.props.annotationTrackContainer;
+
+        var sortedTrackIds = _.sortBy(
+            this.props.annotationTrackContainer.getAllItems(),
+            (trackId) => {
+                var type = typeContainer.getItem(trackId);
+                if (type) {
+                    return type.obj_type + trackId;
+                }
+                else {
+                    return trackId;
+                }
+            });
+
+        // var tracks = _.sortBy(
+        //     _.sortBy(typeContainer.getAllItems(), (track) => track.id1),
+        //     (track) => track.obj_type.toLowerCase()
+        // );
 
         return <div className={['v-track-pane', this.props.className].join(' ')}>
             <div className='checkbox'>
@@ -37,15 +54,17 @@ class TrackPane extends BasePane {
                 </label>
             </div>
             <ul>
-                {tracks.map((track) => {
-                    return <li key={track.id1}>
+                {sortedTrackIds.map((trackId) => {
+                    var type = typeContainer.getItem(trackId);
+                    var label = type ? `${type.obj_type} ${trackId}` : trackId;
+                    return <li key={trackId}>
                         <div className='checkbox'>
                             <label>
                                 <input type='checkbox'
-                                    checked={container.getEnableState(track.id1)}
-                                    onChange={(e) => this.props.toggleTrack(track, e.target.checked)}
+                                    checked={trackContainer.getEnableState(trackId)}
+                                    onChange={(e) => this.props.toggleTrack(trackId, e.target.checked)}
                                 />
-                                {`${track.obj_type} ${track.id1}`}
+                                {label}
                             </label>
                         </div>
                     </li>
