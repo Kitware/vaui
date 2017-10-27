@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 import events from 'girder/events';
 import { restRequest } from 'girder/rest';
@@ -8,7 +8,7 @@ import SpinBox from '../SpinBox';
 import './style.styl';
 import './slider.styl';
 
-class Viewer extends Component {
+class Viewer extends PureComponent {
     constructor(props) {
         super(props);
         this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
@@ -61,6 +61,7 @@ class Viewer extends Component {
                                     ready: true
                                 });
                             }}
+                            annotationsSelect={this.props.annotationsSelect}
                             key={this.props.itemModel.id} />,
                         this.state.ready && !this.props.annotationGeometryContainer
                         && <div className='no-annotation-message' key='no-annotation-message'>
@@ -163,18 +164,23 @@ class Viewer extends Component {
             !this.props.annotationTrackContainer) {
             return;
         }
+        var tracksContainer = this.props.annotationTrackContainer;
+        var activityContainer = this.props.annotationActivityContainer;
         var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
         var data = annotationGeometries.filter((geometry) => {
-            return this.props.annotationTrackContainer.getEnableState(geometry.id1);
+            return tracksContainer.getEnableState(geometry.id1);
         }).map((geometry) => {
-            var activities = this.props.annotationActivityContainer.getEnabledActivities(geometry.id1, frame);
+            var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
             var type = activities ? 'activity' : 'track';
             return {
                 g0: geometry.g0,
-                type
+                type,
+                activities,
+                geometry,
+                track:tracksContainer.getItem(geometry.id1)
             }
         });
         var style = {

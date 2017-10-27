@@ -49,6 +49,10 @@ class ImageViewerWidgetWrapper extends Component {
             if (this.props.onReady) {
                 this.props.onReady();
             }
+        }).on('annotationsClick', (annotations) => {
+            if (this.props.annotationsSelect) {
+                this.props.annotationsSelect(annotations);
+            }
         });
     }
 

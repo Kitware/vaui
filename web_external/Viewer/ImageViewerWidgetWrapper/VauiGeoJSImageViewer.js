@@ -5,6 +5,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     initialize(settings) {
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
+        this._annotationClicks = [];
     },
 
     render() {
@@ -139,7 +140,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         return;
                     }
                     var [data, style] = result;
-                    var feature = this.featureLayer.createFeature('polygon');
+                    var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true });
                     feature.data(data);
                     feature.polygon((d) => {
                         var g0 = d.g0;
@@ -153,8 +154,24 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     for (let key in style) {
                         feature.style(key, style[key]);
                     }
+                    feature.geoOn(geo.event.feature.mouseclick, (evt) => {
+                        this._triggerAnnotationEvent(evt.data);
+                    });
                     this.lastFeatureFrame = feature;
                     this.viewer.draw();
+                }
+
+                map.geoOn(geo.event.mouseclick, () => this._triggerAnnotationEvent());
+
+                this._triggerAnnotationEvent = (annotation) => {
+                    if (annotation) {
+                        this._annotationClicks.push(annotation);
+                    }
+                    clearTimeout(this._annotationEventHandle);
+                    this._annotationEventHandle = setTimeout(() => {
+                        this.trigger('annotationsClick', this._annotationClicks);
+                        this._annotationClicks = [];
+                    }, 0);
                 }
 
                 this._redrawAnnotation = () => {
