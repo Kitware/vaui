@@ -11,7 +11,7 @@ class InfoView extends PureComponent {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Info</div>
                 <div className='panel-body'>
-                    {this.props.annotations && this.props.annotations.length &&
+                    {this.props.annotations && this.props.annotations.length!==0 &&
                         <div>
                             <ul className='geometry'>
                                 {this.props.annotations.map((annotation) => {
