@@ -7,12 +7,14 @@
     flex-direction column
 
   .panel-body
-    flex 1
+    flex 1 1 0
     display flex
     flex-direction column
+    overflow-y hidden
 
   ul
     flex 1
+    overflow-y auto
 
     &.geometry
       padding-left 20px
@@ -29,6 +31,5 @@
 
   .clear-message
     align-self flex-end
-    height auto
     text-align center
     opacity 0.6
