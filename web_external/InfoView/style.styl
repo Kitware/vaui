@@ -8,9 +8,12 @@
 
   .panel-body
     flex 1
-    position relative
+    display flex
+    flex-direction column
 
   ul
+    flex 1
+
     &.geometry
       padding-left 20px
 
@@ -25,9 +28,7 @@
         margin-bottom 2px
 
   .clear-message
-    position absolute
-    bottom 0
-    left 0
-    right 0
+    align-self flex-end
+    height auto
     text-align center
     opacity 0.6
