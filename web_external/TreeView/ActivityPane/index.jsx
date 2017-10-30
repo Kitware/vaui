@@ -40,7 +40,7 @@ class ActivityPanel extends BasePane {
     }
 
     render() {
-        if (!this.props.annotationActivityContainer || !this.props.annotationTrackContainer) {
+        if (!this.props.annotationActivityContainer || !this.props.annotationTypeContainer) {
             return null;
         }
         var container = this.props.annotationActivityContainer;
@@ -75,8 +75,8 @@ class ActivityPanel extends BasePane {
                                                 onChange={(e) => this.props.toggleActivity(activity, e.target.checked)}
                                             />
                                             {activity.actors.map((actor) => {
-                                                var track = this.props.annotationTrackContainer.getItem(actor.id1);
-                                                return `${track.obj_type} ${track.id1}`;
+                                                var type = this.props.annotationTypeContainer.getItem(actor.id1);
+                                                return type ? `${actor.id1} (${type.obj_type})` : `${actor.id1}`
                                             }).join(', ')}
                                         </label>
                                     </div>

@@ -161,26 +161,26 @@ class Viewer extends PureComponent {
     getAnnotationForAFrame(frame) {
         if (!this.props.annotationGeometryContainer ||
             !this.props.annotationActivityContainer ||
-            !this.props.annotationTrackContainer) {
+            !this.props.annotationTrackContainer ||
+            !this.props.annotationTypeContainer) {
             return;
         }
-        var tracksContainer = this.props.annotationTrackContainer;
+        var typeContainer = this.props.annotationTypeContainer;
+        var trackContainer = this.props.annotationTrackContainer;
         var activityContainer = this.props.annotationActivityContainer;
         var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
         var data = annotationGeometries.filter((geometry) => {
-            return tracksContainer.getEnableState(geometry.id1);
+            return trackContainer.getEnableState(geometry.id1);
         }).map((geometry) => {
             var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
-            var type = activities ? 'activity' : 'track';
             return {
                 g0: geometry.g0,
-                type,
                 activities,
                 geometry,
-                track:tracksContainer.getItem(geometry.id1)
+                type: typeContainer.getItem(geometry.id1)
             }
         });
         var style = {
@@ -189,11 +189,29 @@ class Viewer extends PureComponent {
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
             fillOpacity(a, b, d) {
-                return d.type === 'activity' ? 0.4 : 0;
+                return d.activities ? 0.3 : 0;
             },
-            radius: 5.0,
             stroke: true,
-            strokeColor: { r: 0.851, g: 0.604, b: 0.0 },
+            strokeColor(a, b, d) {
+                var attributes = d.geometry.keyValues;
+                if (attributes.src === 'truth') {
+                    if (attributes.eval0 === 'tp') {
+                        return { r: 0, g: 1, b: 0.0 }
+                    }
+                    else if (attributes.eval0 === 'fn') {
+                        return { r: 1, g: 1, b: 0.0 }
+                    }
+                }
+                else if (attributes.src === 'computed') {
+                    if (attributes.eval0 === 'tp') {
+                        return { r: 0, g: 0, b: 1 }
+                    }
+                    else if (attributes.eval0 === 'fp') {
+                        return { r: 1, g: 0, b: 0.0 }
+                    }
+                }
+                return { r: 0.851, g: 0.604, b: 0.0 };
+            },
             strokeWidth: 1.25,
             strokeOpacity: 0.8,
             uniform: true

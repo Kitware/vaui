@@ -11,13 +11,14 @@ class InfoView extends PureComponent {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Info</div>
                 <div className='panel-body'>
-                    {this.props.annotations && this.props.annotations.length!==0 &&
+                    {this.props.annotations && this.props.annotations.length !== 0 &&
                         <div>
                             <ul className='geometry'>
                                 {this.props.annotations.map((annotation) => {
-                                    return <li key={annotation.geometry.id0} className='track'>
+                                    var type = annotation.type ? `${annotation.geometry.id1} (${annotation.type.obj_type})` : annotation.geometry.id1;
+                                    return <li key={`${annotation.geometry.id0}-${annotation.geometry.id1}`} className='track'>
                                         <div>
-                                            <div>{annotation.track.obj_type} {annotation.track.id1}</div>
+                                            <div>{type}</div>
                                             <div>Geometry id: {annotation.geometry.id0}</div>
                                             <div>Frame id: {annotation.geometry.ts0}</div>
                                             {Object.entries(annotation.geometry.keyValues).map(([key, value], index) => {
