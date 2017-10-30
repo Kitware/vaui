@@ -76,10 +76,7 @@ class ActivityPanel extends BasePane {
                                             />
                                             {activity.actors.map((actor) => {
                                                 var type = this.props.annotationTypeContainer.getItem(actor.id1);
-                                                return type?`${actor.id1} (${type.obj_type})`:`${actor.id1}`
-                                                if (!type) {
-                                                    return `${actor.id1}`;
-                                                }
+                                                return type ? `${actor.id1} (${type.obj_type})` : `${actor.id1}`
                                             }).join(', ')}
                                         </label>
                                     </div>

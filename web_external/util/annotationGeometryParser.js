@@ -3,7 +3,6 @@ import YAML from 'yamljs';
 class AnnotationGeometryContainer {
     constructor() {
         this._frameMap = new Map();
-        this._trackIds = new Set();
     }
 
     add(geometry) {
@@ -12,7 +11,6 @@ class AnnotationGeometryContainer {
             frameMap.set(geometry.ts0, []);
         }
         frameMap.get(geometry.ts0).push(geometry);
-        this._trackIds.add(geometry.id1);
     }
 
     getFrame(frame) {
@@ -21,10 +19,6 @@ class AnnotationGeometryContainer {
 
     get length() {
         return this._frameMap.size;
-    }
-
-    getAllTrackId() {
-        return Array.from(this._trackIds);
     }
 }
 

@@ -41,11 +41,6 @@ class TrackPane extends BasePane {
                 }
             });
 
-        // var tracks = _.sortBy(
-        //     _.sortBy(typeContainer.getAllItems(), (track) => track.id1),
-        //     (track) => track.obj_type.toLowerCase()
-        // );
-
         return <div className={['v-track-pane', this.props.className].join(' ')}>
             <div className='checkbox'>
                 <label>
