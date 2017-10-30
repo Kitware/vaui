@@ -18,6 +18,8 @@ class IndexView extends PureComponent {
         this.toggleTrack = this.toggleTrack.bind(this);
         this.onAnnotationsSelect = this.onAnnotationsSelect.bind(this);
         this.state = {
+            isLoadingAnnotation: false,
+            itemModel: null,
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationGeometryContainer: null
@@ -30,34 +32,39 @@ class IndexView extends PureComponent {
                 itemModel,
                 annotationActivityContainer: null,
                 annotationTypeContainer: null,
-                annotationGeometryContainer: null
+                annotationGeometryContainer: null,
+                isLoadingAnnotation: true
             });
-            downloadItemByName(itemModel.get('folderId'), 'activities.yml')
-                .then((raw) => {
-                    var annotationActivityContainer = annotationActivityParser(raw);
-                    this.setState({ annotationActivityContainer });
-                });
-            downloadItemByName(itemModel.get('folderId'), 'types.yml')
-                .then((raw) => {
-                    return annotationTypeParser(raw);
-                })
-                .catch(() => {
-                    return new AnnotationTypeContainer();
-                })
-                .then((annotationTypeContainer) => this.setState({ annotationTypeContainer }));
-            downloadItemByName(itemModel.get('folderId'), 'geom.yml')
-                .then((raw) => {
-                    var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
-                    this.setState({ annotationGeometryContainer, annotationTrackContainer });
-                }).catch(() => {
-                    this.setState({ annotationGeometryContainer: false })
-                    events.trigger('g:alert', {
-                        icon: 'ok',
-                        text: 'Annotation files were not found',
-                        type: 'danger',
-                        timeout: 4000
-                    });
-                });
+            Promise.all([
+                downloadItemByName(itemModel.get('folderId'), 'activities.yml')
+                    .then((raw) => {
+                        var annotationActivityContainer = annotationActivityParser(raw);
+                        this.setState({ annotationActivityContainer });
+                    })
+                    .catch(() => { }),
+                downloadItemByName(itemModel.get('folderId'), 'types.yml')
+                    .then((raw) => {
+                        return annotationTypeParser(raw);
+                    })
+                    .catch(() => {
+                        return new AnnotationTypeContainer();
+                    })
+                    .then((annotationTypeContainer) => this.setState({ annotationTypeContainer })),
+                downloadItemByName(itemModel.get('folderId'), 'geom.yml')
+                    .then((raw) => {
+                        var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
+                        this.setState({ annotationGeometryContainer, annotationTrackContainer });
+                    }).catch(() => {
+                        events.trigger('g:alert', {
+                            icon: 'ok',
+                            text: 'Annotation files were not found',
+                            type: 'danger',
+                            timeout: 4000
+                        });
+                    })
+            ]).then(() => {
+                this.setState({ isLoadingAnnotation: false });
+            });
         });
     }
 
@@ -92,6 +99,7 @@ class IndexView extends PureComponent {
                 annotationActivityContainer={this.state.annotationActivityContainer}
                 annotationTrackContainer={this.state.annotationTrackContainer}
                 annotationTypeContainer={this.state.annotationTypeContainer}
+                isLoadingAnnotation={this.state.isLoadingAnnotation}
                 annotationsSelect={this.onAnnotationsSelect}
             />
             <InfoView className='right-sidebar'
