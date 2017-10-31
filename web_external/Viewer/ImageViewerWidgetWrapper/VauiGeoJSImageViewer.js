@@ -126,7 +126,6 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 });
                         }
                         else {
-                            console.log("pending frame", newFrame);
                             this.pendingFrame = newFrame;
                         }
                     }
