@@ -6,6 +6,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
         this._annotationClicks = [];
+        this.pendingFrame = null;
     },
 
     render() {
@@ -64,7 +65,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 }
 
                 var next = () => {
-                    if (this.pendingFrame) {
+                    if (this.pendingFrame !== null) {
                         frame = this.pendingFrame;
                         this.pendingFrame = null;
                     }
@@ -79,7 +80,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         updateFrame(frame)
                             .then(() => {
                                 pendingNext = false;
-                                if (!this.pendingFrame) {
+                                if (this.pendingFrame === null) {
                                     this.trigger('progress', frame, ids.length);
                                 }
                                 // if we haven't asked to stop, go to the next frame as soon as
