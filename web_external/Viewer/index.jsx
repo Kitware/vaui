@@ -28,6 +28,7 @@ class Viewer extends PureComponent {
     }
     render() {
         var playDisabled = !this.state.ready;
+        var message = this._getMessage();
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
@@ -63,9 +64,8 @@ class Viewer extends PureComponent {
                             }}
                             annotationsSelect={this.props.annotationsSelect}
                             key={this.props.itemModel.id} />,
-                        this.state.ready && !this.props.annotationGeometryContainer
-                        && <div className='no-annotation-message' key='no-annotation-message'>
-                            <span>No annotation</span>
+                        message && <div className={message.classes} key='message'>
+                            <span>{message.text}</span>
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
@@ -156,6 +156,15 @@ class Viewer extends PureComponent {
                 </div>
             </div>
         </div>
+    }
+
+    _getMessage() {
+        if (this.props.isLoadingAnnotation || !this.state.ready) {
+            return {text: 'Loading...', classes: 'message info-message'};
+        }
+        if (!this.props.isLoadingAnnotation && !this.props.annotationGeometryContainer) {
+            return {text: 'No annotation', classes: 'message error-message'};
+        }
     }
 
     getAnnotationForAFrame(frame) {
