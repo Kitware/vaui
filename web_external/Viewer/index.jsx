@@ -64,8 +64,8 @@ class Viewer extends PureComponent {
                             }}
                             annotationsSelect={this.props.annotationsSelect}
                             key={this.props.itemModel.id} />,
-                        message && <div className='message' key='message'>
-                            <span>{message}</span>
+                        message && <div className={message.classes} key='message'>
+                            <span>{message.text}</span>
                         </div>,
                         <div className='control' key='control'>
                             <div className='buttons btn-group'>
@@ -160,10 +160,10 @@ class Viewer extends PureComponent {
 
     _getMessage() {
         if (this.props.isLoadingAnnotation || !this.state.ready) {
-            return 'Loading...';
+            return {text: 'Loading...', classes: 'message info-message'};
         }
         if (!this.props.isLoadingAnnotation && !this.props.annotationGeometryContainer) {
-            return 'No annotation';
+            return {text: 'No annotation', classes: 'message error-message'};
         }
     }
 
