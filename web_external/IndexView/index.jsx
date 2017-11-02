@@ -35,35 +35,40 @@ class IndexView extends PureComponent {
                 annotationGeometryContainer: null,
                 isLoadingAnnotation: true
             });
-            Promise.all([
-                downloadItemByName(itemModel.get('folderId'), 'activities.yml')
-                    .then((raw) => {
-                        var annotationActivityContainer = annotationActivityParser(raw);
-                        this.setState({ annotationActivityContainer });
-                    })
-                    .catch(() => { }),
-                downloadItemByName(itemModel.get('folderId'), 'types.yml')
-                    .then((raw) => {
-                        return annotationTypeParser(raw);
-                    })
-                    .catch(() => {
-                        return new AnnotationTypeContainer();
-                    })
-                    .then((annotationTypeContainer) => this.setState({ annotationTypeContainer })),
-                downloadItemByName(itemModel.get('folderId'), 'geom.yml')
-                    .then((raw) => {
-                        var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
-                        this.setState({ annotationGeometryContainer, annotationTrackContainer });
-                    }).catch(() => {
-                        events.trigger('g:alert', {
-                            icon: 'ok',
-                            text: 'Annotation files were not found',
-                            type: 'danger',
-                            timeout: 4000
-                        });
-                    })
-            ]).then(() => {
-                this.setState({ isLoadingAnnotation: false });
+            restRequest({
+                url: `/folder/${itemModel.get('folderId')}`
+            }).then((folder) => {
+                console.log(folder);
+                Promise.all([
+                    downloadItemByName(itemModel.get('folderId'), `${folder.name}.activities.yml`)
+                        .then((raw) => {
+                            var annotationActivityContainer = annotationActivityParser(raw);
+                            this.setState({ annotationActivityContainer });
+                        })
+                        .catch(() => { }),
+                    downloadItemByName(itemModel.get('folderId'), `${folder.name}.types.yml`)
+                        .then((raw) => {
+                            return annotationTypeParser(raw);
+                        })
+                        .catch(() => {
+                            return new AnnotationTypeContainer();
+                        })
+                        .then((annotationTypeContainer) => this.setState({ annotationTypeContainer })),
+                    downloadItemByName(itemModel.get('folderId'), `${folder.name}.geom.yml`)
+                        .then((raw) => {
+                            var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
+                            this.setState({ annotationGeometryContainer, annotationTrackContainer });
+                        }).catch(() => {
+                            events.trigger('g:alert', {
+                                icon: 'ok',
+                                text: 'Annotation files were not found',
+                                type: 'danger',
+                                timeout: 4000
+                            });
+                        })
+                ]).then(() => {
+                    this.setState({ isLoadingAnnotation: false });
+                });
             });
         });
     }
