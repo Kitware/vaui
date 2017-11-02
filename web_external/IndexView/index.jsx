@@ -38,6 +38,7 @@ class IndexView extends PureComponent {
             restRequest({
                 url: `/folder/${itemModel.get('folderId')}`
             }).then((folder) => {
+                console.log(folder);
                 Promise.all([
                     downloadItemByName(itemModel.get('folderId'), `${folder.name}.activities.yml`)
                         .then((raw) => {
