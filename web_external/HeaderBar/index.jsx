@@ -25,7 +25,7 @@ class HeaderBar extends PureComponent {
         let user = this.state.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='toolbutton'>
-                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true })}>Load</button>
+                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey:Math.random() /* want to have new instance every time */ })}>Load</button>
             </div>
             <div className='v-current-user-text'></div>
             <div className='v-current-user-wrapper toolbutton'>
@@ -57,9 +57,7 @@ class HeaderBar extends PureComponent {
                     </div>
                 }
             </div>
-            {this.state.showClipExplorer &&
-                <ClipExplorer show={true} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(item) => this.itemSelected(item)} />
-            }
+            <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(item) => this.itemSelected(item)} />
         </div>
     }
 
@@ -71,31 +69,5 @@ class HeaderBar extends PureComponent {
         this.handleClipExplorerTryClose();
         events.trigger('v:item_selected', new ItemModel(item));
     }
-
-    // openClicked(e) {
-    //     var widget = new BrowserWidget({
-    //         el: $('#g-dialog-container'),
-    //         parentView: null,
-    //         titleText: 'Select a project...',
-    //         submitText: 'Open',
-    //         showItems: true,
-    //         selectItem: true,
-    //         helpText: 'Click on a project collection to open.',
-    //         rootSelectorSettings: {
-    //             pageLimit: 50
-    //         },
-    //         validate: function (item) {
-    //             if (!item.has('largeImage')) {
-    //                 return $.Deferred().reject('Please select a video frame image.').promise();
-    //             }
-    //             return $.Deferred().resolve().promise();
-    //         }
-    //     })
-    //         .on('g:saved', (itemModel) => {
-    //             //TODO: this would be replaced with Redux
-    //             events.trigger('v:item_selected', itemModel);
-    //         })
-    //         .render();
-    // }
 }
 export default HeaderBar;

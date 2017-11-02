@@ -1,23 +1,9 @@
 import _ from 'underscore';
 import React, { Component } from 'react';
-import { Modal, ButtonToolbar, Button, Row, Col, Glyphicon } from 'react-bootstrap';
+import { Modal, ButtonToolbar, Button, Row, Col, Glyphicon, Checkbox } from 'react-bootstrap';
 import { restRequest } from 'girder/rest';
 
 import style from './style.styl';
-
-function cleanPath(path) {
-    return `/${path.split('/').filter(segment => segment).join('/')}/`;
-}
-
-const SortDirection = {
-    ascending: true,
-    descending: false
-}
-
-const SortByType = {
-    name: true,
-    modifiedTime: false
-}
 
 class ClipExplorer extends Component {
     constructor(props) {
@@ -26,10 +12,12 @@ class ClipExplorer extends Component {
             paths: ['root'],
             currentFolders: [],
             rootFolders: null,
-            annotationFolders: [],
+            annotationFolders: new Set(),
             selectedItem: null,
-            selectedFolderId: null
+            selectedFolderId: null,
+            showOnlyAnnotatedClips: false
         };
+        this.folderCache = new Map();
     }
 
     componentDidMount() {
@@ -53,12 +41,13 @@ class ClipExplorer extends Component {
                 }));
             })
         ]).then((results) => {
-            var rootFolders = _.flatten(results);
-            return rootFolders;
+            var folders = _.flatten(results);
+            return this.attachImageItem(folders);
         })
     }
 
     getAllAnnotationFolders() {
+        // The current set of API is lacking flexible search, this is the method to get all annotated video clips (folder)
         restRequest({
             url: '/item',
             data: {
@@ -66,7 +55,6 @@ class ClipExplorer extends Component {
             }
         }).then((annotationGemoetryItems) => {
             var annotationFolders = new Set(_.pluck(annotationGemoetryItems, 'folderId'));
-            console.log(annotationFolders);
             this.setState({ annotationFolders });
         });
     }
@@ -75,22 +63,17 @@ class ClipExplorer extends Component {
         this.props.onTryClose();
     }
 
-    folderClick(folderId) {
-        this.checkIfClip(folderId)
-            .then((item) => {
-                if (item) {
-                    this.setState({ selectedItem: item, selectedFolderId: folderId });
-                } else {
-                    this.setState({ currentFolders: [] });
-                    this.loadSubFolders(folderId)
-                        .then((folders) => {
-                            this.setState({ paths: [...this.state.paths, folderId], currentFolders: folders });
-                        })
-                }
-            })
+    folderClick(folder) {
+        if (!folder.imageItem) {
+            this.setState({ currentFolders: [], paths: [...this.state.paths, folder._id] }, () => {
+                this.fetchFolder();
+            });
+        } else {
+            this.setState({ selectedItem: folder.imageItem, selectedFolderId: folder._id });
+        }
     }
 
-    checkIfClip(folderId) {
+    tryGetImageItem(folderId) {
         return restRequest({
             url: '/item',
             data: {
@@ -110,19 +93,38 @@ class ClipExplorer extends Component {
                 parentType: 'folder',
                 parentId: folderId
             }
-        });
+        }).then((folders) => {
+            return this.attachImageItem(folders);
+        })
+    }
+
+    attachImageItem(folders) {
+        return Promise.all(
+            folders.map((folder) => {
+                return this.tryGetImageItem(folder._id)
+                    .then((item) => {
+                        folder.imageItem = item;
+                        return folder;
+                    })
+            })
+        );
     }
 
     fetchFolder() {
         var path = this.state.paths.slice(-1)[0];
+        if (this.folderCache.has(path)) {
+            this.setState({ currentFolders: this.folderCache.get(path) });
+            return Promise.resolve();
+        }
         var p = null;
         if (path === 'root') {
             p = this.getAllFoldersAtRoot();
         } else {
             p = this.loadSubFolders(path);
         }
-        p.then((folders) => {
-            this.setState({ currentFolders: folders })
+        return p.then((folders) => {
+            this.folderCache.set(path, folders);
+            this.setState({ currentFolders: folders });
         });
     }
 
@@ -139,29 +141,35 @@ class ClipExplorer extends Component {
     }
 
     render() {
-        var sortedFolders = _.sortBy(this.state.currentFolders, folder => folder.name);
+        var folders = _.sortBy(this.state.currentFolders, folder => folder.name);
+        if (this.state.showOnlyAnnotatedClips) {
+            folders = folders.filter((folder) => this.state.annotationFolders.has(folder._id) || !folder.imageItem);
+        }
         return (
             <Modal className='v-clip-explorer' show={this.props.show} onHide={() => this.tryClose()}>
                 <Modal.Header closeButton>
                     <Modal.Title>Clip Explorer</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Row className="navigation-bar">
+                    <Row>
                         <Col xs={1}><Button bsSize="xsmall" disabled={this.state.paths.length === 1} onClick={() => this.backClick()}><Glyphicon className="button back" glyph="chevron-left" /></Button></Col>
                         <Col xs={11}>
-                            {sortedFolders.length !== 0 &&
+                            {folders.length !== 0 &&
                                 <ul className="folders" >
                                     {
-                                        sortedFolders.map((folder) => {
+                                        folders.map((folder) => {
                                             return <li key={folder._id}
-                                                onClick={(e) => this.folderClick(folder._id)}
+                                                onClick={(e) => this.folderClick(folder)}
+                                                className={folder._id === this.state.selectedFolderId ? 'selected' : ''}
                                             >
-                                                <span className={folder._id === this.state.selectedFolderId ? 'selected' : ''}>
+                                                <div>
+                                                    <Glyphicon className="file-icon" glyph={folder.imageItem ? 'facetime-video' : 'folder-open'} />
                                                     {folder.name}
                                                     {this.state.annotationFolders.has(folder._id) &&
-                                                        <Glyphicon className="file-icon" glyph={'file'} />
+                                                        <Glyphicon className="file-icon annotated-icon" title='Annotated' glyph={'tag'} />
                                                     }
-                                                </span>
+                                                </div>
+                                                {folder.imageItem && <div><img src={`api/v1/item/${folder.imageItem._id}/tiles/thumbnail?width=160&height=100`} /></div>}
                                             </li>;
                                         })
                                     }
@@ -170,6 +178,13 @@ class ClipExplorer extends Component {
                                 <span>Empty</span>}
                         </Col>
                     </Row>
+                    <div style={{ 'text-align': 'right' }}>
+                        <Checkbox className='show-only-annotated-clip'
+                            checked={this.state.showOnlyAnnotatedClips}
+                            onChange={() => this.setState({ showOnlyAnnotatedClips: !this.state.showOnlyAnnotatedClips })}>
+                            Show only video clip with annotation
+                        </Checkbox>
+                    </div>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => this.tryClose()}>Cancel</Button>

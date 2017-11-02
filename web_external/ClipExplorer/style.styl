@@ -1,10 +1,26 @@
 .v-clip-explorer
+  .checkbox.show-only-annotated-clip
+    margin-bottom -10px
+
   ul.folders
+    list-style none
+    padding 0
+    max-height 60vh
+    overflow auto
+
     li
       cursor pointer
+      padding 5px
 
-      span
-        padding 1px
+      &:hover
+        background #BAE0FF
 
-        &.selected
-          background #AAD0F9
+      &.selected
+        background #AAD0F9
+
+      .file-icon
+        margin-right 4px
+
+      .annotated-icon
+        font-size 12px
+        margin-left 4px
