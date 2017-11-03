@@ -9,13 +9,13 @@ class ClipExplorer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            paths: ['root'],
+            paths: [{ name: 'root', folderId: 'root' }],
             currentFolders: [],
             rootFolders: null,
             annotationFolders: new Set(),
             selectedItem: null,
             selectedFolderId: null,
-            showOnlyAnnotatedClips: false
+            showMode: 'all'
         };
         this.folderCache = new Map();
     }
@@ -65,7 +65,12 @@ class ClipExplorer extends Component {
 
     folderClick(folder) {
         if (!folder.imageItem) {
-            this.setState({ currentFolders: [], paths: [...this.state.paths, folder._id] }, () => {
+            this.setState({
+                paths: [...this.state.paths, { name: folder.name, folderId: folder._id }],
+                currentFolders: [],
+                selectedItem: null,
+                selectedFolderId: null
+            }, () => {
                 this.fetchFolder();
             });
         } else {
@@ -111,20 +116,26 @@ class ClipExplorer extends Component {
     }
 
     fetchFolder() {
-        var path = this.state.paths.slice(-1)[0];
-        if (this.folderCache.has(path)) {
-            this.setState({ currentFolders: this.folderCache.get(path) });
+        var folderId = this.state.paths.slice(-1)[0].folderId;
+        if (this.folderCache.has(folderId)) {
+            this.setState({ currentFolders: this.folderCache.get(folderId) });
             return Promise.resolve();
         }
         var p = null;
-        if (path === 'root') {
+        if (folderId === 'root') {
             p = this.getAllFoldersAtRoot();
         } else {
-            p = this.loadSubFolders(path);
+            p = this.loadSubFolders(folderId);
         }
+        this.setState({
+            loading: true
+        });
         return p.then((folders) => {
-            this.folderCache.set(path, folders);
-            this.setState({ currentFolders: folders });
+            this.folderCache.set(folderId, folders);
+            this.setState({
+                currentFolders: folders,
+                loading: false
+            });
         });
     }
 
@@ -142,8 +153,11 @@ class ClipExplorer extends Component {
 
     render() {
         var folders = _.sortBy(this.state.currentFolders, folder => folder.name);
-        if (this.state.showOnlyAnnotatedClips) {
-            folders = folders.filter((folder) => this.state.annotationFolders.has(folder._id) || !folder.imageItem);
+        if (this.state.showMode !== 'all') {
+            folders = folders.filter((folder) => {
+                return !folder.imageItem ||
+                    (this.state.showMode === 'annotated') === this.state.annotationFolders.has(folder._id)
+            });
         }
         return (
             <Modal className='v-clip-explorer' show={this.props.show} onHide={() => this.tryClose()}>
@@ -152,10 +166,21 @@ class ClipExplorer extends Component {
                 </Modal.Header>
                 <Modal.Body>
                     <Row>
-                        <Col xs={1}><Button bsSize="xsmall" disabled={this.state.paths.length === 1} onClick={() => this.backClick()}><Glyphicon className="button back" glyph="chevron-left" /></Button></Col>
+                        <Col xs={1}>
+                            <Button className='back-button' bsSize='xsmall' disabled={this.state.paths.length === 1} onClick={() => this.backClick()}><Glyphicon className='button back' glyph='chevron-left' /></Button>
+                        </Col>
                         <Col xs={11}>
+                            <span className='location'>
+                                {this.state.paths.map((path) => path.name).join(' / ')}
+                            </span>
+                        </Col>
+                    </Row>
+                    <Row className='folders-container'>
+                        <Col xs={11} xsOffset={1}>
+                            {this.state.loading && <span>Loading...</span>}
+                            {!this.state.loading && folders.length ===0 && <span>Empty</span>}
                             {folders.length !== 0 &&
-                                <ul className="folders" >
+                                <ul className='folders' >
                                     {
                                         folders.map((folder) => {
                                             return <li key={folder._id}
@@ -163,13 +188,13 @@ class ClipExplorer extends Component {
                                                 className={folder._id === this.state.selectedFolderId ? 'selected' : ''}
                                             >
                                                 <div>
-                                                    <Glyphicon className="file-icon" glyph={folder.imageItem ? 'facetime-video' : 'folder-open'} />
+                                                    <Glyphicon className='file-icon' glyph={folder.imageItem ? 'facetime-video' : 'folder-open'} />
                                                     {folder.name}
                                                     {this.state.annotationFolders.has(folder._id) &&
-                                                        <Glyphicon className="file-icon annotated-icon" title='Annotated' glyph={'tag'} />
+                                                        <Glyphicon className='file-icon annotated-icon' title='Annotated' glyph={'tag'} />
                                                     }
                                                 </div>
-                                                {folder.imageItem && <div><img src={`api/v1/item/${folder.imageItem._id}/tiles/thumbnail?width=160&height=100`} /></div>}
+                                                {folder.imageItem && <div className='image-container'><img src={`api/v1/item/${folder.imageItem._id}/tiles/thumbnail?width=160&height=100`} /></div>}
                                             </li>;
                                         })
                                     }
@@ -178,17 +203,19 @@ class ClipExplorer extends Component {
                                 <span>Empty</span>}
                         </Col>
                     </Row>
-                    <div style={{ 'text-align': 'right' }}>
-                        <Checkbox className='show-only-annotated-clip'
-                            checked={this.state.showOnlyAnnotatedClips}
-                            onChange={() => this.setState({ showOnlyAnnotatedClips: !this.state.showOnlyAnnotatedClips })}>
-                            Show only video clip with annotation
-                        </Checkbox>
-                    </div>
+                    <Row>
+                        <Col xs={11} xsOffset={1}>
+                            <select value={this.state.showMode} onChange={(e) => this.setState({ showMode: e.target.value })}>
+                                <option value='all'>All</option>
+                                <option value='not-annotated'>Not annotated</option>
+                                <option value='annotated'>Annotated</option>
+                            </select>
+                        </Col>
+                    </Row>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => this.tryClose()}>Cancel</Button>
-                    <Button bsStyle="primary"
+                    <Button bsStyle='primary'
                         onClick={(e) => { this.props.onItemSelected(this.state.selectedItem) }}
                         disabled={!this.state.selectedItem}>Select</Button>
                 </Modal.Footer>
