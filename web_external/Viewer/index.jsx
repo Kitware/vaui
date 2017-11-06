@@ -160,10 +160,10 @@ class Viewer extends PureComponent {
 
     _getMessage() {
         if (this.props.isLoadingAnnotation || !this.state.ready) {
-            return {text: 'Loading...', classes: 'message info-message'};
+            return { text: 'Loading...', classes: 'message info-message' };
         }
         if (!this.props.isLoadingAnnotation && !this.props.annotationGeometryContainer) {
-            return {text: 'No annotation', classes: 'message error-message'};
+            return { text: 'No annotation', classes: 'message error-message' };
         }
     }
 
@@ -181,26 +181,27 @@ class Viewer extends PureComponent {
         if (!annotationGeometries) {
             return;
         }
-        var data = annotationGeometries.filter((geometry) => {
-            return trackContainer.getEnableState(geometry.id1);
-        }).map((geometry) => {
+        var data = annotationGeometries.map((geometry) => {
             var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
             return {
                 g0: geometry.g0,
                 activities,
+                trackEnabled: trackContainer.getEnableState(geometry.id1),
                 geometry,
                 type: typeContainer.getItem(geometry.id1)
             }
+        }).filter((data) => {
+            return data.activities || data.trackEnabled;
         });
         var style = {
             fill: true,
-            fillColor(d) {
-                return { r: 1.0, g: 0.839, b: 0.439 };
-            },
+            fillColor: { r: 1.0, g: 0.839, b: 0.439 },
             fillOpacity(a, b, d) {
                 return d.activities ? 0.3 : 0;
             },
-            stroke: true,
+            stroke(d) {
+                return d.trackEnabled;
+            },
             strokeColor(a, b, d) {
                 var attributes = d.geometry.keyValues;
                 if (attributes.src === 'truth') {
@@ -223,7 +224,7 @@ class Viewer extends PureComponent {
             },
             strokeWidth: 1.25,
             strokeOpacity: 0.8,
-            uniform: true
+            uniformPolygon: true
         }
         return [data, style];
     }
