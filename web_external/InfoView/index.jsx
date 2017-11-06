@@ -13,10 +13,12 @@ class InfoView extends PureComponent {
                 <div className='panel-body'>
                     <ul className='geometry'>
                         {this.props.annotations && this.props.annotations.map((annotation) => {
-                            var type = annotation.type ? `${annotation.geometry.id1} (${annotation.type.obj_type})` : annotation.geometry.id1;
                             return <li key={`${annotation.geometry.id0}-${annotation.geometry.id1}`} className='track'>
-                                <div>{type}</div>
-                                <div>Geometry id: {annotation.geometry.id0}</div>
+                                <div title='id1'>Track id: {annotation.geometry.id1}</div>
+                                {annotation.type &&
+                                    <div>type: {annotation.type.obj_type}</div>
+                                }
+                                <div title='id0'>Geometry id: {annotation.geometry.id0}</div>
                                 <div>Frame id: {annotation.geometry.ts0}</div>
                                 {Object.entries(annotation.geometry.keyValues).map(([key, value], index) => {
                                     return <div key={index}>{key}: {value}</div>
@@ -25,7 +27,7 @@ class InfoView extends PureComponent {
                                     && <ul className='activity'>
                                         {annotation.activities.map((activity) => {
                                             return <li key={activity.id2} className='activity'>
-                                                <div>Activity Id: {activity.id2}</div>
+                                                <div title='id2'>Activity id: {activity.id2}</div>
                                                 <div>Activity: {activity.act2}</div>
                                             </li>
                                         })}
@@ -40,4 +42,3 @@ class InfoView extends PureComponent {
     }
 }
 export default InfoView;
-
