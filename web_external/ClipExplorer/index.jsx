@@ -14,7 +14,7 @@ class ClipExplorer extends Component {
             rootFolders: null,
             annotationFolders: new Set(),
             selectedItem: null,
-            selectedFolderId: null,
+            selectedFolder: null,
             showMode: 'all'
         };
         this.folderCache = new Map();
@@ -71,12 +71,12 @@ class ClipExplorer extends Component {
                 paths: [...this.state.paths, { name: folder.name, folderId: folder._id }],
                 currentFolders: [],
                 selectedItem: null,
-                selectedFolderId: null
+                selectedFolder: null
             }, () => {
                 this.fetchFolder();
             });
         } else {
-            this.setState({ selectedItem: folder.imageItem, selectedFolderId: folder._id });
+            this.setState({ selectedItem: folder.imageItem, selectedFolder: folder });
         }
     }
 
@@ -146,7 +146,7 @@ class ClipExplorer extends Component {
         this.setState({
             paths: this.state.paths.slice(0, -1),
             selectedItem: null,
-            selectedFolderId: null,
+            selectedFolder: null,
             currentFolders: []
         }, () => {
             this.fetchFolder();
@@ -181,14 +181,14 @@ class ClipExplorer extends Component {
                     <Row className='folders-container'>
                         <Col xs={11} xsOffset={1}>
                             {this.state.loading && <span>Loading...</span>}
-                            {!this.state.loading && folders.length ===0 && <span>Empty</span>}
+                            {!this.state.loading && folders.length === 0 && <span>Empty</span>}
                             {folders.length !== 0 &&
                                 <ul className='folders' >
                                     {
                                         folders.map((folder) => {
                                             return <li key={folder._id}
                                                 onClick={(e) => this.folderClick(folder)}
-                                                className={folder._id === this.state.selectedFolderId ? 'selected' : ''}
+                                                className={(this.state.selectedFolder &&folder._id === this.state.selectedFolder._id) ? 'selected' : ''}
                                             >
                                                 <div>
                                                     <Glyphicon className='file-icon' glyph={folder.imageItem ? 'film' : 'folder-open'} />
@@ -219,7 +219,7 @@ class ClipExplorer extends Component {
                 <Modal.Footer>
                     <Button onClick={() => this.tryClose()}>Cancel</Button>
                     <Button bsStyle='primary'
-                        onClick={(e) => { this.props.onItemSelected(this.state.selectedItem) }}
+                        onClick={(e) => { this.props.onItemSelected(this.state.selectedFolder, this.state.selectedItem) }}
                         disabled={!this.state.selectedItem}>Select</Button>
                 </Modal.Footer>
             </Modal>

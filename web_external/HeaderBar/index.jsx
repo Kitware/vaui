@@ -13,6 +13,7 @@ class HeaderBar extends PureComponent {
         super(props);
         this.state = {
             user: getCurrentUser(),
+            selectedFolder: null,
             showClipExplorer: false
         };
     }
@@ -24,10 +25,10 @@ class HeaderBar extends PureComponent {
     render() {
         let user = this.state.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
-            <div className='toolbutton'>
-                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey:Math.random() /* want to have new instance every time */ })}>Load</button>
+            <div className='load-button-wrapper toolbutton'>
+                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() /* want to have new instance every time */ })}>Load</button>
             </div>
-            <div className='v-current-user-text'></div>
+            <div className='clip-name'>{this.state.selectedFolder ? this.state.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
                 {user ?
                     <div className='v-user-link-wrapper'>
@@ -57,7 +58,7 @@ class HeaderBar extends PureComponent {
                     </div>
                 }
             </div>
-            <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(item) => this.itemSelected(item)} />
+            <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(folder, item) => this.itemSelected(folder, item)} />
         </div>
     }
 
@@ -65,7 +66,8 @@ class HeaderBar extends PureComponent {
         this.setState({ showClipExplorer: false });
     }
 
-    itemSelected(item) {
+    itemSelected(folder, item) {
+        this.setState({ selectedFolder: folder })
         this.handleClipExplorerTryClose();
         events.trigger('v:item_selected', new ItemModel(item));
     }
