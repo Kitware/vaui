@@ -8,10 +8,10 @@
     "react-dom": "^16.0.0",
     "geojs": "0.12.1",
     "hammerjs": "^2.0.8",
-    "reconcile.js": "^1.3.2",
     "bootstrap-slider": "^9.9.0",
     "babel-preset-react": "^6.24.1",
     "react-bootstrap-slider": "2.1.3",
+    "react-bootstrap": "^0.31.5",
     "yamljs": "0.3.0"
   },
   "author": "",
