@@ -74,9 +74,10 @@ class ActivityPanel extends BasePane {
                                                 checked={container.getEnableState(activity.id2)}
                                                 onChange={(e) => this.props.toggleActivity(activity, e.target.checked)}
                                             />
+                                            {activity.id2}{' '}
                                             {activity.actors.map((actor) => {
                                                 var type = this.props.annotationTypeContainer.getItem(actor.id1);
-                                                return type ? `${actor.id1} (${type.obj_type})` : `${actor.id1}`
+                                                return type ? `(${type.obj_type} ${actor.id1})` : `(${actor.id1})`
                                             }).join(', ')}
                                         </label>
                                     </div>
