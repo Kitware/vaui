@@ -35,7 +35,8 @@ class ClipExplorer extends Component {
                         url: 'folder',
                         data: {
                             parentType: 'collection',
-                            parentId: collection._id
+                            parentId: collection._id,
+                            limit: 0
                         }
                     })
                 }));
@@ -51,7 +52,8 @@ class ClipExplorer extends Component {
         restRequest({
             url: '/item',
             data: {
-                text: '".geom.yml"'
+                text: '".geom.yml"',
+                limit: 0
             }
         }).then((annotationGemoetryItems) => {
             var annotationFolders = new Set(_.pluck(annotationGemoetryItems, 'folderId'));
@@ -96,7 +98,8 @@ class ClipExplorer extends Component {
             url: '/folder',
             data: {
                 parentType: 'folder',
-                parentId: folderId
+                parentId: folderId,
+                limit: 0
             }
         }).then((folders) => {
             return this.attachImageItem(folders);
@@ -188,7 +191,7 @@ class ClipExplorer extends Component {
                                                 className={folder._id === this.state.selectedFolderId ? 'selected' : ''}
                                             >
                                                 <div>
-                                                    <Glyphicon className='file-icon' glyph={folder.imageItem ? 'facetime-video' : 'folder-open'} />
+                                                    <Glyphicon className='file-icon' glyph={folder.imageItem ? 'film' : 'folder-open'} />
                                                     {folder.name}
                                                     {this.state.annotationFolders.has(folder._id) &&
                                                         <Glyphicon className='file-icon annotated-icon' title='Annotated' glyph={'tag'} />
