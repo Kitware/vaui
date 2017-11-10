@@ -1,11 +1,15 @@
 module.exports = {
-    extends: process.cwd() + '/.eslintrc',
+    extends: [
+        process.cwd() + '/.eslintrc',
+        'plugin:react/recommended'
+    ],
+    'plugins': [
+        'react'
+    ],
     rules: {
         complexity: [2, 12],
-        'underscore/prefer-invoke': 0
     },
     globals: {
-        vaui: true,
         geo: true,
         jsonPath: true,
         colorbrewer: true,
