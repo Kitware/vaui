@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
@@ -6,10 +6,6 @@ import BasePane from '../BasePane';
 import './style.styl';
 
 class TrackPane extends BasePane {
-    constructor(props) {
-        super(props);
-    }
-
     getContainer() {
         return this.props.annotationTrackContainer;
     }
@@ -35,8 +31,7 @@ class TrackPane extends BasePane {
                 var type = typeContainer.getItem(trackId);
                 if (type) {
                     return type.obj_type + trackId;
-                }
-                else {
+                } else {
                     return trackId;
                 }
             });
@@ -62,10 +57,10 @@ class TrackPane extends BasePane {
                                 {label}
                             </label>
                         </div>
-                    </li>
+                    </li>;
                 })}
             </ul>
-        </div>
+        </div>;
     }
 }
 export default TrackPane;

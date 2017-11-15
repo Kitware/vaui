@@ -1,6 +1,7 @@
 import Backbone from 'backbone';
 import girderRouter from 'girder/router';
 import events from 'girder/events';
+
 import IndexView from './views/body/IndexView';
 
 girderRouter.enabled(false);
@@ -16,4 +17,3 @@ router.route('', 'index', function () {
 events.on('g:login', function () {
     events.trigger('g:navigateTo', IndexView);
 });
-

@@ -6,13 +6,13 @@ class SpinBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          width: this.calcWidth(props.max)
+            width: this.calcWidth(props.max)
         };
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.max != this.props.max) {
+        if (nextProps.max !== this.props.max) {
             var w = this.calcWidth(nextProps.max);
-            if (w != this.state.width) {
+            if (w !== this.state.width) {
                 this.setState({width: this.calcWidth(nextProps.max)});
             }
         }
@@ -31,7 +31,7 @@ class SpinBox extends Component {
                 disabled={this.props.disabled}
                 onChange={(e) => this.props.change(e)} />
             {this.props.suffix}
-        </div>
+        </div>;
     }
 }
 

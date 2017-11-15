@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
@@ -10,7 +10,7 @@ class ActivityPanel extends BasePane {
         super(props);
         this.state = {
             groupedActivities: null
-        }
+        };
     }
     getContainer() {
         return this.props.annotationActivityContainer;
@@ -33,8 +33,8 @@ class ActivityPanel extends BasePane {
         if (this.props.annotationActivityContainer !== nextProps.annotationActivityContainer) {
             if (nextProps.annotationActivityContainer) {
                 var activities = nextProps.annotationActivityContainer.getAllItems();
-                var groupedActivities = _.groupBy(activities, (activity) => activity.act2);
-                this.setState({ groupedActivities })
+                var groupedActivities = _.groupBy(activities, 'act2');
+                this.setState({ groupedActivities });
             }
         }
     }
@@ -77,17 +77,17 @@ class ActivityPanel extends BasePane {
                                             {activity.id2}{' '}
                                             {activity.actors.map((actor) => {
                                                 var type = this.props.annotationTypeContainer.getItem(actor.id1);
-                                                return type ? `(${type.obj_type} ${actor.id1})` : `(${actor.id1})`
+                                                return type ? `(${type.obj_type} ${actor.id1})` : `(${actor.id1})`;
                                             }).join(', ')}
                                         </label>
                                     </div>
-                                </li>
+                                </li>;
                             })}
                         </ul>
-                    </li>
+                    </li>;
                 })}
             </ul>
-        </div>
+        </div>;
     }
 }
 export default ActivityPanel;

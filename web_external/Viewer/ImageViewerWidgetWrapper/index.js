@@ -1,13 +1,9 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+
 import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
 class ImageViewerWidgetWrapper extends Component {
-    constructor(props) {
-        super(props);
-    }
-
-    shouldComponentUpdate() {
+    shouldComponentUpdate() { // eslint-disable-line
         return false;
     }
 
@@ -22,9 +18,9 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.currentFrame !== nextProps.currentFrame) {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
-        if (this.props.geometryCotnainer !== nextProps.geometryCotnainer
-            || this.props.annotationActivityContainer !== nextProps.annotationActivityContainer
-            || this.props.annotationTrackContainer !== nextProps.annotationTrackContainer
+        if (this.props.geometryCotnainer !== nextProps.geometryCotnainer ||
+            this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
+            this.props.annotationTrackContainer !== nextProps.annotationTrackContainer
         ) {
             this.geojsViewer.redrawAnnotation();
         }
@@ -33,7 +29,7 @@ class ImageViewerWidgetWrapper extends Component {
     componentDidMount() {
         this.geojsViewer = new VauiGeoJSImageViewer({
             parentView: null,
-            el: ReactDOM.findDOMNode(this),
+            el: this.container,
             itemId: this.props.itemModel.id,
             model: this.props.itemModel,
             getAnnotation: this.props.getAnnotation
@@ -61,7 +57,7 @@ class ImageViewerWidgetWrapper extends Component {
     }
 
     render() {
-        return <div className={['v-viewer-wrapper', this.props.className].join(' ')}></div>;
+        return <div ref={(container) => { this.container = container; }} className={['v-viewer-wrapper', this.props.className].join(' ')}></div>;
     }
 }
 export default ImageViewerWidgetWrapper;

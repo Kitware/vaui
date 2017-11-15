@@ -102,10 +102,8 @@ function annotationGeometryParser(raw) {
     return { annotationGeometryContainer, annotationTrackContainer };
 }
 
-
-
 export {
     AnnotationGeometry,
     AnnotationGeometryContainer
-}
+};
 export default annotationGeometryParser;

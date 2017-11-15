@@ -30,13 +30,12 @@ class TrackAttribute extends Component {
                                         </li>;
                                     })}
                                 </ul>
-                            </li>
+                            </li>;
                         })}
                     </ul>
                 </div>
             </div>
-        </div>
+        </div>;
     }
 }
 export default TrackAttribute;
-
