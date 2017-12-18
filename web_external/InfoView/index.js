@@ -25,7 +25,7 @@ class InfoView extends PureComponent {
                                         {annotation.activities.map((activity) => {
                                             return <li key={activity.id2} className='activity'>
                                                 <div title='id2'>Activity id: {activity.id2}</div>
-                                                <div>Activity: {activity.act2}</div>
+                                                <div>Activity: {activity.label2}</div>
                                             </li>;
                                         })}
                                     </ul>}

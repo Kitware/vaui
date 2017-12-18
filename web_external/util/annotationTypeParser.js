@@ -32,7 +32,7 @@ function annotationTypeParser(raw) {
         if ('meta' in line) {
             continue;
         }
-        var annotationType = new AnnotationType(line);
+        var annotationType = new AnnotationType(line.types);
         container.add(annotationType);
     }
     return container;

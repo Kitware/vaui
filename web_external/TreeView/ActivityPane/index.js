@@ -33,7 +33,7 @@ class ActivityPanel extends BasePane {
         if (this.props.annotationActivityContainer !== nextProps.annotationActivityContainer) {
             if (nextProps.annotationActivityContainer) {
                 var activities = nextProps.annotationActivityContainer.getAllItems();
-                var groupedActivities = _.groupBy(activities, 'act2');
+                var groupedActivities = _.groupBy(activities, 'label2');
                 this.setState({ groupedActivities });
             }
         }
