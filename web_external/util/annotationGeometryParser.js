@@ -93,8 +93,8 @@ function annotationGeometryParser(raw) {
             continue;
         }
         var annotationGeometry = new AnnotationGeometry();
-        for (let key in line) {
-            annotationGeometry.set(key, line[key]);
+        for (let key in line.geom) {
+            annotationGeometry.set(key, line.geom[key]);
         }
         annotationGeometryContainer.add(annotationGeometry);
         annotationTrackContainer.add(annotationGeometry);

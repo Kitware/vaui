@@ -62,14 +62,14 @@ class AnnotationActivity {
     }
 }
 
-function annotationGeometryParser(raw) {
+function annotationActivityParser(raw) {
     var lines = YAML.parse(raw);
     var container = new AnnotationActivityContainer();
     for (let line of lines) {
         if ('meta' in line) {
             continue;
         }
-        var annotationActivity = new AnnotationActivity(line);
+        var annotationActivity = new AnnotationActivity(line.act);
         container.add(annotationActivity);
     }
     return container;
@@ -79,4 +79,4 @@ export {
     AnnotationActivity,
     AnnotationActivityContainer
 };
-export default annotationGeometryParser;
+export default annotationActivityParser;
