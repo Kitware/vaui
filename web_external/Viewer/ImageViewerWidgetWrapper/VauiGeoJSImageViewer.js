@@ -40,7 +40,6 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     this._updating = true;
                     return new Promise((resolve, reject) => {
                         map.onIdle(() => {
-
                             // set our bottom tile layer to the new url.  We can control the
                             // format and size by adding query parameters.  For example,
                             //  'encoding=PNG'
@@ -62,7 +61,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             });
                         });
                     });
-                }
+                };
 
                 var next = () => {
                     if (this.pendingFrame !== null) {
@@ -74,8 +73,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (++frame >= ids.length - 1) {
                         frame = 0;
                         this.trigger('pause');
-                    }
-                    else {
+                    } else {
                         pendingNext = true;
                         updateFrame(frame)
                             .then(() => {
@@ -88,14 +86,14 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 if (playing) {
                                     next();
                                 }
+                                return undefined;
                             });
                     }
-                }
-
+                };
 
                 this.stop = () => {
                     playing = false;
-                }
+                };
 
                 this.play = () => {
                     if (!playing) {
@@ -104,14 +102,13 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             next();
                         }
                     }
-                }
+                };
 
                 this.setFrame = (newFrame) => {
                     if (playing) {
                         return;
                     }
-                    if (newFrame >= 0
-                        && newFrame <= ids.length - 1) {
+                    if (newFrame >= 0 && newFrame <= ids.length - 1) {
                         if (!this._updating) {
                             frame = newFrame;
                             updateFrame(frame)
@@ -119,17 +116,16 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                     if (this.pendingFrame) {
                                         this.setFrame(this.pendingFrame);
                                         this.pendingFrame = null;
-                                    }
-                                    else {
+                                    } else {
                                         this.trigger('progress', frame, ids.length);
                                     }
+                                    return undefined;
                                 });
-                        }
-                        else {
+                        } else {
                             this.pendingFrame = newFrame;
                         }
                     }
-                }
+                };
 
                 this._drawAnnotation = (frame) => {
                     if (this.lastFeatureFrame) {
@@ -150,7 +146,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             { x: g0[1][0], y: g0[0][1] },
                             { x: g0[1][0], y: g0[1][1] },
                             { x: g0[0][0], y: g0[1][1] }]
-                        }
+                        };
                     });
                     for (let key in style) {
                         feature.style(key, style[key]);
@@ -160,7 +156,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     });
                     this.lastFeatureFrame = feature;
                     this.viewer.draw();
-                }
+                };
 
                 map.geoOn(geo.event.mouseclick, () => this._triggerAnnotationEvent());
 
@@ -173,18 +169,17 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.trigger('annotationsClick', this._annotationClicks);
                         this._annotationClicks = [];
                     }, 0);
-                }
+                };
 
                 this._redrawAnnotation = () => {
                     this._drawAnnotation(frame);
-                }
+                };
 
                 updateFrame(frame);
 
                 this.trigger('ready');
                 this.trigger('progress', frame, ids.length);
             });
-
     },
 
     redrawAnnotation() {

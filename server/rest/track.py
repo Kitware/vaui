@@ -17,13 +17,11 @@
 #  limitations under the License.
 ##############################################################################
 
-import cherrypy
+# import cherrypy
 
 from girder.api import access
-from girder.api.describe import describeRoute, autoDescribeRoute, Description
-from girder.api.rest import Resource, loadmodel, filtermodel, RestException
-from girder.constants import AccessType, SortDir
-from girder.models.model_base import ValidationException
+from girder.api.describe import autoDescribeRoute, Description
+from girder.api.rest import Resource
 
 
 class TrackResource(Resource):

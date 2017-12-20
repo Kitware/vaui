@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import _ from 'underscore';
+import { Component } from 'react';
 
 import './style.styl';
 
@@ -18,8 +19,7 @@ class BasePane extends Component {
     allClick() {
         if (this.allChecked()) {
             this.uncheckAll();
-        }
-        else {
+        } else {
             this.checkAll();
         }
     }
@@ -27,7 +27,7 @@ class BasePane extends Component {
     allChecked() {
         var container = this.getContainer();
         var items = container.getAllItems();
-        return _.every(items.map((item) => container.getEnableState(this.getItemId(item))), (checked) => checked);
+        return _.every(items.map((item) => container.getEnableState(this.getItemId(item))));
     }
 
     checkAll() {

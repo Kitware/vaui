@@ -41,5 +41,5 @@ function annotationTypeParser(raw) {
 export {
     AnnotationType,
     AnnotationTypeContainer
-}
+};
 export default annotationTypeParser;

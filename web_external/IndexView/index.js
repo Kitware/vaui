@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import events from 'girder/events';
+import { restRequest } from 'girder/rest';
 
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
@@ -7,7 +8,6 @@ import InfoView from '../InfoView';
 import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
-import { restRequest } from 'girder/rest';
 
 import './style.styl';
 
@@ -23,7 +23,7 @@ class IndexView extends PureComponent {
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationGeometryContainer: null
-        }
+        };
     }
     componentDidMount() {
         // the states would be lifted to redux store
@@ -38,11 +38,12 @@ class IndexView extends PureComponent {
             restRequest({
                 url: `/folder/${itemModel.get('folderId')}`
             }).then((folder) => {
-                Promise.all([
+                return Promise.all([
                     downloadItemByName(itemModel.get('folderId'), `${folder.name}.activities.yml`)
                         .then((raw) => {
                             var annotationActivityContainer = annotationActivityParser(raw);
                             this.setState({ annotationActivityContainer });
+                            return undefined;
                         })
                         .catch(() => { }),
                     downloadItemByName(itemModel.get('folderId'), `${folder.name}.types.yml`)
@@ -57,6 +58,7 @@ class IndexView extends PureComponent {
                         .then((raw) => {
                             var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
                             this.setState({ annotationGeometryContainer, annotationTrackContainer });
+                            return undefined;
                         }).catch(() => {
                             events.trigger('g:alert', {
                                 icon: 'ok',
@@ -67,6 +69,7 @@ class IndexView extends PureComponent {
                         })
                 ]).then(() => {
                     this.setState({ isLoadingAnnotation: false });
+                    return undefined;
                 });
             });
         });
@@ -74,18 +77,18 @@ class IndexView extends PureComponent {
 
     toggleActivity(activity, enabled) {
         var annotationActivityContainer = this.state.annotationActivityContainer;
-        var annotationActivityContainer = annotationActivityContainer.toggleState(activity.id2, enabled);
+        annotationActivityContainer = annotationActivityContainer.toggleState(activity.id2, enabled);
         this.setState({ annotationActivityContainer });
     }
 
     toggleTrack(trackId, enabled) {
         var annotationTrackContainer = this.state.annotationTrackContainer;
-        var annotationTrackContainer = annotationTrackContainer.toggleState(trackId, enabled);
+        annotationTrackContainer = annotationTrackContainer.toggleState(trackId, enabled);
         this.setState({ annotationTrackContainer });
     }
 
     onAnnotationsSelect(annotations) {
-        this.setState({ selectedAnnotations: annotations })
+        this.setState({ selectedAnnotations: annotations });
     }
 
     render() {
@@ -109,7 +112,7 @@ class IndexView extends PureComponent {
             <InfoView className='right-sidebar'
                 annotations={this.state.selectedAnnotations}
             />
-        </div>
+        </div>;
     }
 }
 
@@ -126,6 +129,6 @@ var downloadItemByName = (folderId, name) => {
             dataType: 'text'
         });
     });
-}
+};
 
 export default IndexView;

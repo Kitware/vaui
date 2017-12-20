@@ -78,5 +78,5 @@ function annotationGeometryParser(raw) {
 export {
     AnnotationActivity,
     AnnotationActivityContainer
-}
+};
 export default annotationGeometryParser;

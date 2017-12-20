@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import requests
-import cherrypy
-from base64 import b64encode
-from girder import events
 from girder.utility.webroot import Webroot
 from rest import track
 

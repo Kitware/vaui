@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { registerPluginNamespace } from 'girder/pluginUtils';
+// import { registerPluginNamespace } from 'girder/pluginUtils';
 import girderRouter from 'girder/router';
 
 import App from './App.js';

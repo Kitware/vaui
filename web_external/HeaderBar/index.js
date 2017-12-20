@@ -1,4 +1,3 @@
-import $ from 'jquery';
 import React, { PureComponent } from 'react';
 import { logout, getCurrentUser } from 'girder/auth';
 import events from 'girder/events';
@@ -20,18 +19,18 @@ class HeaderBar extends PureComponent {
     componentDidMount() {
         events.on('g:login', () => {
             this.setState({ user: getCurrentUser() });
-        })
+        });
     }
     render() {
         let user = this.state.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='load-button-wrapper toolbutton'>
-                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() /* want to have new instance every time */ })}>Load</button>
+                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
             </div>
             <div className='clip-name'>{this.state.selectedFolder ? this.state.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
-                {user ?
-                    <div className='v-user-link-wrapper'>
+                {user
+                    ? <div className='v-user-link-wrapper'>
                         <a className='v-user-link' data-toggle='dropdown' data-target='#g-user-action-menu'>
                             {user.get('firstName')} {user.get('lastName')}
                             <i className='icon-down-open'></i>
@@ -46,8 +45,8 @@ class HeaderBar extends PureComponent {
                                 </li>
                             </ul>
                         </div>
-                    </div> :
-                    <div className='v-login-link-wrapper'>
+                    </div>
+                    : <div className='v-login-link-wrapper'>
                         <a className='g-register' onClick={(e) =>
                             events.trigger('g:registerUi')}>Register</a>
                         or
@@ -59,7 +58,7 @@ class HeaderBar extends PureComponent {
                 }
             </div>
             <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(folder, item) => this.itemSelected(folder, item)} />
-        </div>
+        </div>;
     }
 
     handleClipExplorerTryClose() {
@@ -67,7 +66,7 @@ class HeaderBar extends PureComponent {
     }
 
     itemSelected(folder, item) {
-        this.setState({ selectedFolder: folder })
+        this.setState({ selectedFolder: folder });
         this.handleClipExplorerTryClose();
         events.trigger('v:item_selected', new ItemModel(item));
     }

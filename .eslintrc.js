@@ -1,11 +1,18 @@
 module.exports = {
-    extends: process.cwd() + '/.eslintrc',
+    extends: [
+        process.cwd() + '/.eslintrc',
+        'plugin:react/recommended'
+    ],
+    'plugins': [
+        'react'
+    ],
     rules: {
         complexity: [2, 12],
-        'underscore/prefer-invoke': 0
+        // Many props won't be needed once moved to Redux
+        'react/prop-types': 'off',
+        'promise/no-nesting': 'off'
     },
     globals: {
-        vaui: true,
         geo: true,
         jsonPath: true,
         colorbrewer: true,
