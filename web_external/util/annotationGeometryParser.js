@@ -1,5 +1,3 @@
-import YAML from 'yamljs';
-
 class AnnotationGeometryContainer {
     constructor() {
         this._frameMap = new Map();
@@ -84,17 +82,13 @@ class AnnotationGeometry {
     }
 }
 
-function annotationGeometryParser(raw) {
-    var lines = YAML.parse(raw);
+function annotationGeometryParser(geoms) {
     var annotationGeometryContainer = new AnnotationGeometryContainer();
     var annotationTrackContainer = new AnnotationTrackContainer();
-    for (let line of lines) {
-        if ('meta' in line) {
-            continue;
-        }
+    for (let geom of geoms) {
         var annotationGeometry = new AnnotationGeometry();
-        for (let key in line.geom) {
-            annotationGeometry.set(key, line.geom[key]);
+        for (let key in geom) {
+            annotationGeometry.set(key, geom[key]);
         }
         annotationGeometryContainer.add(annotationGeometry);
         annotationTrackContainer.add(annotationGeometry);

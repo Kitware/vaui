@@ -54,9 +54,20 @@ class IndexView extends PureComponent {
                             return new AnnotationTypeContainer();
                         })
                         .then((annotationTypeContainer) => this.setState({ annotationTypeContainer })),
-                    downloadItemByName(itemModel.get('folderId'), `${folder.name}.geom.yml`)
-                        .then((raw) => {
-                            var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(raw);
+                    restRequest({
+                        url: '/item',
+                        data: {
+                            folderId: itemModel.get('folderId'),
+                            name: `${folder.name}.geom.yml`
+                        }
+                    })
+                        .then((items) => {
+                            return restRequest({
+                                url: `/geom/${items[0]._id}`
+                            })
+                        })
+                        .then((geoms)=>{
+                            var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(geoms);
                             this.setState({ annotationGeometryContainer, annotationTrackContainer });
                             return undefined;
                         }).catch(() => {
