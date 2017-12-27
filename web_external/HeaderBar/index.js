@@ -1,8 +1,10 @@
 import React, { PureComponent } from 'react';
-import { logout, getCurrentUser } from 'girder/auth';
+import { connect } from 'react-redux'
+import { logout } from 'girder/auth';
 import events from 'girder/events';
 import ItemModel from 'girder/models/ItemModel';
 
+import { SELECTED_FOLDER_CHANGE } from '../actions';
 import ClipExplorer from '../ClipExplorer';
 
 import './style.styl';
@@ -11,23 +13,17 @@ class HeaderBar extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            user: getCurrentUser(),
-            selectedFolder: null,
             showClipExplorer: false
         };
     }
-    componentDidMount() {
-        events.on('g:login', () => {
-            this.setState({ user: getCurrentUser() });
-        });
-    }
+
     render() {
-        let user = this.state.user;
+        let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='load-button-wrapper toolbutton'>
                 <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
             </div>
-            <div className='clip-name'>{this.state.selectedFolder ? this.state.selectedFolder.name : null}</div>
+            <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
                 {user
                     ? <div className='v-user-link-wrapper'>
@@ -66,9 +62,27 @@ class HeaderBar extends PureComponent {
     }
 
     itemSelected(folder, item) {
-        this.setState({ selectedFolder: folder });
+        // this.setState({ selectedFolder: folder });
+        this.props.dispatch({
+            type: SELECTED_FOLDER_CHANGE,
+            folder
+        });
         this.handleClipExplorerTryClose();
         events.trigger('v:item_selected', new ItemModel(item));
     }
 }
-export default HeaderBar;
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        user: state.user,
+        selectedFolder: state.selectedFolder
+    }
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderBar);
