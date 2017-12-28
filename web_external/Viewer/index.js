@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux'
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 
+import { ANNOTATIONS_CLICKED } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -21,7 +23,7 @@ class Viewer extends PureComponent {
         this.draggingSlider = false;
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.itemModel !== this.props.itemModel) {
+        if (nextProps.selectedItem !== this.props.selectedItem) {
             this.setState({ ready: false });
         }
     }
@@ -31,10 +33,10 @@ class Viewer extends PureComponent {
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
-                    {this.props.itemModel &&
+                    {this.props.selectedItem &&
                         [
                             <ImageViewerWidgetWrapper className='video'
-                                itemModel={this.props.itemModel}
+                                item={this.props.selectedItem}
                                 playing={this.state.videoPlaying}
                                 geometryCotnainer={this.props.annotationGeometryContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
@@ -62,8 +64,11 @@ class Viewer extends PureComponent {
                                         ready: true
                                     });
                                 }}
-                                annotationsSelect={this.props.annotationsSelect}
-                                key={this.props.itemModel.id} />,
+                                annotationsClick={(annotations) => this.props.dispatch({
+                                    type: ANNOTATIONS_CLICKED,
+                                    payload: annotations
+                                })}
+                                key={this.props.selectedItem._id} />,
                             message && <div className={message.classes} key='message'>
                                 <span>{message.text}</span>
                             </div>,
@@ -160,10 +165,10 @@ class Viewer extends PureComponent {
     }
 
     _getMessage() {
-        if (this.props.isLoadingAnnotation || !this.state.ready) {
+        if (this.props.loadingAnnotation || !this.state.ready) {
             return { text: 'Loading...', classes: 'message info-message' };
         }
-        if (!this.props.isLoadingAnnotation && !this.props.annotationGeometryContainer) {
+        if (!this.props.loadingAnnotation && !this.props.annotationGeometryContainer) {
             return { text: 'No annotation', classes: 'message error-message' };
         }
     }
@@ -227,4 +232,21 @@ class Viewer extends PureComponent {
         return [data, style];
     }
 }
-export default Viewer;
+const mapStateToProps = (state, ownProps) => {
+    return {
+        selectedItem: state.selectedItem,
+        loadingAnnotation: state.loadingAnnotation,
+        annotationGeometryContainer: state.annotationGeometryContainer,
+        annotationActivityContainer: state.annotationActivityContainer,
+        annotationTrackContainer: state.annotationTrackContainer,
+        annotationTypeContainer: state.annotationTypeContainer,
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Viewer);

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ItemModel from 'girder/models/ItemModel';
 
 import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
@@ -30,8 +31,8 @@ class ImageViewerWidgetWrapper extends Component {
         this.geojsViewer = new VauiGeoJSImageViewer({
             parentView: null,
             el: this.container,
-            itemId: this.props.itemModel.id,
-            model: this.props.itemModel,
+            itemId: this.props.item._id,
+            model: new ItemModel(this.props.item),
             getAnnotation: this.props.getAnnotation
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
@@ -46,8 +47,8 @@ class ImageViewerWidgetWrapper extends Component {
                 this.props.onReady();
             }
         }).on('annotationsClick', (annotations) => {
-            if (this.props.annotationsSelect) {
-                this.props.annotationsSelect(annotations);
+            if (this.props.annotationsClick) {
+                this.props.annotationsClick(annotations);
             }
         });
     }

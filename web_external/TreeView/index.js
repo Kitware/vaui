@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux'
 
 import ActivityPane from './ActivityPane';
 import TrackPane from './TrackPane';
@@ -25,21 +26,10 @@ class TreeView extends Component {
                 <div className='panel-body'>
                     <div className='tab-content'>
                         <div id='activities' className='tab-pane active'>
-                            <ActivityPane
-                                annotationActivityContainer={this.props.annotationActivityContainer
-                                }
-                                toggleActivity={this.props.toggleActivity}
-                                annotationTypeContainer={this.props.annotationTypeContainer}
-                            />
+                            <ActivityPane />
                         </div>
                         <div id='tracks' className='tab-pane'>
-                            <TrackPane
-                                annotationTrackContainer={this.props.annotationTrackContainer
-                                }
-                                annotationTypeContainer={this.props.annotationTypeContainer
-                                }
-                                toggleTrack={this.props.toggleTrack}
-                            />
+                            <TrackPane />
                         </div>
                         <div id='scene-elements' className='tab-pane'>4</div>
                     </div>
@@ -49,4 +39,15 @@ class TreeView extends Component {
     }
 }
 
-export default TreeView;
+const mapStateToProps = (state, ownProps) => {
+    return {
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TreeView);

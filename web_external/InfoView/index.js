@@ -1,4 +1,5 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux';
 
 import './style.styl';
 
@@ -38,4 +39,16 @@ class InfoView extends PureComponent {
         </div>;
     }
 }
-export default InfoView;
+const mapStateToProps = (state, ownProps) => {
+    return {
+        annotations: state.selectedAnnotations
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(InfoView);

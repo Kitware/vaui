@@ -1,7 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux'
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
+import { TOGGLE_TRACK } from '../../actions/types';
 
 import './style.styl';
 
@@ -15,7 +17,10 @@ class TrackPane extends BasePane {
     }
 
     toggleItem(item, enabled) {
-        return this.props.toggleTrack(item, enabled);
+        this.props.dispatch({
+            type: TOGGLE_TRACK,
+            payload: { track: item, enabled }
+        });
     }
 
     render() {
@@ -52,7 +57,10 @@ class TrackPane extends BasePane {
                             <label>
                                 <input type='checkbox'
                                     checked={trackContainer.getEnableState(trackId)}
-                                    onChange={(e) => this.props.toggleTrack(trackId, e.target.checked)}
+                                    onChange={(e) => this.props.dispatch({
+                                        type: TOGGLE_TRACK,
+                                        payload: { track: trackId, enabled: e.target.checked }
+                                    })}
                                 />
                                 {label}
                             </label>
@@ -63,4 +71,18 @@ class TrackPane extends BasePane {
         </div>;
     }
 }
-export default TrackPane;
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        annotationTrackContainer: state.annotationTrackContainer,
+        annotationTypeContainer: state.annotationTypeContainer
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TrackPane);

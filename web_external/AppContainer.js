@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import events from 'girder/events';
 import { logout, getCurrentUser } from 'girder/auth';
 
-import { LOGIN_STATE_CHANGE } from './actions';
+import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
 import HeaderBar from './HeaderBar';
 

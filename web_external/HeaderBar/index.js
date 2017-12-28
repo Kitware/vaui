@@ -2,10 +2,10 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { logout } from 'girder/auth';
 import events from 'girder/events';
-import ItemModel from 'girder/models/ItemModel';
 
-import { SELECTED_FOLDER_CHANGE } from '../actions';
+import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
+import loadAnnotation from '../actions/loadAnnotation';
 
 import './style.styl';
 
@@ -67,8 +67,12 @@ class HeaderBar extends PureComponent {
             type: SELECTED_FOLDER_CHANGE,
             folder
         });
+        this.props.dispatch({
+            type: SELECTED_ITEM_CHANGE,
+            payload: item
+        });
+        this.props.dispatch(loadAnnotation(item));
         this.handleClipExplorerTryClose();
-        events.trigger('v:item_selected', new ItemModel(item));
     }
 }
 
@@ -76,13 +80,13 @@ const mapStateToProps = (state, ownProps) => {
     return {
         user: state.user,
         selectedFolder: state.selectedFolder
-    }
-}
+    };
+};
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
         dispatch
-    }
-}
+    };
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(HeaderBar);
