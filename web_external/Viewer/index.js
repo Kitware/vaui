@@ -27,9 +27,26 @@ class Viewer extends PureComponent {
         if (nextProps.selectedItem !== this.props.selectedItem) {
             this.setState({ ready: false });
         }
+        if (this.props.requestFrameRange !== nextProps.requestFrameRange) {
+            if (this.state.videoCurrentFrame < nextProps.requestFrameRange[0] ||
+                this.state.videoCurrentFrame > nextProps.requestFrameRange[1]) {
+                this.requestToFrame(nextProps.requestFrameRange[0]);
+            }
+        }
+        if (this.props.requestFrame !== nextProps.requestFrame) {
+            this.requestToFrame(nextProps.requestFrame.frame);
+        }
+    }
+    requestToFrame(frame) {
+        // This works now but can be improved, the player and this controller still has some data racing issue
+        this.setState({ playing: false, videoPlaying: false }, () => {
+            setTimeout(() => {
+                this.setState({ videoCurrentFrame: Math.min(frame, this.state.videoMaxFrame) });
+            }, 100);
+        });
     }
     render() {
-        var playDisabled = !this.state.ready;
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
         var message = this._getMessage();
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
@@ -45,7 +62,7 @@ class Viewer extends PureComponent {
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
                                 editingTrackId={this.props.editingTrackId}
-                                selectedAnnotation={this.props.selectedAnnotation}
+                                selectedTrackId={this.props.selectedTrackId}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
                                         this.setState({
@@ -134,9 +151,6 @@ class Viewer extends PureComponent {
                                         }}>
                                         <i className='icon-to-end'></i>
                                     </button>
-                                    {/* <button className='fast-forward btn btn-default' disabled={true}>
-                                    <i className='icon-fast-fw'></i>
-                                </button> */}
                                 </div>
                                 <div className='time-control'>
                                     <ReactBootstrapSlider
@@ -214,7 +228,7 @@ class Viewer extends PureComponent {
         }).filter((data) => {
             return data.activities || data.trackEnabled;
         });
-        var selectedAnnotation = this.props.selectedAnnotation;
+        var selectedTrackId = this.props.selectedTrackId;
         var editingTrackId = this.props.editingTrackId;
         var style = {
             fill: true,
@@ -229,7 +243,7 @@ class Viewer extends PureComponent {
                 if (d.geometry.id1 === editingTrackId) {
                     return { r: 0.5, g: 1, b: 1 };
                 }
-                if (selectedAnnotation && d.geometry.id1 === selectedAnnotation.geometry.id1) {
+                if (d.geometry.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
                 var attributes = d.geometry.keyValues;
@@ -263,8 +277,10 @@ const mapStateToProps = (state, ownProps) => {
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTrackContainer: state.annotationTrackContainer,
         annotationTypeContainer: state.annotationTypeContainer,
-        selectedAnnotation: state.selectedAnnotation,
-        editingTrackId: state.editingTrackId
+        selectedTrackId: state.selectedTrackId,
+        editingTrackId: state.editingTrackId,
+        requestFrameRange: state.requestFrameRange,
+        requestFrame: state.requestFrame
     };
 };
 

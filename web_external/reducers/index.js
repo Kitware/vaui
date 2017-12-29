@@ -13,8 +13,10 @@ function app(state, action) {
             annotationGeometryContainer: null,
             annotationTrackContainer: null,
             selectedAnnotation: null,
+            selectedTrackId: null,
             editingTrackId: null,
-            saving: false
+            saving: false,
+            requestFrameRange: null
         }
     }
     switch (action.type) {
@@ -37,7 +39,7 @@ function app(state, action) {
             var annotationTrackContainer = state.annotationTrackContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationTrackContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.geometry.id1 : null } };
         case types.EDITING_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_GEOM:
@@ -47,6 +49,13 @@ function app(state, action) {
             return { ...state, ...{ saving: true } };
         case types.SAVE + '_FULFILLED':
             return { ...state, ...action.payload };
+        case types.FOCUS_TRACK:
+            var range = state.annotationTrackContainer.getTrackFrameRange(action.payload);
+            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload } };
+        case types.GOTO_TRACK_START:
+        case types.GOTO_TRACK_END:
+            var range = state.annotationTrackContainer.getTrackFrameRange(action.payload);
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload } };
         default:
             return state;
     }

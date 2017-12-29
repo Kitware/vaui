@@ -36,15 +36,15 @@ class AnnotationGeometryContainer {
 
     getChanges() {
         return {
-            changed: Array.from(this._changedGeom).map((geom)=>{
-                var newGeom = Object.assign({},geom, geom.keyValues);
+            changed: Array.from(this._changedGeom).map((geom) => {
+                var newGeom = Object.assign({}, geom, geom.keyValues);
                 delete newGeom.keyValues;
                 return newGeom;
             })
         };
     }
 
-    reset(){
+    reset() {
         this._changedGeom.clear();
         return this.copy();
     }
@@ -57,6 +57,7 @@ class AnnotationGeometryContainer {
 class AnnotationTrackContainer {
     constructor() {
         this._trackIds = new Set();
+        this._trackRanges = new Map();
         this._enableState = new Map();
     }
 
@@ -65,6 +66,12 @@ class AnnotationTrackContainer {
             this._trackIds.add(geometry.id1);
             this._enableState.set(geometry.id1, true);
         }
+        if (!this._trackRanges.has(geometry.id1)) {
+            this._trackRanges.set(geometry.id1, new Array(Number.MAX_VALUE, Number.MIN_VALUE));
+        }
+        var trackRange = this._trackRanges.get(geometry.id1);
+        trackRange[0] = Math.min(trackRange[0], geometry.ts0);
+        trackRange[1] = Math.max(trackRange[1], geometry.ts0);
     }
 
     getAllItems() {
@@ -78,6 +85,10 @@ class AnnotationTrackContainer {
     toggleState(id1, enabled) {
         this._enableState.set(id1, enabled);
         return this.copy();
+    }
+
+    getTrackFrameRange(id1) {
+        return this._trackRanges.get(id1);
     }
 
     copy() {

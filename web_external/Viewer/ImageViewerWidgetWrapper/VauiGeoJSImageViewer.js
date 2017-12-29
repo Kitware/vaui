@@ -85,7 +85,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 }
                                 // if we haven't asked to stop, go to the next frame as soon as
                                 // possible.
-                                if (playing) {
+                                if (playing || this.pendingFrame) {
                                     next();
                                 }
                                 return undefined;
