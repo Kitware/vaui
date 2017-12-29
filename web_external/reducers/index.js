@@ -12,7 +12,7 @@ function app(state, action) {
             annotationTypeContainer: null,
             annotationGeometryContainer: null,
             annotationTrackContainer: null,
-            selectedAnnotations: [],
+            selectedAnnotation: null,
             editingTrackId: null,
             saving: false
         }
@@ -36,8 +36,8 @@ function app(state, action) {
         case types.TOGGLE_TRACK:
             var annotationTrackContainer = state.annotationTrackContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationTrackContainer } };
-        case types.ANNOTATIONS_CLICKED:
-            return { ...state, ...{ selectedAnnotations: action.payload } };
+        case types.ANNOTATION_CLICKED:
+            return { ...state, ...{ selectedAnnotation: action.payload } };
         case types.EDITING_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_GEOM:

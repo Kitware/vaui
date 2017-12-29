@@ -25,7 +25,7 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.geometryCotnainer !== nextProps.geometryCotnainer ||
             this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
             this.props.annotationTrackContainer !== nextProps.annotationTrackContainer ||
-            this.props.selectedAnnotations !== nextProps.selectedAnnotations ||
+            this.props.selectedAnnotation !== nextProps.selectedAnnotation ||
             this.props.editingTrackId !== nextProps.editingTrackId
         ) {
             this.geojsViewer.redrawAnnotation();
@@ -51,12 +51,10 @@ class ImageViewerWidgetWrapper extends Component {
             if (this.props.onReady) {
                 this.props.onReady();
             }
-        }).on('annotationsLeftClick', (annotations) => {
-            if (this.props.annotationsClick) {
-                this.props.annotationsClick(annotations);
-            }
-        }).on('annotationRightClick', (annotations) => {
-            this.props.annotationRightClick(annotations);
+        }).on('annotationLeftClick', (annotation) => {
+            this.props.annotationLeftClick(annotation);
+        }).on('annotationRightClick', (annotation) => {
+            this.props.annotationRightClick(annotation);
         }).on('annotationDrawn', (g0) => {
             this.props.annotationDrawn(g0);
         });

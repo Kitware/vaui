@@ -13,10 +13,10 @@ class TreeView extends Component {
                 <div className='panel-heading'>
                     <ul className='nav nav-tabs'>
                         <li className='active'>
-                            <a data-toggle='tab' href='#activities'>Activities</a>
+                            <a data-toggle='tab' href='#tracks'>Tracks</a>
                         </li>
                         <li>
-                            <a data-toggle='tab' href='#tracks'>Tracks</a>
+                            <a data-toggle='tab' href='#activities'>Activities</a>
                         </li>
                         {/* <li>
                             <a data-toggle='tab' href='#scene-elements'>Scene Elements</a>
@@ -25,11 +25,11 @@ class TreeView extends Component {
                 </div>
                 <div className='panel-body'>
                     <div className='tab-content'>
-                        <div id='activities' className='tab-pane active'>
-                            <ActivityPane />
-                        </div>
-                        <div id='tracks' className='tab-pane'>
+                        <div id='tracks' className='tab-pane active'>
                             <TrackPane />
+                        </div>
+                        <div id='activities' className='tab-pane'>
+                            <ActivityPane />
                         </div>
                         <div id='scene-elements' className='tab-pane'>4</div>
                     </div>

@@ -5,7 +5,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     initialize(settings) {
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
-        this._annotationClicks = [];
+        this._annotationLeftClick = null;
         this._annotationRightClick = null;
         this.pendingFrame = null;
         this.drawingModeEnabled = false;
@@ -183,7 +183,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     }
                     feature.geoOn(geo.event.feature.mouseclick, (e) => {
                         if (e.mouse.buttonsDown.left) {
-                            this._triggerAnnotationEvent(e.data);
+                            this._triggerAnnotationLeftClickEvent(e.data);
                         } else if (e.mouse.buttonsDown.right) {
                             this._triggerAnnotationRightClickEvent(e.data);
                         }
@@ -194,21 +194,20 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
 
                 map.geoOn(geo.event.mouseclick, (e) => {
                     if (e.buttonsDown.left) {
-                        this._triggerAnnotationEvent();
+                        this._triggerAnnotationLeftClickEvent();
                     }
                     if (e.buttonsDown.right) {
                         this._triggerAnnotationRightClickEvent();
                     }
                 });
 
-                this._triggerAnnotationEvent = (annotation) => {
+                this._triggerAnnotationLeftClickEvent = (annotation) => {
                     if (annotation) {
-                        this._annotationClicks.push(annotation);
+                        this._annotationLeftClick = annotation;
                     }
                     clearTimeout(this._annotationEventHandle);
                     this._annotationEventHandle = setTimeout(() => {
-                        this.trigger('annotationsLeftClick', this._annotationClicks);
-                        this._annotationClicks = [];
+                        this.trigger('annotationLeftClick', this._annotationLeftClick);
                     }, 0);
                 };
 
