@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 import _ from 'underscore';
+import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import BasePane from '../BasePane';
 import { TOGGLE_TRACK } from '../../actions/types';
@@ -8,6 +9,13 @@ import { TOGGLE_TRACK } from '../../actions/types';
 import './style.styl';
 
 class TrackPane extends BasePane {
+    constructor(props) {
+        super(props);
+        this.state = {
+            interactTrackId: null
+        }
+    }
+
     getContainer() {
         return this.props.annotationTrackContainer;
     }
@@ -21,6 +29,12 @@ class TrackPane extends BasePane {
             type: TOGGLE_TRACK,
             payload: { track: item, enabled }
         });
+    }
+
+    setInteractTarget(trackId) {
+        this.setState({
+            interactTrackId: trackId
+        })
     }
 
     render() {
@@ -53,21 +67,35 @@ class TrackPane extends BasePane {
                     var type = typeContainer.getItem(trackId);
                     var label = type ? `${type.obj_type} ${trackId}` : trackId;
                     return <li key={trackId}>
-                        <div className='checkbox'>
-                            <label>
-                                <input type='checkbox'
-                                    checked={trackContainer.getEnableState(trackId)}
-                                    onChange={(e) => this.props.dispatch({
-                                        type: TOGGLE_TRACK,
-                                        payload: { track: trackId, enabled: e.target.checked }
-                                    })}
-                                />
-                                {label}
-                            </label>
-                        </div>
+                        <ContextMenuTrigger id='trackMenu'>
+                            <div className='checkbox' onContextMenu={(e) => this.setInteractTarget(trackId)}>
+                                <label>
+                                    <input type='checkbox'
+                                        checked={trackContainer.getEnableState(trackId)}
+                                        onChange={(e) => this.props.dispatch({
+                                            type: TOGGLE_TRACK,
+                                            payload: { track: trackId, enabled: e.target.checked }
+                                        })}
+                                    />
+                                    {label}
+                                </label>
+                            </div>
+                        </ContextMenuTrigger>
                     </li>;
                 })}
             </ul>
+            <ContextMenu id="trackMenu">
+                <MenuItem onClick={this.handleClick}>
+                    Track {this.state.interactTrackId}
+                </MenuItem>
+                <MenuItem onClick={this.handleClick}>
+                    ContextMenu Item 2
+                </MenuItem>
+                <MenuItem divider />
+                <MenuItem onClick={this.handleClick}>
+                    ContextMenu Item 3
+                </MenuItem>
+            </ContextMenu>
         </div>;
     }
 }

@@ -3,9 +3,10 @@ import { connect } from 'react-redux'
 import { logout } from 'girder/auth';
 import events from 'girder/events';
 
-import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
+import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE, SAVE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
 import loadAnnotation from '../actions/loadAnnotation';
+import save from '../actions/save';
 
 import './style.styl';
 
@@ -22,6 +23,7 @@ class HeaderBar extends PureComponent {
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='load-button-wrapper toolbutton'>
                 <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
+                <button className='btn btn-primary' onClick={(e) => this.props.dispatch(save())}>Save</button>
             </div>
             <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>

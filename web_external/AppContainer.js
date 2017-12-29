@@ -7,6 +7,8 @@ import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
 import HeaderBar from './HeaderBar';
 
+import './stylesheets/contextMenu.css';
+
 class AppContainer extends PureComponent {
     componentDidMount() {
         events.on('g:login', () => {

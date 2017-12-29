@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux'
 import ReactBootstrapSlider from 'react-bootstrap-slider';
+import _ from 'underscore';
 
-import { ANNOTATIONS_CLICKED } from '../actions/types';
+import { ANNOTATIONS_CLICKED, EDITING_TRACK, CHANGE_GEOM } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -43,6 +44,8 @@ class Viewer extends PureComponent {
                                 annotationTrackContainer={this.props.annotationTrackContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
+                                editingTrackId={this.props.editingTrackId}
+                                selectedAnnotations={this.props.selectedAnnotations}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
                                         this.setState({
@@ -67,6 +70,18 @@ class Viewer extends PureComponent {
                                 annotationsClick={(annotations) => this.props.dispatch({
                                     type: ANNOTATIONS_CLICKED,
                                     payload: annotations
+                                })}
+                                annotationRightClick={(annotation) => this.props.dispatch({
+                                    type: EDITING_TRACK,
+                                    payload: annotation ? annotation.geometry.id1 : null
+                                })}
+                                annotationDrawn={(g0) => this.props.dispatch({
+                                    type: CHANGE_GEOM,
+                                    payload: {
+                                        frame: this.state.videoCurrentFrame,
+                                        trackId: this.props.editingTrackId,
+                                        g0
+                                    }
                                 })}
                                 key={this.props.selectedItem._id} />,
                             message && <div className={message.classes} key='message'>
@@ -199,6 +214,8 @@ class Viewer extends PureComponent {
         }).filter((data) => {
             return data.activities || data.trackEnabled;
         });
+        var selectedAnnotations = this.props.selectedAnnotations;
+        var editingTrackId = this.props.editingTrackId;
         var style = {
             fill: true,
             fillColor: { r: 1.0, g: 0.839, b: 0.439 },
@@ -209,6 +226,12 @@ class Viewer extends PureComponent {
                 return d.trackEnabled;
             },
             strokeColor(a, b, d) {
+                if (d.geometry.id1 === editingTrackId) {
+                    return { r: 0.5, g: 1, b: 1 };
+                }
+                if (selectedAnnotations.map((annotation) => annotation.geometry.id1).indexOf(d.geometry.id1) !== -1) {
+                    return { r: 1, g: 0.08, b: 0.58 };
+                }
                 var attributes = d.geometry.keyValues;
                 if (attributes.src === 'truth') {
                     if (attributes.eval0 === 'tp') {
@@ -240,6 +263,8 @@ const mapStateToProps = (state, ownProps) => {
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTrackContainer: state.annotationTrackContainer,
         annotationTypeContainer: state.annotationTypeContainer,
+        selectedAnnotations: state.selectedAnnotations,
+        editingTrackId: state.editingTrackId
     };
 };
 

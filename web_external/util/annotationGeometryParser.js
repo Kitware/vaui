@@ -1,6 +1,7 @@
 class AnnotationGeometryContainer {
     constructor() {
         this._frameMap = new Map();
+        this._changedGeom = new Set();
     }
 
     add(geometry) {
@@ -17,6 +18,39 @@ class AnnotationGeometryContainer {
 
     get length() {
         return this._frameMap.size;
+    }
+
+    change(frame, trackId, g0) {
+        var geomSet = this.getFrame(frame);
+        var geomToChange = Array.from(geomSet).find((geom) => {
+            return geom.id1 === trackId && geom.ts0 == frame;
+        });
+        if (geomToChange) {
+            Object.assign(geomToChange, {
+                g0
+            });
+            this._changedGeom.add(geomToChange);
+        }
+        return this.copy();
+    }
+
+    getChanges() {
+        return {
+            changed: Array.from(this._changedGeom).map((geom)=>{
+                var newGeom = Object.assign({},geom, geom.keyValues);
+                delete newGeom.keyValues;
+                return newGeom;
+            })
+        };
+    }
+
+    reset(){
+        this._changedGeom.clear();
+        return this.copy();
+    }
+
+    copy() {
+        return Object.assign(new this.constructor(), this);
     }
 }
 
@@ -62,13 +96,9 @@ class AnnotationGeometry {
     }
     set(key, value) {
         switch (key) {
+            case '_id':
+            case 'itemId':
             case 'g0':
-                let values = value.split(' ');
-                this.g0 = [
-                    [parseInt(values[0]), parseInt(values[1])],
-                    [parseInt(values[2]), parseInt(values[3])]
-                ];
-                break;
             case 'id0':
             case 'id1':
             case 'ts0':

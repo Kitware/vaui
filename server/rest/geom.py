@@ -68,6 +68,8 @@ class GeomResource(Resource):
     )
     @access.user
     def updateGeom(self, geom, data, params):
+        data.pop('_id', None)
+        data.pop('itemId', None)
         geom.update(data)
         return Geom().save(geom)
 

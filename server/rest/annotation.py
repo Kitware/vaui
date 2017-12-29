@@ -88,6 +88,11 @@ class AnnotationResource(Resource):
                 continue
             geom = obj['geom']
             geom['itemId'] = item['_id']
+            values = geom['g0'].split()
+            geom['g0'] = [
+                [int(values[0]), int(values[1])],
+                [int(values[2]), int(values[3])]
+            ]
             Geom().save(geom)
         print 'finish _importGeom()'
         print datetime.datetime.utcnow()

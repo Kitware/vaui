@@ -11,7 +11,7 @@ class InfoView extends PureComponent {
                 <div className='panel-body'>
                     <ul className='geometry'>
                         {this.props.annotations && this.props.annotations.map((annotation) => {
-                            return <li key={`${annotation.geometry.id0}-${annotation.geometry.id1}`} className='track'>
+                            return <li key={annotation.geometry.id0 + '-' + annotation.geometry.id1} className='track'>
                                 <div title='id1'>Track id: {annotation.geometry.id1}</div>
                                 {annotation.type &&
                                     <div>type: {annotation.type.obj_type}</div>
