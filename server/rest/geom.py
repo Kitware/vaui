@@ -17,10 +17,12 @@
 #  limitations under the License.
 ##############################################################################
 
+import yaml
+
 from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
-from girder.api.rest import Resource
+from girder.api.rest import Resource, setResponseHeader, rawResponse
 from girder.models.item import Item
 from girder.plugins.vaui.models.Geom import Geom
 
@@ -35,6 +37,7 @@ class GeomResource(Resource):
         self.route('POST', (':itemId',), self.addGeomToItem)
         self.route('PUT', (':geomId',), self.updateGeom)
         self.route('DELETE', (':geomId',), self.deleteGeom)
+        self.route('GET', ('export', ':itemId',), self.exportKPF)
 
     @autoDescribeRoute(
         Description('')
@@ -80,6 +83,35 @@ class GeomResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def deleteGeom(self, geom,  params):
+    def deleteGeom(self, geom, params):
         Geom().remove(geom)
         return ''
+
+    @autoDescribeRoute(
+        Description('')
+        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .errorResponse()
+        .errorResponse('Read access was denied on the item.', 403)
+    )
+    @access.user
+    @access.cookie
+    @rawResponse
+    def exportKPF(self, item, params):
+        setResponseHeader('Content-Type', 'text/plain')
+        setResponseHeader('Content-Disposition', 'attachment; filename=geom.kpf')
+        cursor = Geom().findByItem(item)
+        output = []
+        for geom in cursor:
+            keyValues = []
+            for key in geom:
+                if key == 'itemId' or key == '_id':
+                    continue
+                if key == 'g0':
+                    value = str(geom['g0'][0][0]) + ' ' + str(geom['g0'][0][1]) + \
+                        ' ' + str(geom['g0'][1][0]) + ' ' + str(geom['g0'][1][1])
+                else:
+                    value = geom[key]
+                keyValues.append('{0}: {1}'.format(key, value))
+            content = '- { geom: { ' + ', '.join(keyValues) + ' } }'
+            output.append(content)
+        return '\n'.join(output)

@@ -12,10 +12,12 @@ function app(state, action) {
             annotationTypeContainer: null,
             annotationGeometryContainer: null,
             annotationTrackContainer: null,
+            geomItem: null,
             selectedAnnotation: null,
             selectedTrackId: null,
             editingTrackId: null,
             saving: false,
+            pendingSave: false,
             requestFrameRange: null
         }
     }
@@ -26,11 +28,11 @@ function app(state, action) {
             return { ...state, ...{ selectedFolder: action.folder } };
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
-        case types.ANNOTATIONS_LOADED + '_PENDING':
+        case types.LOAD_ANNOTATION + '_PENDING':
             return { ...state, ...{ loadingAnnotation: true } };
-        case types.ANNOTATIONS_LOADED + '_FULFILLED':
+        case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
-        case types.ANNOTATIONS_LOADED + '_REJECTED':
+        case types.LOAD_ANNOTATION + '_REJECTED':
             return { ...state, ...{ loadingAnnotation: false } };
         case types.TOGGLE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.toggleState(action.payload.activity.id2, action.payload.enabled);
@@ -42,13 +44,15 @@ function app(state, action) {
             return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.geometry.id1 : null } };
         case types.EDITING_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
+        case types.SET_GEOM_ITEM:
+            return { ...state, ...{ geomItem: action.payload } };
         case types.CHANGE_GEOM:
             var annotationGeometryContainer = state.annotationGeometryContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
-            return { ...state, ...{ annotationGeometryContainer } };
+            return { ...state, ...{ annotationGeometryContainer, pendingSave: true } };
         case types.SAVE + '_PENDING':
             return { ...state, ...{ saving: true } };
         case types.SAVE + '_FULFILLED':
-            return { ...state, ...action.payload };
+            return { ...state, ...action.payload, pendingSave: false };
         case types.FOCUS_TRACK:
             var range = state.annotationTrackContainer.getTrackFrameRange(action.payload);
             return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload } };

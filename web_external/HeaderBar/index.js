@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux'
 import { logout } from 'girder/auth';
 import events from 'girder/events';
+import { getApiRoot } from 'girder/rest';
 
 import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE, SAVE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
@@ -21,9 +22,10 @@ class HeaderBar extends PureComponent {
     render() {
         let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
-            <div className='load-button-wrapper toolbutton'>
+            <div className='button-wrapper toolbutton'>
                 <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
-                <button className='btn btn-primary' onClick={(e) => this.props.dispatch(save())}>Save</button>
+                <button className='btn btn-primary' disabled={!this.props.pendingSave} onClick={(e) => this.props.dispatch(save())}>Save</button>
+                <button className='btn btn-link' disabled={!this.props.geomItem} onClick={(e) => { window.location = getApiRoot() + `/geom/export/${this.props.geomItem._id}`; }}>Export</button>
             </div>
             <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
@@ -81,7 +83,9 @@ class HeaderBar extends PureComponent {
 const mapStateToProps = (state, ownProps) => {
     return {
         user: state.user,
-        selectedFolder: state.selectedFolder
+        selectedFolder: state.selectedFolder,
+        pendingSave: state.pendingSave,
+        geomItem: state.geomItem
     };
 };
 

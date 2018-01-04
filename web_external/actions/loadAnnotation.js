@@ -1,6 +1,6 @@
 
 import { restRequest } from 'girder/rest';
-import { ANNOTATIONS_LOADED } from '../actions/types';
+import { LOAD_ANNOTATION, SET_GEOM_ITEM } from '../actions/types';
 
 
 import annotationGeometryParser from '../util/annotationGeometryParser';
@@ -8,9 +8,11 @@ import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 
 export default (item) => {
-    return {
-        type: ANNOTATIONS_LOADED,
-        payload: restRequest({
+    return (dispatch, getState) => {
+        dispatch({
+            type: `${LOAD_ANNOTATION}_PENDING`
+        });
+        restRequest({
             url: `/folder/${item.folderId}`
         }).then((folder) => {
             return Promise.all([
@@ -35,6 +37,10 @@ export default (item) => {
                     }
                 })
                     .then((items) => {
+                        dispatch({
+                            type: SET_GEOM_ITEM,
+                            payload: items[0]
+                        });
                         return restRequest({
                             url: `/geom/${items[0]._id}`
                         })
@@ -44,10 +50,13 @@ export default (item) => {
                         return { annotationGeometryContainer, annotationTrackContainer };
                     })
             ]).then(([annotationActivityContainer, annotationTypeContainer, { annotationGeometryContainer, annotationTrackContainer }]) => {
-                return { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer, annotationTrackContainer };
+                dispatch({
+                    type: LOAD_ANNOTATION + '_FULFILLED',
+                    payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer, annotationTrackContainer }
+                });
             });
-        })
-    }
+        });
+    };
 };
 
 const downloadItemByName = (folderId, name) => {

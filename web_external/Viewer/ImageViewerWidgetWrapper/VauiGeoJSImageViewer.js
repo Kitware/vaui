@@ -140,7 +140,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         layer.geoOn(geo.event.annotation.state, (e) => {
                             var geometry = layer.geojson().features[0].geometry;
                             var coords = geometry.coordinates[0];
-                            var g0 = [[coords[0][0], coords[0][1]], [coords[2][0], coords[2][1]]];
+                            var g0 = [[Math.round(coords[0][0]), Math.round(coords[0][1])], [Math.round(coords[2][0]), Math.round(coords[2][1])]];
                             this.trigger('annotationDrawn', g0);
                             layer.removeAllAnnotations();
                         });
