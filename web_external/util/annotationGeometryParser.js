@@ -23,7 +23,7 @@ class AnnotationGeometryContainer {
     change(frame, trackId, g0) {
         var geomSet = this.getFrame(frame);
         var geomToChange = Array.from(geomSet).find((geom) => {
-            return geom.id1 === trackId && geom.ts0 == frame;
+            return geom.id1 === trackId && geom.ts0 === frame;
         });
         if (geomToChange) {
             Object.assign(geomToChange, {
@@ -67,7 +67,7 @@ class AnnotationTrackContainer {
             this._enableState.set(geometry.id1, true);
         }
         if (!this._trackRanges.has(geometry.id1)) {
-            this._trackRanges.set(geometry.id1, new Array(Number.MAX_VALUE, Number.MIN_VALUE));
+            this._trackRanges.set(geometry.id1, [(Number.MAX_VALUE, Number.MIN_VALUE)]);
         }
         var trackRange = this._trackRanges.get(geometry.id1);
         trackRange[0] = Math.min(trackRange[0], geometry.ts0);

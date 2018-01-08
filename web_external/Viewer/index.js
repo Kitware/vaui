@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
-import _ from 'underscore';
 
 import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';

@@ -1,5 +1,6 @@
-import * as types from '../actions/types';
 import { getCurrentUser } from 'girder/auth';
+
+import * as types from '../actions/types';
 
 function app(state, action) {
     if (typeof state === 'undefined') {
@@ -19,7 +20,7 @@ function app(state, action) {
             saving: false,
             pendingSave: false,
             requestFrameRange: null
-        }
+        };
     }
     switch (action.type) {
         case types.LOGIN_STATE_CHANGE:

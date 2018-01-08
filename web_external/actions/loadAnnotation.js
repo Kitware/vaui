@@ -1,8 +1,7 @@
 
 import { restRequest } from 'girder/rest';
+
 import { LOAD_ANNOTATION, SET_GEOM_ITEM } from '../actions/types';
-
-
 import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
@@ -16,17 +15,17 @@ export default (item) => {
             url: `/vaui-annotation/status/${item.folderId}`
         }).then((result) => {
             if (result) {
-                return;
+
             } else {
                 return restRequest({
                     method: 'POST',
                     url: `/vaui-annotation/import/${item.folderId}`
-                })
+                });
             }
         }).then(() => {
             return restRequest({
                 url: `/folder/${item.folderId}`
-            })
+            });
         }).then((folder) => {
             return Promise.all([
                 loadAnnotation(item.folderId, folder.name, 'activities')
@@ -55,7 +54,7 @@ export default (item) => {
                     });
                     return restRequest({
                         url: `/geom/${items[0]._id}`
-                    })
+                    });
                 }).then((geoms) => {
                     var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(geoms);
                     return { annotationGeometryContainer, annotationTrackContainer };
@@ -80,6 +79,6 @@ const loadAnnotation = (folderId, folderName, type) => {
     }).then((items) => {
         return restRequest({
             url: `/${type}/${items[0]._id}`
-        })
-    })
+        });
+    });
 };

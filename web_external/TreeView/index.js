@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 
 import ActivityPane from './ActivityPane';
 import TrackPane from './TrackPane';

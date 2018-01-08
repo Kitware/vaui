@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import { logout } from 'girder/auth';
 import events from 'girder/events';
 import { getApiRoot } from 'girder/rest';
 
-import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE, SAVE } from '../actions/types';
+import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
 import loadAnnotation from '../actions/loadAnnotation';
 import save from '../actions/save';

@@ -10,7 +10,8 @@ module.exports = {
         complexity: [2, 12],
         // Many props won't be needed once moved to Redux
         'react/prop-types': 'off',
-        'promise/no-nesting': 'off'
+        'promise/no-nesting': 'off',
+        'promise/always-return': 'off'
     },
     globals: {
         geo: true,

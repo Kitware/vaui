@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import _ from 'underscore';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
@@ -13,7 +13,7 @@ class TrackPane extends BasePane {
         super(props);
         this.state = {
             interactTrackId: null
-        }
+        };
     }
 
     getContainer() {
@@ -34,7 +34,7 @@ class TrackPane extends BasePane {
     setInteractTarget(trackId) {
         this.setState({
             interactTrackId: trackId
-        })
+        });
     }
 
     render() {

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 import events from 'girder/events';
-import { logout, getCurrentUser } from 'girder/auth';
+import { getCurrentUser } from 'girder/auth';
 
 import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
@@ -26,9 +26,9 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             dispatch({
                 type: LOGIN_STATE_CHANGE,
                 user
-            })
+            });
         }
-    }
-}
+    };
+};
 
 export default connect(null, mapDispatchToProps)(AppContainer);

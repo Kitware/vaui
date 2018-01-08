@@ -1,7 +1,5 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux'
-import events from 'girder/events';
-import { restRequest } from 'girder/rest';
+import { connect } from 'react-redux';
 
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
@@ -18,21 +16,6 @@ class IndexView extends PureComponent {
         </div>;
     }
 }
-
-var downloadItemByName = (folderId, name) => {
-    return restRequest({
-        url: '/item',
-        data: {
-            folderId: folderId,
-            name: name
-        }
-    }).then((items) => {
-        return restRequest({
-            url: `/item/${items[0]._id}/download`,
-            dataType: 'text'
-        });
-    });
-};
 
 const mapStateToProps = (state, ownProps) => {
     return {

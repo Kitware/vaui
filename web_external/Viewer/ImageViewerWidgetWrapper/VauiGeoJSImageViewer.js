@@ -148,7 +148,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             if (!e.mode) {
                                 layer.mode('rectangle');
                             }
-                        })
+                        });
                     } else {
                         layer.geoOff(geo.event.annotation.state);
                         layer.geoOff(geo.event.annotation.mode);
@@ -212,7 +212,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 };
 
                 this._triggerAnnotationRightClickEvent = (annotation) => {
-                    this._annotationRightClick = annotation ? annotation : null;
+                    this._annotationRightClick = annotation || null;
                     clearTimeout(this._annotationRightClickHandle);
                     this._annotationRightClickHandle = setTimeout(() => {
                         this.trigger('annotationRightClick', this._annotationRightClick);
