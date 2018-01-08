@@ -1,14 +1,9 @@
 from girder.models.model_base import Model
 
 
-class Geom(Model):
-
-    def initialize(self):
-        self.name = 'geom'
-        self.ensureIndex('itemId')
-
-    def validate(self, geom):
-        return geom
+class Base(Model):
+    def validate(self, model):
+        return model
 
     def findByItem(self, item):
         return self.find(query={'itemId': item['_id']})

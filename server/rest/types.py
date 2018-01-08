@@ -21,19 +21,19 @@ from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
 from girder.models.item import Item
-from girder.plugins.vaui.models.geom import Geom
+from girder.plugins.vaui.models.types import Types
 
 
-class GeomResource(Resource):
+class TypesResource(Resource):
 
     def __init__(self):
-        super(GeomResource, self).__init__()
+        super(TypesResource, self).__init__()
 
-        self.resourceName = 'geom'
-        self.route('GET', (':itemId',), self.getGeomsOfItem)
-        self.route('POST', (':itemId',), self.addGeomToItem)
-        self.route('PUT', (':geomId',), self.updateGeom)
-        self.route('DELETE', (':geomId',), self.deleteGeom)
+        self.resourceName = 'types'
+        self.route('GET', (':itemId',), self.getTypesOfItem)
+        self.route('POST', (':itemId',), self.addTypesToItem)
+        self.route('PUT', (':typesId',), self.updateTypes)
+        self.route('DELETE', (':typesId',), self.deleteTypes)
         self.route('GET', ('export', ':itemId',), self.exportKPF)
 
     @autoDescribeRoute(
@@ -43,45 +43,45 @@ class GeomResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def getGeomsOfItem(self, item, params):
-        cursor = Geom().findByItem(item)
+    def getTypesOfItem(self, item, params):
+        cursor = Types().findByItem(item)
         return list(cursor)
 
     @autoDescribeRoute(
         Description('')
         .modelParam('itemId', model=Item, level=AccessType.WRITE)
-        .jsonParam('data', 'The geom content', requireObject=True, paramType='body')
+        .jsonParam('data', 'The types content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def addGeomToItem(self, item, data, params):
+    def addTypesToItem(self, item, data, params):
         data['itemId'] = item['_id']
-        return Geom().save(data)
+        return Types().save(data)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('geomId', model=Geom)
-        .jsonParam('data', 'The geom content', requireObject=True, paramType='body')
+        .modelParam('typesId', model=Types)
+        .jsonParam('data', 'The types content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def updateGeom(self, geom, data, params):
+    def updateTypes(self, types, data, params):
         data.pop('_id', None)
         data.pop('itemId', None)
-        geom.update(data)
-        return Geom().save(geom)
+        types.update(data)
+        return Types().save(types)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('geomId', model=Geom)
+        .modelParam('typesId', model=Types)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def deleteGeom(self, geom, params):
-        Geom().remove(geom)
+    def deleteTypes(self, types, params):
+        Types().remove(types)
         return ''
 
     @autoDescribeRoute(
@@ -95,20 +95,5 @@ class GeomResource(Resource):
     @rawResponse
     def exportKPF(self, item, params):
         setResponseHeader('Content-Type', 'text/plain')
-        setResponseHeader('Content-Disposition', 'attachment; filename=geom.kpf')
-        cursor = Geom().findByItem(item)
-        output = []
-        for geom in cursor:
-            keyValues = []
-            for key in geom:
-                if key == 'itemId' or key == '_id':
-                    continue
-                if key == 'g0':
-                    value = str(geom['g0'][0][0]) + ' ' + str(geom['g0'][0][1]) + \
-                        ' ' + str(geom['g0'][1][0]) + ' ' + str(geom['g0'][1][1])
-                else:
-                    value = geom[key]
-                keyValues.append('{0}: {1}'.format(key, value))
-            content = '- { geom: { ' + ', '.join(keyValues) + ' } }'
-            output.append(content)
-        return '\n'.join(output)
+        setResponseHeader('Content-Disposition', 'attachment; filename=types.kpf')
+        raise Exception('Not implemented')

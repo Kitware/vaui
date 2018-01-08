@@ -18,8 +18,7 @@
     "redux-promise-middleware": "^5.0.0",
     "react-redux": "^5.0.6",
     "redux-thunk": "^2.2.0",
-    "redux": "^3.7.2",
-    "yamljs": "0.3.0"
+    "redux": "^3.7.2"
   },
   "author": "",
   "license": ""

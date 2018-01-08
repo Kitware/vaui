@@ -1,5 +1,3 @@
-import YAML from 'yamljs';
-
 class AnnotationTypeContainer {
     constructor() {
         this._mapper = new Map();
@@ -20,19 +18,15 @@ class AnnotationTypeContainer {
 }
 
 class AnnotationType {
-    constructor(line) {
-        Object.assign(this, line);
+    constructor(types) {
+        Object.assign(this, types);
     }
 }
 
-function annotationTypeParser(raw) {
-    var lines = YAML.parse(raw);
+function annotationTypeParser(typesList) {
     var container = new AnnotationTypeContainer();
-    for (let line of lines) {
-        if ('meta' in line) {
-            continue;
-        }
-        var annotationType = new AnnotationType(line.types);
+    for (let types of typesList) {
+        var annotationType = new AnnotationType(types);
         container.add(annotationType);
     }
     return container;

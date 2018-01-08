@@ -1,5 +1,3 @@
-import YAML from 'yamljs';
-
 class AnnotationActivityContainer {
     constructor() {
         this._mapper = new Map();
@@ -57,19 +55,15 @@ class AnnotationActivityContainer {
 }
 
 class AnnotationActivity {
-    constructor(line) {
-        Object.assign(this, line);
+    constructor(activity) {
+        Object.assign(this, activity);
     }
 }
 
-function annotationActivityParser(raw) {
-    var lines = YAML.parse(raw);
+function annotationActivityParser(activities) {
     var container = new AnnotationActivityContainer();
-    for (let line of lines) {
-        if ('meta' in line) {
-            continue;
-        }
-        var annotationActivity = new AnnotationActivity(line.act);
+    for (let activity of activities) {
+        var annotationActivity = new AnnotationActivity(activity);
         container.add(annotationActivity);
     }
     return container;

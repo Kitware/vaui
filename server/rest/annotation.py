@@ -28,7 +28,9 @@ from girder.models.folder import Folder
 from girder.models.item import Item
 from girder.models.file import File
 from girder.exceptions import RestException
-from girder.plugins.vaui.models.Geom import Geom
+from girder.plugins.vaui.models.geom import Geom
+from girder.plugins.vaui.models.activities import Activities
+from girder.plugins.vaui.models.types import Types
 
 
 class AnnotationResource(Resource):
@@ -36,9 +38,9 @@ class AnnotationResource(Resource):
     def __init__(self):
         super(AnnotationResource, self).__init__()
 
-        self.resourceName = 'vauiAnnotation'
+        self.resourceName = 'vaui_annotation'
         self.route('POST', ('import', ':folderId',), self.importAnnotation)
-        self.route('GET', ('importStatus', ':folderId',), self.checkImportStatus)
+        self.route('GET', ('status', ':folderId',), self.checkImportStatus)
 
     @autoDescribeRoute(
         Description('')
@@ -50,6 +52,8 @@ class AnnotationResource(Resource):
     def importAnnotation(self, folder, params):
         # TODO: Check if is a clip folder
         geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
+        self._importActivities(activitiesItem)
+        self._importTypes(typesItem)
         self._importGeom(geomItem)
         return
 
@@ -67,6 +71,13 @@ class AnnotationResource(Resource):
             'name': '{0}.types.yml'.format(folder['name'])
         })
         return geomItem, activitiesItem, typesItem
+
+    @staticmethod
+    def _readKPF(item):
+        geomFile = Item().childFiles(item)[0]
+        result = File().download(geomFile, headers=False)
+        fileContent = ''.join(list(result()))
+        return fileContent.splitlines()
 
     def _importGeom(self, item):
         print 'start import geom'
@@ -97,6 +108,28 @@ class AnnotationResource(Resource):
         print 'finish _importGeom()'
         print datetime.datetime.utcnow()
 
+    def _importActivities(self, item):
+        Activities().removeWithQuery(query={'itemId': item['_id']})
+
+        for line in AnnotationResource._readKPF(item):
+            obj = yaml.load(line)[0]
+            if 'act' not in obj:
+                continue
+            activity = obj['act']
+            activity['itemId'] = item['_id']
+            Activities().save(activity)
+
+    def _importTypes(self, item):
+        Types().removeWithQuery(query={'itemId': item['_id']})
+
+        for line in AnnotationResource._readKPF(item):
+            obj = yaml.load(line)[0]
+            if 'types' not in obj:
+                continue
+            types = obj['types']
+            types['itemId'] = item['_id']
+            Types().save(types)
+
     @autoDescribeRoute(
         Description('')
         .modelParam('folderId', model=Folder, level=AccessType.WRITE)
@@ -112,5 +145,6 @@ class AnnotationResource(Resource):
             raise RestException('missing activities annotation file', code=404)
         if not typesItem:
             raise RestException('missing types annotation file', code=404)
-        geomImported = Geom().imported(geomItem)
-        return geomImported
+        imported = Geom().imported(geomItem) and Activities().imported(
+            activitiesItem) and Types().imported(typesItem)
+        return imported

@@ -13,18 +13,31 @@ export default (item) => {
             type: `${LOAD_ANNOTATION}_PENDING`
         });
         restRequest({
-            url: `/folder/${item.folderId}`
+            url: `/vaui-annotation/status/${item.folderId}`
+        }).then((result) => {
+            if (result) {
+                return;
+            } else {
+                return restRequest({
+                    method: 'POST',
+                    url: `/vaui-annotation/import/${item.folderId}`
+                })
+            }
+        }).then(() => {
+            return restRequest({
+                url: `/folder/${item.folderId}`
+            })
         }).then((folder) => {
             return Promise.all([
-                downloadItemByName(item.folderId, `${folder.name}.activities.yml`)
-                    .then((raw) => {
-                        var annotationActivityContainer = annotationActivityParser(raw);
+                loadAnnotation(item.folderId, folder.name, 'activities')
+                    .then((activities) => {
+                        var annotationActivityContainer = annotationActivityParser(activities);
                         return annotationActivityContainer;
                     })
                     .catch(() => { }),
-                downloadItemByName(item.folderId, `${folder.name}.types.yml`)
-                    .then((raw) => {
-                        return annotationTypeParser(raw);
+                loadAnnotation(item.folderId, folder.name, 'types')
+                    .then((types) => {
+                        return annotationTypeParser(types);
                     })
                     .catch(() => {
                         return new AnnotationTypeContainer();
@@ -35,20 +48,18 @@ export default (item) => {
                         folderId: item.folderId,
                         name: `${folder.name}.geom.yml`
                     }
+                }).then((items) => {
+                    dispatch({
+                        type: SET_GEOM_ITEM,
+                        payload: items[0]
+                    });
+                    return restRequest({
+                        url: `/geom/${items[0]._id}`
+                    })
+                }).then((geoms) => {
+                    var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(geoms);
+                    return { annotationGeometryContainer, annotationTrackContainer };
                 })
-                    .then((items) => {
-                        dispatch({
-                            type: SET_GEOM_ITEM,
-                            payload: items[0]
-                        });
-                        return restRequest({
-                            url: `/geom/${items[0]._id}`
-                        })
-                    })
-                    .then((geoms) => {
-                        var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(geoms);
-                        return { annotationGeometryContainer, annotationTrackContainer };
-                    })
             ]).then(([annotationActivityContainer, annotationTypeContainer, { annotationGeometryContainer, annotationTrackContainer }]) => {
                 dispatch({
                     type: LOAD_ANNOTATION + '_FULFILLED',
@@ -59,17 +70,16 @@ export default (item) => {
     };
 };
 
-const downloadItemByName = (folderId, name) => {
+const loadAnnotation = (folderId, folderName, type) => {
     return restRequest({
         url: '/item',
         data: {
-            folderId: folderId,
-            name: name
+            folderId,
+            name: `${folderName}.${type}.yml`
         }
     }).then((items) => {
         return restRequest({
-            url: `/item/${items[0]._id}/download`,
-            dataType: 'text'
-        });
-    });
+            url: `/${type}/${items[0]._id}`
+        })
+    })
 };
