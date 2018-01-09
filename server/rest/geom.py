@@ -96,6 +96,11 @@ class GeomResource(Resource):
     def exportKPF(self, item, params):
         setResponseHeader('Content-Type', 'text/plain')
         setResponseHeader('Content-Disposition', 'attachment; filename=geom.kpf')
+        return self.generateKPFContent(item)
+
+    @staticmethod
+    def generateKPFContent(item):
+        # The pyyaml without c yaml is not fast, so for geom, considering the size, we build the yaml by hand
         cursor = Geom().findByItem(item)
         output = []
         for geom in cursor:
@@ -111,4 +116,6 @@ class GeomResource(Resource):
                 keyValues.append('{0}: {1}'.format(key, value))
             content = '- { geom: { ' + ', '.join(keyValues) + ' } }'
             output.append(content)
-        return '\n'.join(output)
+        def gen():
+            yield '\n'.join(output)
+        return gen
