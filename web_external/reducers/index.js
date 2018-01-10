@@ -29,7 +29,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true } };
+            return { ...state, ...{ loadingAnnotation: true, geomItem: null, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, annotationTypeContainer: null, annotationGeometryContainer: null, annotationActivityContainer: null } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':

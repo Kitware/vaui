@@ -84,12 +84,12 @@ class AnnotationGeometryContainer {
             this._editedGeom.add(geomToChange);
         }
         else {
-            var newGeom = {
+            var newGeom = new AnnotationGeometry({
                 id1: trackId,
                 ts0: frame,
                 g0,
                 itemId: this._itemId
-            };
+            });
             this._addedGeom.add(newGeom);
             this._frameMap.get(frame).push(newGeom);
             this._updateTrackRange(trackId, frame);
@@ -124,13 +124,17 @@ class AnnotationGeometryContainer {
 }
 
 class AnnotationGeometry {
-    constructor() {
+    constructor(geom) {
         this.id0 = 0;
         this.id1 = 0;
         this.ts0 = 0;
         this.ts1 = 0;
         this.g0 = null;
+        this.src = 'truth';
         this.keyValues = {};
+        for (let key in geom) {
+            this.set(key, geom[key]);
+        }
     }
     set(key, value) {
         switch (key) {
@@ -141,6 +145,7 @@ class AnnotationGeometry {
             case 'id1':
             case 'ts0':
             case 'ts1':
+            case 'src':
                 this[key] = value;
                 break;
             default:
@@ -153,10 +158,7 @@ class AnnotationGeometry {
 function annotationGeometryParser(geoms) {
     var annotationGeometryContainer = new AnnotationGeometryContainer();
     for (let geom of geoms) {
-        var annotationGeometry = new AnnotationGeometry();
-        for (let key in geom) {
-            annotationGeometry.set(key, geom[key]);
-        }
+        var annotationGeometry = new AnnotationGeometry(geom);
         annotationGeometryContainer.add(annotationGeometry);
     }
     return annotationGeometryContainer;

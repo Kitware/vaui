@@ -46,7 +46,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             // format and size by adding query parameters.  For example,
                             //  'encoding=PNG'
                             //  'encoding=JPEG&jpegQuality=70&jpegSubsampling=2'
-                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}?encoding=JPEG&redirect=encoding';
+                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}?encoding=PNG&redirect=encoding';
                             l1.url(url);
                             // encoding could also be PNG
                             map.onIdle(() => {
