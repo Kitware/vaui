@@ -157,6 +157,7 @@ class AnnotationResource(Resource):
     @autoDescribeRoute(
         Description('')
         .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .produces('application/zip')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
@@ -165,7 +166,7 @@ class AnnotationResource(Resource):
     @rawResponse
     def export(self, folder, params):
         setResponseHeader('Content-Type', 'application/zip')
-        setResponseHeader('Content-Disposition', 'attachment; filename=' + folder['name'] + '.zip')
+        setContentDisposition(folder['name'] + '.zip')
 
         def stream():
             zip = ziputil.ZipGenerator(folder['name'])
