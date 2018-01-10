@@ -17,7 +17,7 @@ class TrackPane extends BasePane {
     }
 
     getContainer() {
-        return this.props.annotationTrackContainer;
+        return this.props.annotationGeometryContainer;
     }
 
     getItemId(item) {
@@ -38,13 +38,13 @@ class TrackPane extends BasePane {
     }
 
     render() {
-        if (!this.props.annotationTypeContainer || !this.props.annotationTrackContainer) {
+        if (!this.props.annotationTypeContainer || !this.props.annotationGeometryContainer) {
             return null;
         }
         var typeContainer = this.props.annotationTypeContainer;
-        var trackContainer = this.props.annotationTrackContainer;
+        var geometryContainer = this.props.annotationGeometryContainer;
 
-        var sortedTrackIds = _.sortBy(this.props.annotationTrackContainer.getAllItems());
+        var sortedTrackIds = _.sortBy(geometryContainer.getAllItems());
 
         return <div className={['v-track-pane', this.props.className].join(' ')}>
             <div className='checkbox'>
@@ -62,7 +62,7 @@ class TrackPane extends BasePane {
                             <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)}>
                                 <label className={trackId === this.props.editingTrackId ? 'editing' : ''}>
                                     <input type='checkbox'
-                                        checked={trackContainer.getEnableState(trackId)}
+                                        checked={geometryContainer.getEnableState(trackId)}
                                         onChange={(e) => this.props.dispatch({
                                             type: TOGGLE_TRACK,
                                             payload: { track: trackId, enabled: e.target.checked }
@@ -102,7 +102,7 @@ class TrackPane extends BasePane {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        annotationTrackContainer: state.annotationTrackContainer,
+        annotationGeometryContainer: state.annotationGeometryContainer,
         annotationTypeContainer: state.annotationTypeContainer,
         selectedTrackId: state.selectedTrackId,
         editingTrackId: state.editingTrackId

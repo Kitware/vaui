@@ -6,6 +6,7 @@
   "dependencies": {
     "babel-preset-react": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "bootbox": "^4.4.0",
     "bootstrap-slider": "^9.9.0",
     "eslint-plugin-react": "^7.4.0",
     "geojs": "0.12.1",
