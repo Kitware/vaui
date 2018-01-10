@@ -5,8 +5,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     initialize(settings) {
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
-        this._annotationClicks = [];
+        this._annotationLeftClick = null;
+        this._annotationRightClick = null;
         this.pendingFrame = null;
+        this.drawingModeEnabled = false;
     },
 
     render() {
@@ -44,7 +46,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             // format and size by adding query parameters.  For example,
                             //  'encoding=PNG'
                             //  'encoding=JPEG&jpegQuality=70&jpegSubsampling=2'
-                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}?encoding=PNG&redirect=encoding';
+                            var url = 'api/v1/item/' + ids[frame] + '/tiles/zxy/{z}/{x}/{y}?encoding=JPEG&redirect=encoding';
                             l1.url(url);
                             // encoding could also be PNG
                             map.onIdle(() => {
@@ -83,7 +85,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 }
                                 // if we haven't asked to stop, go to the next frame as soon as
                                 // possible.
-                                if (playing) {
+                                if (playing || this.pendingFrame) {
                                     next();
                                 }
                                 return undefined;
@@ -127,6 +129,34 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     }
                 };
 
+                this.drawingMode = (enabled) => {
+                    if (this.drawingModeEnabled === enabled) {
+                        return;
+                    }
+                    var layer = this.annotationLayer;
+                    if (enabled) {
+                        window.annotationLayer = layer;
+                        layer.mode('rectangle');
+                        layer.geoOn(geo.event.annotation.state, (e) => {
+                            var geometry = layer.geojson().features[0].geometry;
+                            var coords = geometry.coordinates[0];
+                            var g0 = [[Math.round(coords[0][0]), Math.round(coords[0][1])], [Math.round(coords[2][0]), Math.round(coords[2][1])]];
+                            this.trigger('annotationDrawn', g0);
+                            layer.removeAllAnnotations();
+                        });
+                        layer.geoOn(geo.event.annotation.mode, (e) => {
+                            if (!e.mode) {
+                                layer.mode('rectangle');
+                            }
+                        });
+                    } else {
+                        layer.geoOff(geo.event.annotation.state);
+                        layer.geoOff(geo.event.annotation.mode);
+                        layer.mode(null);
+                    }
+                    this.drawingModeEnabled = enabled;
+                };
+
                 this._drawAnnotation = (frame) => {
                     if (this.lastFeatureFrame) {
                         this.featureLayer.deleteFeature(this.lastFeatureFrame);
@@ -151,23 +181,41 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     for (let key in style) {
                         feature.style(key, style[key]);
                     }
-                    feature.geoOn(geo.event.feature.mouseclick, (evt) => {
-                        this._triggerAnnotationEvent(evt.data);
+                    feature.geoOn(geo.event.feature.mouseclick, (e) => {
+                        if (e.mouse.buttonsDown.left) {
+                            this._triggerAnnotationLeftClickEvent(e.data);
+                        } else if (e.mouse.buttonsDown.right) {
+                            this._triggerAnnotationRightClickEvent(e.data);
+                        }
                     });
                     this.lastFeatureFrame = feature;
                     this.viewer.draw();
                 };
 
-                map.geoOn(geo.event.mouseclick, () => this._triggerAnnotationEvent());
+                map.geoOn(geo.event.mouseclick, (e) => {
+                    if (e.buttonsDown.left) {
+                        this._triggerAnnotationLeftClickEvent();
+                    }
+                    if (e.buttonsDown.right) {
+                        this._triggerAnnotationRightClickEvent();
+                    }
+                });
 
-                this._triggerAnnotationEvent = (annotation) => {
+                this._triggerAnnotationLeftClickEvent = (annotation) => {
                     if (annotation) {
-                        this._annotationClicks.push(annotation);
+                        this._annotationLeftClick = annotation;
                     }
                     clearTimeout(this._annotationEventHandle);
                     this._annotationEventHandle = setTimeout(() => {
-                        this.trigger('annotationsClick', this._annotationClicks);
-                        this._annotationClicks = [];
+                        this.trigger('annotationLeftClick', this._annotationLeftClick);
+                    }, 0);
+                };
+
+                this._triggerAnnotationRightClickEvent = (annotation) => {
+                    this._annotationRightClick = annotation || null;
+                    clearTimeout(this._annotationRightClickHandle);
+                    this._annotationRightClickHandle = setTimeout(() => {
+                        this.trigger('annotationRightClick', this._annotationRightClick);
                     }, 0);
                 };
 

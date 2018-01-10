@@ -1,8 +1,7 @@
-import YAML from 'yamljs';
-
 class AnnotationGeometryContainer {
     constructor() {
         this._frameMap = new Map();
+        this._changedGeom = new Set();
     }
 
     add(geometry) {
@@ -20,11 +19,45 @@ class AnnotationGeometryContainer {
     get length() {
         return this._frameMap.size;
     }
+
+    change(frame, trackId, g0) {
+        var geomSet = this.getFrame(frame);
+        var geomToChange = Array.from(geomSet).find((geom) => {
+            return geom.id1 === trackId && geom.ts0 === frame;
+        });
+        if (geomToChange) {
+            Object.assign(geomToChange, {
+                g0
+            });
+            this._changedGeom.add(geomToChange);
+        }
+        return this.copy();
+    }
+
+    getChanges() {
+        return {
+            changed: Array.from(this._changedGeom).map((geom) => {
+                var newGeom = Object.assign({}, geom, geom.keyValues);
+                delete newGeom.keyValues;
+                return newGeom;
+            })
+        };
+    }
+
+    reset() {
+        this._changedGeom.clear();
+        return this.copy();
+    }
+
+    copy() {
+        return Object.assign(new this.constructor(), this);
+    }
 }
 
 class AnnotationTrackContainer {
     constructor() {
         this._trackIds = new Set();
+        this._trackRanges = new Map();
         this._enableState = new Map();
     }
 
@@ -33,6 +66,12 @@ class AnnotationTrackContainer {
             this._trackIds.add(geometry.id1);
             this._enableState.set(geometry.id1, true);
         }
+        if (!this._trackRanges.has(geometry.id1)) {
+            this._trackRanges.set(geometry.id1, [(Number.MAX_VALUE, Number.MIN_VALUE)]);
+        }
+        var trackRange = this._trackRanges.get(geometry.id1);
+        trackRange[0] = Math.min(trackRange[0], geometry.ts0);
+        trackRange[1] = Math.max(trackRange[1], geometry.ts0);
     }
 
     getAllItems() {
@@ -46,6 +85,10 @@ class AnnotationTrackContainer {
     toggleState(id1, enabled) {
         this._enableState.set(id1, enabled);
         return this.copy();
+    }
+
+    getTrackFrameRange(id1) {
+        return this._trackRanges.get(id1);
     }
 
     copy() {
@@ -64,13 +107,9 @@ class AnnotationGeometry {
     }
     set(key, value) {
         switch (key) {
+            case '_id':
+            case 'itemId':
             case 'g0':
-                let values = value.split(' ');
-                this.g0 = [
-                    [parseInt(values[0]), parseInt(values[1])],
-                    [parseInt(values[2]), parseInt(values[3])]
-                ];
-                break;
             case 'id0':
             case 'id1':
             case 'ts0':
@@ -84,17 +123,13 @@ class AnnotationGeometry {
     }
 }
 
-function annotationGeometryParser(raw) {
-    var lines = YAML.parse(raw);
+function annotationGeometryParser(geoms) {
     var annotationGeometryContainer = new AnnotationGeometryContainer();
     var annotationTrackContainer = new AnnotationTrackContainer();
-    for (let line of lines) {
-        if ('meta' in line) {
-            continue;
-        }
+    for (let geom of geoms) {
         var annotationGeometry = new AnnotationGeometry();
-        for (let key in line.geom) {
-            annotationGeometry.set(key, line.geom[key]);
+        for (let key in geom) {
+            annotationGeometry.set(key, geom[key]);
         }
         annotationGeometryContainer.add(annotationGeometry);
         annotationTrackContainer.add(annotationGeometry);

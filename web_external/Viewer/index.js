@@ -1,6 +1,8 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux';
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -21,26 +23,45 @@ class Viewer extends PureComponent {
         this.draggingSlider = false;
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.itemModel !== this.props.itemModel) {
+        if (nextProps.selectedItem !== this.props.selectedItem) {
             this.setState({ ready: false });
         }
+        if (this.props.requestFrameRange !== nextProps.requestFrameRange) {
+            if (this.state.videoCurrentFrame < nextProps.requestFrameRange[0] ||
+                this.state.videoCurrentFrame > nextProps.requestFrameRange[1]) {
+                this.requestToFrame(nextProps.requestFrameRange[0]);
+            }
+        }
+        if (this.props.requestFrame !== nextProps.requestFrame) {
+            this.requestToFrame(nextProps.requestFrame.frame);
+        }
+    }
+    requestToFrame(frame) {
+        // This works now but can be improved, the player and this controller still has some data racing issue
+        this.setState({ playing: false, videoPlaying: false }, () => {
+            setTimeout(() => {
+                this.setState({ videoCurrentFrame: Math.min(frame, this.state.videoMaxFrame) });
+            }, 100);
+        });
     }
     render() {
-        var playDisabled = !this.state.ready;
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
         var message = this._getMessage();
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
-                    {this.props.itemModel &&
+                    {this.props.selectedItem &&
                         [
                             <ImageViewerWidgetWrapper className='video'
-                                itemModel={this.props.itemModel}
+                                item={this.props.selectedItem}
                                 playing={this.state.videoPlaying}
                                 geometryCotnainer={this.props.annotationGeometryContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 annotationTrackContainer={this.props.annotationTrackContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
+                                editingTrackId={this.props.editingTrackId}
+                                selectedTrackId={this.props.selectedTrackId}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
                                         this.setState({
@@ -62,8 +83,23 @@ class Viewer extends PureComponent {
                                         ready: true
                                     });
                                 }}
-                                annotationsSelect={this.props.annotationsSelect}
-                                key={this.props.itemModel.id} />,
+                                annotationLeftClick={(annotation) => this.props.dispatch({
+                                    type: ANNOTATION_CLICKED,
+                                    payload: annotation
+                                })}
+                                annotationRightClick={(annotation) => this.props.dispatch({
+                                    type: EDITING_TRACK,
+                                    payload: annotation ? annotation.geometry.id1 : null
+                                })}
+                                annotationDrawn={(g0) => this.props.dispatch({
+                                    type: CHANGE_GEOM,
+                                    payload: {
+                                        frame: this.state.videoCurrentFrame,
+                                        trackId: this.props.editingTrackId,
+                                        g0
+                                    }
+                                })}
+                                key={this.props.selectedItem._id} />,
                             message && <div className={message.classes} key='message'>
                                 <span>{message.text}</span>
                             </div>,
@@ -114,9 +150,6 @@ class Viewer extends PureComponent {
                                         }}>
                                         <i className='icon-to-end'></i>
                                     </button>
-                                    {/* <button className='fast-forward btn btn-default' disabled={true}>
-                                    <i className='icon-fast-fw'></i>
-                                </button> */}
                                 </div>
                                 <div className='time-control'>
                                     <ReactBootstrapSlider
@@ -160,10 +193,10 @@ class Viewer extends PureComponent {
     }
 
     _getMessage() {
-        if (this.props.isLoadingAnnotation || !this.state.ready) {
+        if (this.props.loadingAnnotation || !this.state.ready) {
             return { text: 'Loading...', classes: 'message info-message' };
         }
-        if (!this.props.isLoadingAnnotation && !this.props.annotationGeometryContainer) {
+        if (!this.props.loadingAnnotation && !this.props.annotationGeometryContainer) {
             return { text: 'No annotation', classes: 'message error-message' };
         }
     }
@@ -194,6 +227,8 @@ class Viewer extends PureComponent {
         }).filter((data) => {
             return data.activities || data.trackEnabled;
         });
+        var selectedTrackId = this.props.selectedTrackId;
+        var editingTrackId = this.props.editingTrackId;
         var style = {
             fill: true,
             fillColor: { r: 1.0, g: 0.839, b: 0.439 },
@@ -204,6 +239,12 @@ class Viewer extends PureComponent {
                 return d.trackEnabled;
             },
             strokeColor(a, b, d) {
+                if (d.geometry.id1 === editingTrackId) {
+                    return { r: 0.5, g: 1, b: 1 };
+                }
+                if (d.geometry.id1 === selectedTrackId) {
+                    return { r: 1, g: 0.08, b: 0.58 };
+                }
                 var attributes = d.geometry.keyValues;
                 if (attributes.src === 'truth') {
                     if (attributes.eval0 === 'tp') {
@@ -227,4 +268,25 @@ class Viewer extends PureComponent {
         return [data, style];
     }
 }
-export default Viewer;
+const mapStateToProps = (state, ownProps) => {
+    return {
+        selectedItem: state.selectedItem,
+        loadingAnnotation: state.loadingAnnotation,
+        annotationGeometryContainer: state.annotationGeometryContainer,
+        annotationActivityContainer: state.annotationActivityContainer,
+        annotationTrackContainer: state.annotationTrackContainer,
+        annotationTypeContainer: state.annotationTypeContainer,
+        selectedTrackId: state.selectedTrackId,
+        editingTrackId: state.editingTrackId,
+        requestFrameRange: state.requestFrameRange,
+        requestFrame: state.requestFrame
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Viewer);

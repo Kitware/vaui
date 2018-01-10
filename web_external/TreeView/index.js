@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import ActivityPane from './ActivityPane';
 import TrackPane from './TrackPane';
@@ -12,10 +13,10 @@ class TreeView extends Component {
                 <div className='panel-heading'>
                     <ul className='nav nav-tabs'>
                         <li className='active'>
-                            <a data-toggle='tab' href='#activities'>Activities</a>
+                            <a data-toggle='tab' href='#tracks'>Tracks</a>
                         </li>
                         <li>
-                            <a data-toggle='tab' href='#tracks'>Tracks</a>
+                            <a data-toggle='tab' href='#activities'>Activities</a>
                         </li>
                         {/* <li>
                             <a data-toggle='tab' href='#scene-elements'>Scene Elements</a>
@@ -24,22 +25,11 @@ class TreeView extends Component {
                 </div>
                 <div className='panel-body'>
                     <div className='tab-content'>
-                        <div id='activities' className='tab-pane active'>
-                            <ActivityPane
-                                annotationActivityContainer={this.props.annotationActivityContainer
-                                }
-                                toggleActivity={this.props.toggleActivity}
-                                annotationTypeContainer={this.props.annotationTypeContainer}
-                            />
+                        <div id='tracks' className='tab-pane active'>
+                            <TrackPane />
                         </div>
-                        <div id='tracks' className='tab-pane'>
-                            <TrackPane
-                                annotationTrackContainer={this.props.annotationTrackContainer
-                                }
-                                annotationTypeContainer={this.props.annotationTypeContainer
-                                }
-                                toggleTrack={this.props.toggleTrack}
-                            />
+                        <div id='activities' className='tab-pane'>
+                            <ActivityPane />
                         </div>
                         <div id='scene-elements' className='tab-pane'>4</div>
                     </div>
@@ -49,4 +39,15 @@ class TreeView extends Component {
     }
 }
 
-export default TreeView;
+const mapStateToProps = (state, ownProps) => {
+    return {
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TreeView);

@@ -1,9 +1,13 @@
 import React, { PureComponent } from 'react';
-import { logout, getCurrentUser } from 'girder/auth';
+import { connect } from 'react-redux';
+import { logout } from 'girder/auth';
 import events from 'girder/events';
-import ItemModel from 'girder/models/ItemModel';
+import { getApiRoot } from 'girder/rest';
 
+import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
+import loadAnnotation from '../actions/loadAnnotation';
+import save from '../actions/save';
 
 import './style.styl';
 
@@ -11,23 +15,19 @@ class HeaderBar extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            user: getCurrentUser(),
-            selectedFolder: null,
             showClipExplorer: false
         };
     }
-    componentDidMount() {
-        events.on('g:login', () => {
-            this.setState({ user: getCurrentUser() });
-        });
-    }
+
     render() {
-        let user = this.state.user;
+        let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
-            <div className='load-button-wrapper toolbutton'>
-                <button className='btn btn-primary' onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
+            <div className='button-wrapper toolbutton'>
+                <button className='btn btn-primary' disabled={this.props.loadingAnnotation} onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
+                <button className='btn btn-primary' disabled={!this.props.pendingSave} onClick={(e) => this.props.dispatch(save())}>Save</button>
+                <button className='btn btn-link' disabled={!this.props.geomItem} onClick={(e) => { window.location = getApiRoot() + `/geom/export/${this.props.geomItem._id}`; }}>Export</button>
             </div>
-            <div className='clip-name'>{this.state.selectedFolder ? this.state.selectedFolder.name : null}</div>
+            <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
                 {user
                     ? <div className='v-user-link-wrapper'>
@@ -66,9 +66,34 @@ class HeaderBar extends PureComponent {
     }
 
     itemSelected(folder, item) {
-        this.setState({ selectedFolder: folder });
+        // this.setState({ selectedFolder: folder });
+        this.props.dispatch({
+            type: SELECTED_FOLDER_CHANGE,
+            folder
+        });
+        this.props.dispatch({
+            type: SELECTED_ITEM_CHANGE,
+            payload: item
+        });
+        this.props.dispatch(loadAnnotation(item));
         this.handleClipExplorerTryClose();
-        events.trigger('v:item_selected', new ItemModel(item));
     }
 }
-export default HeaderBar;
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        user: state.user,
+        selectedFolder: state.selectedFolder,
+        pendingSave: state.pendingSave,
+        geomItem: state.geomItem,
+        loadingAnnotation: state.loadingAnnotation
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HeaderBar);

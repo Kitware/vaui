@@ -1,5 +1,5 @@
 .v-track-pane
-  padding-left 25px
+  padding-left 40px
 
   ul
     list-style none
@@ -8,3 +8,15 @@
   div.checkbox
     margin-top 0
     margin-bottom 1px
+    padding-left 5px
+
+    &.selected
+      background #efefef
+
+    label
+      padding-right 5px
+
+      &.editing
+        // overwrite base girder
+        background-color inherit
+        font-weight bold

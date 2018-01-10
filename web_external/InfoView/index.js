@@ -1,16 +1,18 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux';
 
 import './style.styl';
 
 class InfoView extends PureComponent {
     render() {
+        var annotation = this.props.annotation;
         return <div className={['v-infoview', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-heading'>Info</div>
                 <div className='panel-body'>
                     <ul className='geometry'>
-                        {this.props.annotations && this.props.annotations.map((annotation) => {
-                            return <li key={`${annotation.geometry.id0}-${annotation.geometry.id1}`} className='track'>
+                        {annotation &&
+                            <li key={annotation.geometry.id0 + '-' + annotation.geometry.id1} className='track'>
                                 <div title='id1'>Track id: {annotation.geometry.id1}</div>
                                 {annotation.type &&
                                     <div>type: {annotation.type.obj_type}</div>
@@ -29,8 +31,8 @@ class InfoView extends PureComponent {
                                             </li>;
                                         })}
                                     </ul>}
-                            </li>;
-                        })}
+                            </li>
+                        }
                     </ul>
                     <div className='clear-message'>(Click an annotation to view details. Click on an empty space to clear.)</div>
                 </div>
@@ -38,4 +40,16 @@ class InfoView extends PureComponent {
         </div>;
     }
 }
-export default InfoView;
+const mapStateToProps = (state, ownProps) => {
+    return {
+        annotation: state.selectedAnnotation
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(InfoView);

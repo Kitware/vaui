@@ -1,7 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
+import { TOGGLE_ACTIVITY } from '../../actions/types';
 
 import './style.styl';
 
@@ -21,12 +23,18 @@ class ActivityPanel extends BasePane {
     }
 
     toggleItem(item, enabled) {
-        return this.props.toggleActivity(item, enabled);
+        this.props.dispatch({
+            type: TOGGLE_ACTIVITY,
+            payload: { activity: item, enabled }
+        });
     }
 
     toggleGroup(groupName, checked) {
         var activities = this.state.groupedActivities[groupName];
-        activities.forEach((activity) => this.props.toggleActivity(activity, checked));
+        activities.forEach((activity) => this.props.dispatch({
+            type: TOGGLE_ACTIVITY,
+            payload: { activity, enabled: checked }
+        }));
     }
 
     componentWillReceiveProps(nextProps) {
@@ -72,7 +80,10 @@ class ActivityPanel extends BasePane {
                                         <label>
                                             <input type='checkbox'
                                                 checked={container.getEnableState(activity.id2)}
-                                                onChange={(e) => this.props.toggleActivity(activity, e.target.checked)}
+                                                onChange={(e) => this.props.dispatch({
+                                                    type: TOGGLE_ACTIVITY,
+                                                    payload: { activity, enabled: e.target.checked }
+                                                })}
                                             />
                                             {activity.id2}{' '}
                                             {activity.actors.map((actor) => {
@@ -90,4 +101,18 @@ class ActivityPanel extends BasePane {
         </div>;
     }
 }
-export default ActivityPanel;
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        annotationActivityContainer: state.annotationActivityContainer,
+        annotationTypeContainer: state.annotationTypeContainer
+    };
+};
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        dispatch
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActivityPanel);
