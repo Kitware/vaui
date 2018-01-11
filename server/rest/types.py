@@ -16,6 +16,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ##############################################################################
+import yaml
+
 from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
@@ -34,7 +36,7 @@ class TypesResource(Resource):
         self.route('POST', (':itemId',), self.addTypesToItem)
         self.route('PUT', (':typesId',), self.updateTypes)
         self.route('DELETE', (':typesId',), self.deleteTypes)
-        self.route('GET', ('export', ':itemId',), self.exportKPF)
+        self.route('GET', ('export', ':itemId',), self.export)
 
     @autoDescribeRoute(
         Description('')
@@ -93,7 +95,22 @@ class TypesResource(Resource):
     @access.user
     @access.cookie
     @rawResponse
-    def exportKPF(self, item, params):
+    def export(self, item, params):
         setResponseHeader('Content-Type', 'text/plain')
         setResponseHeader('Content-Disposition', 'attachment; filename=types.kpf')
-        raise Exception('Not implemented')
+        return self.generateKPFContent(item)
+
+    @staticmethod
+    def generateKPFContent(item):
+        cursor = Types().findByItem(item)
+        output = []
+        for types in cursor:
+            del types['_id']
+            del types['itemId']
+            types = yaml.safe_dump(types, default_flow_style=True,
+                                   width=1000).rstrip()
+            output.append('- {{ types: {0} }}'.format(types))
+
+        def gen():
+            yield '\n'.join(output)
+        return gen

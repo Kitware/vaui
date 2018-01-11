@@ -16,12 +16,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ##############################################################################
+import yaml
+
 from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
 from girder.models.item import Item
-from girder.plugins.vaui.models.activities import Activities
+from ..models.activities import Activities
 
 
 class ActivitiesResource(Resource):
@@ -95,5 +97,20 @@ class ActivitiesResource(Resource):
     @rawResponse
     def exportKPF(self, item, params):
         setResponseHeader('Content-Type', 'text/plain')
-        setResponseHeader('Content-Disposition', 'attachment; filename=types.kpf')
-        raise Exception('Not implemented')
+        setResponseHeader('Content-Disposition', 'attachment; filename=activities.kpf')
+        return self.generateKPFContent(item)
+
+    @staticmethod
+    def generateKPFContent(item):
+        cursor = Activities().findByItem(item)
+        output = []
+        for activity in cursor:
+            del activity['_id']
+            del activity['itemId']
+            activity = yaml.safe_dump(activity, default_flow_style=True,
+                                      width=1000).rstrip()
+            output.append('- {{ act: {0} }}'.format(activity))
+
+        def gen():
+            yield '\n'.join(output)
+        return gen

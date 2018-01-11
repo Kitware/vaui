@@ -9,10 +9,18 @@ export default (save) => {
             type: `${SAVE}_PENDING`
         });
         return Promise.all(
-            annotationGeometryContainer.getChanges().changed.map((geom) => {
+            annotationGeometryContainer.getEdited().map((geom) => {
                 return restRequest({
                     method: 'PUT',
                     url: `/geom/${geom._id}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(geom)
+                });
+            }),
+            annotationGeometryContainer.getAdded().map((geom) => {
+                return restRequest({
+                    method: 'POST',
+                    url: `/geom/${geom.itemId}`,
                     contentType: 'application/json',
                     data: JSON.stringify(geom)
                 });

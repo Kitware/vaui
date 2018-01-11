@@ -23,14 +23,18 @@ import datetime
 from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
-from girder.api.rest import Resource
+from girder.utility import ziputil
+from girder.api.rest import Resource, setResponseHeader, setContentDisposition, rawResponse
 from girder.models.folder import Folder
 from girder.models.item import Item
 from girder.models.file import File
 from girder.exceptions import RestException
-from girder.plugins.vaui.models.geom import Geom
-from girder.plugins.vaui.models.activities import Activities
-from girder.plugins.vaui.models.types import Types
+from ..models.geom import Geom
+from ..models.activities import Activities
+from ..models.types import Types
+from .geom import GeomResource
+from .activities import ActivitiesResource
+from .types import TypesResource
 
 
 class AnnotationResource(Resource):
@@ -41,6 +45,7 @@ class AnnotationResource(Resource):
         self.resourceName = 'vaui_annotation'
         self.route('POST', ('import', ':folderId',), self.importAnnotation)
         self.route('GET', ('status', ':folderId',), self.checkImportStatus)
+        self.route('GET', ('export', ':folderId',), self.export)
 
     @autoDescribeRoute(
         Description('')
@@ -148,3 +153,30 @@ class AnnotationResource(Resource):
         imported = Geom().imported(geomItem) and Activities().imported(
             activitiesItem) and Types().imported(typesItem)
         return imported
+
+    @autoDescribeRoute(
+        Description('')
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .produces('application/zip')
+        .errorResponse()
+        .errorResponse('Read access was denied on the item.', 403)
+    )
+    @access.user
+    @access.cookie
+    @rawResponse
+    def export(self, folder, params):
+        setResponseHeader('Content-Type', 'application/zip')
+        setContentDisposition(folder['name'] + '.zip')
+
+        def stream():
+            zip = ziputil.ZipGenerator(folder['name'])
+            geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
+
+            for data in zip.addFile(GeomResource.generateKPFContent(geomItem), geomItem['name']):
+                yield data
+            for data in zip.addFile(TypesResource.generateKPFContent(typesItem), typesItem['name']):
+                yield data
+            for data in zip.addFile(ActivitiesResource.generateKPFContent(activitiesItem), activitiesItem['name']):
+                yield data
+            yield zip.footer()
+        return stream

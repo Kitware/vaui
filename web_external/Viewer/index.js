@@ -1,8 +1,10 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import { connect } from 'react-redux'
 import ReactBootstrapSlider from 'react-bootstrap-slider';
+import bootbox from 'bootbox';
+import mousetrap from 'mousetrap';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -36,6 +38,16 @@ class Viewer extends PureComponent {
             this.requestToFrame(nextProps.requestFrame.frame);
         }
     }
+    componentDidMount() {
+        mousetrap.bind('shift+t', () => this.newTrack());
+        mousetrap.bind('left', () => this._previousFrame());
+        mousetrap.bind('right', () => this._nextFrame());
+    }
+    componentWillUnmount() {
+        mousetrap.unbind('shift+t');
+        mousetrap.unbind('left');
+        mousetrap.unbind('right');
+    }
     requestToFrame(frame) {
         // This works now but can be improved, the player and this controller still has some data racing issue
         this.setState({ playing: false, videoPlaying: false }, () => {
@@ -52,12 +64,14 @@ class Viewer extends PureComponent {
                 <div className='panel-body'>
                     {this.props.selectedItem &&
                         [
+                            <div key='control-bar'>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
+                            </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
                                 playing={this.state.videoPlaying}
                                 geometryCotnainer={this.props.annotationGeometryContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
-                                annotationTrackContainer={this.props.annotationTrackContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
                                 editingTrackId={this.props.editingTrackId}
@@ -113,15 +127,7 @@ class Viewer extends PureComponent {
                                 </button> */}
                                     <button className='previous-frame btn btn-default'
                                         disabled={playDisabled || this.state.videoCurrentFrame <= 0}
-                                        onClick={() => {
-                                            if (this.state.videoCurrentFrame > 0) {
-                                                this.setState({
-                                                    playing: false,
-                                                    videoPlaying: false,
-                                                    videoCurrentFrame: this.state.videoCurrentFrame - 1
-                                                });
-                                            }
-                                        }}>
+                                        onClick={() => this._previousFrame()}>
                                         <i className='icon-to-start'></i>
                                     </button>
                                     {!this.state.playing
@@ -139,15 +145,7 @@ class Viewer extends PureComponent {
                                         </button>}
                                     <button className='next-frame btn btn-default'
                                         disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
-                                        onClick={() => {
-                                            if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
-                                                this.setState({
-                                                    playing: false,
-                                                    videoPlaying: false,
-                                                    videoCurrentFrame: this.state.videoCurrentFrame + 1
-                                                });
-                                            }
-                                        }}>
+                                        onClick={() => this._nextFrame()}>
                                         <i className='icon-to-end'></i>
                                     </button>
                                 </div>
@@ -204,14 +202,13 @@ class Viewer extends PureComponent {
     getAnnotationForAFrame(frame) {
         if (!this.props.annotationGeometryContainer ||
             !this.props.annotationActivityContainer ||
-            !this.props.annotationTrackContainer ||
             !this.props.annotationTypeContainer) {
             return;
         }
         var typeContainer = this.props.annotationTypeContainer;
-        var trackContainer = this.props.annotationTrackContainer;
+        var geometryContainer = this.props.annotationGeometryContainer;
         var activityContainer = this.props.annotationActivityContainer;
-        var annotationGeometries = this.props.annotationGeometryContainer.getFrame(frame);
+        var annotationGeometries = geometryContainer.getFrame(frame);
         if (!annotationGeometries) {
             return;
         }
@@ -220,7 +217,7 @@ class Viewer extends PureComponent {
             return {
                 g0: geometry.g0,
                 activities,
-                trackEnabled: trackContainer.getEnableState(geometry.id1),
+                trackEnabled: geometryContainer.getEnableState(geometry.id1),
                 geometry,
                 type: typeContainer.getItem(geometry.id1)
             };
@@ -267,6 +264,61 @@ class Viewer extends PureComponent {
         };
         return [data, style];
     }
+
+    newTrack() {
+        bootbox.prompt({
+            size: 'small',
+            title: 'New track id?',
+            inputType: 'number',
+            value: this.props.annotationGeometryContainer.getNextTrackId(),
+            callback: (trackId) => {
+                if (!trackId) {
+                    return;
+                }
+                trackId = parseInt(trackId);
+                if (!this.props.annotationGeometryContainer.validateNewTrackId(trackId)) {
+                    bootbox.alert({
+                        size: 'small',
+                        message: 'A track with this id already exists',
+                        callback: () => this.newTrack()
+                    });
+                    return;
+                }
+                this.props.dispatch({
+                    type: NEW_TRACK,
+                    payload: { trackId, itemId: this.props.selectedItem._id }
+                });
+            }
+        });
+    }
+
+    _previousFrame() {
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
+        if (playDisabled) {
+            return;
+        }
+        if (this.state.videoCurrentFrame > 0) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: this.state.videoCurrentFrame - 1
+            });
+        }
+    }
+
+    _nextFrame() {
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
+        if (playDisabled) {
+            return;
+        }
+        if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: this.state.videoCurrentFrame + 1
+            });
+        }
+    }
 }
 const mapStateToProps = (state, ownProps) => {
     return {
@@ -274,7 +326,6 @@ const mapStateToProps = (state, ownProps) => {
         loadingAnnotation: state.loadingAnnotation,
         annotationGeometryContainer: state.annotationGeometryContainer,
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationTrackContainer: state.annotationTrackContainer,
         annotationTypeContainer: state.annotationTypeContainer,
         selectedTrackId: state.selectedTrackId,
         editingTrackId: state.editingTrackId,

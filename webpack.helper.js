@@ -4,8 +4,8 @@ module.exports = (config) => {
         exclude: /node_modules/,
         loader: "babel-loader",
         query: {
-            presets: ['es2015', 'react'],
-            plugins: ['transform-object-rest-spread']
+            presets: ['env', 'react'],
+            plugins: ['transform-object-rest-spread', 'transform-class-properties']
         }
     });
     return config;

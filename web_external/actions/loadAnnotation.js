@@ -56,13 +56,12 @@ export default (item) => {
                         url: `/geom/${items[0]._id}`
                     });
                 }).then((geoms) => {
-                    var { annotationGeometryContainer, annotationTrackContainer } = annotationGeometryParser(geoms);
-                    return { annotationGeometryContainer, annotationTrackContainer };
+                        return annotationGeometryParser(geoms);
                 })
-            ]).then(([annotationActivityContainer, annotationTypeContainer, { annotationGeometryContainer, annotationTrackContainer }]) => {
+            ]).then(([annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer]) => {
                 dispatch({
                     type: LOAD_ANNOTATION + '_FULFILLED',
-                    payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer, annotationTrackContainer }
+                    payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer }
                 });
             });
         });
