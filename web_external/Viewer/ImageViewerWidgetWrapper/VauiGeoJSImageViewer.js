@@ -14,6 +14,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     render() {
         GeojsImageViewerWidget.prototype.render.call(this);
         var map = this.viewer;
+        var interactorOpts = map.interactor().options();
+        interactorOpts.keyboard.focusHighlight = false;
+        interactorOpts.keyboard.actions = {};
+        map.interactor().options(interactorOpts);
         var ids = null;
         var siblings = new ItemCollection();
         siblings.pageLimit = 0;

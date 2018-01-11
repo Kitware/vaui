@@ -5,7 +5,7 @@ module.exports = (config) => {
         loader: "babel-loader",
         query: {
             presets: ['env', 'react'],
-            plugins: ['transform-object-rest-spread']
+            plugins: ['transform-object-rest-spread', 'transform-class-properties']
         }
     });
     return config;

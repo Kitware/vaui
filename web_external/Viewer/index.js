@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux'
 import ReactBootstrapSlider from 'react-bootstrap-slider';
 import bootbox from 'bootbox';
+import mousetrap from 'mousetrap';
 
 import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
@@ -36,6 +37,16 @@ class Viewer extends PureComponent {
         if (this.props.requestFrame !== nextProps.requestFrame) {
             this.requestToFrame(nextProps.requestFrame.frame);
         }
+    }
+    componentDidMount() {
+        mousetrap.bind('shift+t', () => this.newTrack());
+        mousetrap.bind('left', () => this._previousFrame());
+        mousetrap.bind('right', () => this._nextFrame());
+    }
+    componentWillUnmount() {
+        mousetrap.unbind('shift+t');
+        mousetrap.unbind('left');
+        mousetrap.unbind('right');
     }
     requestToFrame(frame) {
         // This works now but can be improved, the player and this controller still has some data racing issue
@@ -116,15 +127,7 @@ class Viewer extends PureComponent {
                                 </button> */}
                                     <button className='previous-frame btn btn-default'
                                         disabled={playDisabled || this.state.videoCurrentFrame <= 0}
-                                        onClick={() => {
-                                            if (this.state.videoCurrentFrame > 0) {
-                                                this.setState({
-                                                    playing: false,
-                                                    videoPlaying: false,
-                                                    videoCurrentFrame: this.state.videoCurrentFrame - 1
-                                                });
-                                            }
-                                        }}>
+                                        onClick={() => this._previousFrame()}>
                                         <i className='icon-to-start'></i>
                                     </button>
                                     {!this.state.playing
@@ -142,15 +145,7 @@ class Viewer extends PureComponent {
                                         </button>}
                                     <button className='next-frame btn btn-default'
                                         disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
-                                        onClick={() => {
-                                            if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
-                                                this.setState({
-                                                    playing: false,
-                                                    videoPlaying: false,
-                                                    videoCurrentFrame: this.state.videoCurrentFrame + 1
-                                                });
-                                            }
-                                        }}>
+                                        onClick={() => this._nextFrame()}>
                                         <i className='icon-to-end'></i>
                                     </button>
                                 </div>
@@ -295,6 +290,34 @@ class Viewer extends PureComponent {
                 });
             }
         });
+    }
+
+    _previousFrame() {
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
+        if (playDisabled) {
+            return;
+        }
+        if (this.state.videoCurrentFrame > 0) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: this.state.videoCurrentFrame - 1
+            });
+        }
+    }
+
+    _nextFrame() {
+        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
+        if (playDisabled) {
+            return;
+        }
+        if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: this.state.videoCurrentFrame + 1
+            });
+        }
     }
 }
 const mapStateToProps = (state, ownProps) => {

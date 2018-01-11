@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
 import ItemModel from 'girder/models/ItemModel';
+import mousetrap from 'mousetrap';
 
 import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
 class ImageViewerWidgetWrapper extends Component {
+    trapCatch = null
+
     shouldComponentUpdate() { // eslint-disable-line
         return false;
     }
@@ -57,10 +60,12 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('annotationDrawn', (g0) => {
             this.props.annotationDrawn(g0);
         });
+        this.trapCatch = mousetrap(this.container).bind('del', () => console.error('DELETE Not implemented'));
     }
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
+        this.trapCatch.unbind('del');
     }
 
     render() {
