@@ -4,7 +4,7 @@ import _ from 'underscore';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import BasePane from '../BasePane';
-import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK } from '../../actions/types';
+import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK, EDITING_TRACK } from '../../actions/types';
 
 import './style.styl';
 
@@ -56,7 +56,7 @@ class TrackPane extends BasePane {
             <ul>
                 {sortedTrackIds.map((trackId) => {
                     var type = typeContainer.getItem(trackId);
-                    var label = (type ? `${type.obj_type} ${trackId}` : trackId);
+                    var label = ((type && type.obj_type) ? `${type.obj_type} ${trackId}` : trackId);
                     return <li key={trackId}>
                         <ContextMenuTrigger id='track-menu'>
                             <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)} onClick={(e) => {
@@ -99,6 +99,13 @@ class TrackPane extends BasePane {
                     payload: this.state.interactTrackId
                 })}>
                     Go to end
+                </MenuItem>
+                <MenuItem divider />
+                <MenuItem onClick={(e) => this.props.dispatch({
+                    type: EDITING_TRACK,
+                    payload: this.state.interactTrackId
+                })}>
+                    Edit
                 </MenuItem>
             </ContextMenu>
         </div>;

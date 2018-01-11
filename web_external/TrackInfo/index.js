@@ -7,7 +7,7 @@ import trackTypes from '../trackTypes';
 class TrackInfo extends PureComponent {
     render() {
         var range = this.props.annotationGeometryContainer.getTrackFrameRange(this.props.selectedTrackId);
-        var type = this.props.annotationTypeContainer.getItem(this.props.selectedTrackId).obj_type;
+        var type = this.props.annotationTypeContainer.getItem(this.props.selectedTrackId).obj_type || '';
 
         return <div className='trackinfo-widget'>
             <form className='form-horizontal'>
@@ -23,6 +23,7 @@ class TrackInfo extends PureComponent {
                         <label className='col-sm-2 control-label'>Type:</label>
                         <div className='col-sm-8'>
                             <select className='form-control' value={type} onChange={() => { }} >
+                                <option value=''></option>
                                 {trackTypes.map((type) => {
                                     return <option key={type} value={type}>{type}</option>
                                 })}

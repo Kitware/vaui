@@ -11,6 +11,7 @@
     opacity: 0;
     pointer-events: none;
     font-size: 90%;
+    z-index: 1;
 }
 
 .react-contextmenu.react-contextmenu--visible {
