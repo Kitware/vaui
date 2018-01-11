@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
-import { TOGGLE_ACTIVITY } from '../../actions/types';
+import { TOGGLE_ACTIVITY, SELECT_ACTIVITY } from '../../actions/types';
 
 import './style.styl';
 
@@ -76,8 +76,8 @@ class ActivityPanel extends BasePane {
                         <ul>
                             {this.state.groupedActivities[groupName].map((activity) => {
                                 return <li key={activity.id2}>
-                                    <div className='checkbox'>
-                                        <label>
+                                    <div className={'checkbox ' + (activity.id2 === this.props.selectedActivityId ? 'selected' : '')}>
+                                        <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                             <input type='checkbox'
                                                 checked={container.getEnableState(activity.id2)}
                                                 onChange={(e) => this.props.dispatch({
@@ -85,11 +85,18 @@ class ActivityPanel extends BasePane {
                                                     payload: { activity, enabled: e.target.checked }
                                                 })}
                                             />
-                                            {activity.id2}{' '}
-                                            {activity.actors.map((actor) => {
-                                                var type = this.props.annotationTypeContainer.getItem(actor.id1);
-                                                return type ? `(${type.obj_type} ${actor.id1})` : `(${actor.id1})`;
-                                            }).join(', ')}
+                                            <span onClick={(e) => {
+                                                this.props.dispatch({
+                                                    type: SELECT_ACTIVITY,
+                                                    payload: this.props.selectedActivityId === activity.id2 ? null : activity.id2
+                                                });
+                                            }}>
+                                                {activity.id2}{' '}
+                                                {activity.actors.map((actor) => {
+                                                    var type = this.props.annotationTypeContainer.getItem(actor.id1);
+                                                    return type ? `(${type.obj_type} ${actor.id1})` : `(${actor.id1})`;
+                                                }).join(', ')}
+                                            </span>
                                         </label>
                                     </div>
                                 </li>;
@@ -105,7 +112,8 @@ class ActivityPanel extends BasePane {
 const mapStateToProps = (state, ownProps) => {
     return {
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationTypeContainer: state.annotationTypeContainer
+        annotationTypeContainer: state.annotationTypeContainer,
+        selectedActivityId: state.selectedActivityId
     };
 };
 

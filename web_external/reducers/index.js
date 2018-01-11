@@ -15,6 +15,7 @@ function app(state, action) {
             geomItem: null,
             selectedAnnotation: null,
             selectedTrackId: null,
+            selectedActivityId: null,
             editingTrackId: null,
             saving: false,
             pendingSave: false,
@@ -63,6 +64,10 @@ function app(state, action) {
         case types.NEW_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.newTrack(action.payload.trackId);
             return { ...state, ...{ editingTrackId: action.payload.trackId, annotationGeometryContainer } }
+        case types.SELECT_TRACK:
+            return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null } };
+        case types.SELECT_ACTIVITY:
+            return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null } };
         default:
             return state;
     }

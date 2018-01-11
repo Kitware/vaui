@@ -4,7 +4,7 @@ import _ from 'underscore';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import BasePane from '../BasePane';
-import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END } from '../../actions/types';
+import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK } from '../../actions/types';
 
 import './style.styl';
 
@@ -59,8 +59,13 @@ class TrackPane extends BasePane {
                     var label = (type ? `${type.obj_type} ${trackId}` : trackId);
                     return <li key={trackId}>
                         <ContextMenuTrigger id='track-menu'>
-                            <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)}>
-                                <label className={trackId === this.props.editingTrackId ? 'editing' : ''}>
+                            <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)} onClick={(e) => {
+                                this.props.dispatch({
+                                    type: SELECT_TRACK,
+                                    payload: trackId === this.props.selectedTrackId ? null : trackId
+                                });
+                            }}>
+                                <label className={trackId === this.props.editingTrackId ? 'editing' : ''} onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                     <input type='checkbox'
                                         checked={geometryContainer.getEnableState(trackId)}
                                         onChange={(e) => this.props.dispatch({
@@ -68,7 +73,7 @@ class TrackPane extends BasePane {
                                             payload: { track: trackId, enabled: e.target.checked }
                                         })}
                                     />
-                                    {label}
+                                    <span>{label}</span>
                                 </label>
                             </div>
                         </ContextMenuTrigger>

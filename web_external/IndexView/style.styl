@@ -1,3 +1,31 @@
+// overwrite
+fieldset
+  legend
+    font-size inherit
+    color inherit
+
+.form-group-xs .form-control,
+.input-group-xs > .form-control,
+.input-group-xs > .input-group-addon,
+.input-group-xs > .input-group-btn > .btn 
+  height 23px
+  padding 1px 5px
+  font-size 12px
+  line-height 1.5
+
+
+.form-horizontal .form-group-xs .control-label 
+  padding-top 3px
+  font-size 12px
+
+.form-group-xs .form-control-static
+  height 23px
+  padding 1px 0
+  min-height 23px
+
+
+// global
+
 .app
   display flex
   flex-direction column
@@ -11,6 +39,14 @@
   .left-sidebar
     width 320px
     padding 1px
+    display flex
+    flex-direction column
+    
+    .treeview-container
+      flex 1
+
+    .objectinfo-container
+      height 300px
 
   .main
     flex 1
