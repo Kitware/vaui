@@ -8,8 +8,7 @@ class AnnotationTypeContainer {
 
     add(types) {
         this._itemId = types.itemId;
-        var id = types.id1;
-        this._mapper.set(id, types);
+        this._mapper.set(types.id1, types);
     }
 
     getAllItems() {
@@ -26,20 +25,24 @@ class AnnotationTypeContainer {
         return this._mapper.get(id1);;
     }
 
-    change(trackId, obj_type) {
+    change(trackId, newTrackId, newTrackType) {
         var typeToChange = this.getAllItems().find((type) => {
             return type.id1 === trackId
         });
         if (typeToChange) {
             Object.assign(typeToChange, {
-                obj_type
+                id1: newTrackId,
+                obj_type: newTrackType
             });
-            this._edited.add(typeToChange);
+            if (!this._added.has(typeToChange)) {
+                this._edited.add(typeToChange);
+            }
+            this._mapper.set(newTrackId, this._mapper.get(trackId));
         }
         else {
             var newType = new AnnotationType({
                 id1: trackId,
-                obj_type,
+                obj_type: newTrackType,
                 itemId: this._itemId
             });
             this._added.add(newType);

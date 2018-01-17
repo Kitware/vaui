@@ -53,7 +53,7 @@ function app(state, action) {
         case types.SAVE + '_PENDING':
             return { ...state, ...{ saving: true } };
         case types.SAVE + '_FULFILLED':
-            return { ...state, ...action.payload, pendingSave: false };
+            return { ...state, ...action.payload, pendingSave: false, saving: false };
         case types.FOCUS_TRACK:
             var range = state.annotationGeometryContainer.getTrackFrameRange(action.payload);
             return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload, editingTrackId: null } };
@@ -63,8 +63,12 @@ function app(state, action) {
             return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, editingTrackId: null } };
         case types.NEW_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.newTrack(action.payload.trackId);
-            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, null);
-            return { ...state, ...{ editingTrackId: action.payload.trackId, annotationGeometryContainer, annotationTypeContainer } }
+            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, null, null);
+            return { ...state, ...{ editingTrackId: action.payload.trackId, annotationGeometryContainer, annotationTypeContainer } };
+        case types.CHANGE_TRACK:
+            var annotationGeometryContainer = state.annotationGeometryContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
+            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newTrackType);
+            return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
         case types.SELECT_TRACK:
             return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.SELECT_ACTIVITY:

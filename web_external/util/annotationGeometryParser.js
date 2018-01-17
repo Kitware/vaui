@@ -66,6 +66,25 @@ class AnnotationGeometryContainer {
         return this.copy();
     }
 
+    changeTrack(trackId, newTrackId) {
+        if (trackId !== newTrackId) {
+            this._trackIds.delete(trackId);
+            this._trackIds.add(newTrackId);
+            this._trackRanges.set(newTrackId, this._trackRanges.get(trackId));
+            this._enableState.set(newTrackId, this._enableState.get(trackId));
+            _.flatten(Array.from(this._frameMap.values())).forEach((geom) => {
+                if (geom.id1 !== trackId) {
+                    return;
+                }
+                geom.id1 = newTrackId;
+                if (!this._addedGeom.has(geom)) {
+                    this._editedGeom.add(geom);
+                }
+            });
+        }
+        return this.copy();
+    }
+
     getFrame(frame) {
         return this._frameMap.get(frame);
     }

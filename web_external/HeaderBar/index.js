@@ -24,7 +24,7 @@ class HeaderBar extends PureComponent {
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
                 <button className='btn btn-primary' disabled={this.props.loadingAnnotation} onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
-                <button className='btn btn-primary' disabled={!this.props.pendingSave} onClick={(e) => this.props.dispatch(save())}>Save</button>
+                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving} onClick={(e) => this.props.dispatch(save())}>{this.props.saving ? 'Saving' : 'Save'}</button>
                 <button className='btn btn-link' disabled={!this.props.selectedFolder} onClick={(e) => { window.location = getApiRoot() + `/vaui-annotation/export/${this.props.selectedFolder._id}`; }}>Export</button>
             </div>
             <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
@@ -85,6 +85,7 @@ const mapStateToProps = (state, ownProps) => {
         user: state.user,
         selectedFolder: state.selectedFolder,
         pendingSave: state.pendingSave,
+        saving: state.saving,
         loadingAnnotation: state.loadingAnnotation
     };
 };

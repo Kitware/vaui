@@ -13,5 +13,6 @@ export const FOCUS_TRACK = 'FOCUS_TRACK';
 export const GOTO_TRACK_START = 'GOTO_TRACK_START';
 export const GOTO_TRACK_END = 'GOTO_TRACK_END';
 export const NEW_TRACK = 'NEW_TRACK';
+export const CHANGE_TRACK = 'CHANGE_TRACK';
 export const SELECT_TRACK = 'SELECT_TRACK';
 export const SELECT_ACTIVITY = 'SELECT_ACTIVITY';
