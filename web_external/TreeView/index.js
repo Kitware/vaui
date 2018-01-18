@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import { Tabs, Tab, Nav, NavItem } from 'react-bootstrap';
 
+import { TREE_PANEL_SELECT } from '../actions/types';
 import ActivityPane from './ActivityPane';
 import TrackPane from './TrackPane';
 
@@ -9,32 +11,32 @@ import './style.styl';
 class TreeView extends Component {
     render() {
         return <div className={['v-treeview', this.props.className].join(' ')}>
-            <div className='panel panel-default'>
-                <div className='panel-heading'>
-                    <ul className='nav nav-tabs'>
-                        <li className='active'>
-                            <a data-toggle='tab' href='#tracks'>Tracks</a>
-                        </li>
-                        <li>
-                            <a data-toggle='tab' href='#activities'>Activities</a>
-                        </li>
-                        {/* <li>
-                            <a data-toggle='tab' href='#scene-elements'>Scene Elements</a>
-                        </li> */}
-                    </ul>
-                </div>
-                <div className='panel-body'>
-                    <div className='tab-content'>
-                        <div id='tracks' className='tab-pane active'>
-                            <TrackPane />
-                        </div>
-                        <div id='activities' className='tab-pane'>
-                            <ActivityPane />
-                        </div>
-                        <div id='scene-elements' className='tab-pane'>4</div>
+            <Tab.Container id='tabs-with-dropdown' defaultActiveKey='track'
+                onSelect={(key) => {
+                    this.props.dispatch({
+                        type: TREE_PANEL_SELECT,
+                        payload: key
+                    })
+                }}>
+                <div className='panel panel-default'>
+                    <div className='panel-heading'>
+                        <Nav bsStyle='tabs'>
+                            <NavItem eventKey='track'>Track</NavItem>
+                            <NavItem eventKey='activity'>Activities</NavItem>
+                        </Nav>
+                    </div>
+                    <div className='panel-body'>
+                        <Tab.Content animation={false}>
+                            <Tab.Pane eventKey='track'>
+                                <TrackPane />
+                            </Tab.Pane>
+                            <Tab.Pane eventKey='activity'>
+                                <ActivityPane />
+                            </Tab.Pane>
+                        </Tab.Content>
                     </div>
                 </div>
-            </div>
+            </Tab.Container>
         </div>;
     }
 }

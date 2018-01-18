@@ -6,6 +6,7 @@ function app(state, action) {
     if (typeof state === 'undefined') {
         return {
             user: getCurrentUser(),
+            treePanel: 'track',
             selectedFolder: null,
             selectedItem: null,
             loadingAnnotation: false,
@@ -25,6 +26,8 @@ function app(state, action) {
     switch (action.type) {
         case types.LOGIN_STATE_CHANGE:
             return { ...state, ...{ user: action.user } };
+        case types.TREE_PANEL_SELECT:
+            return { ...state, ...{ treePanel: action.payload } };
         case types.SELECTED_FOLDER_CHANGE:
             return { ...state, ...{ selectedFolder: action.folder } };
         case types.SELECTED_ITEM_CHANGE:

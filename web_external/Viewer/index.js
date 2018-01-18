@@ -256,7 +256,7 @@ class Viewer extends PureComponent {
                         return { r: 1, g: 0, b: 0.0 };
                     }
                 }
-                return { r: 0.851, g: 0.604, b: 0.0 };
+                return { r: 1, g: 0.87, b: 0.0 };
             },
             strokeWidth: 1.25,
             strokeOpacity: 0.8,

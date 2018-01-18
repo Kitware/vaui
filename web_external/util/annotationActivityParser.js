@@ -1,28 +1,29 @@
 class AnnotationActivityContainer {
     constructor() {
+        this._trackToActivityMapper = new Map();
         this._mapper = new Map();
         this._enableState = new Map();
-        this._activities = [];
     }
 
     add(activity) {
+        var trackToActivityMapper = this._trackToActivityMapper;
         var mapper = this._mapper;
         activity.actors.forEach((actor) => {
             var id = actor.id1;
-            if (!mapper.has(id)) {
-                mapper.set(id, []);
+            if (!trackToActivityMapper.has(id)) {
+                trackToActivityMapper.set(id, []);
             }
-            mapper.get(id).push(activity);
+            trackToActivityMapper.get(id).push(activity);
         });
         this._enableState.set(activity.id2, true);
-        this._activities.push(activity);
+        this._mapper.set(activity.id2,activity);
     }
 
     getEnabledActivities(id1, frame) {
-        if (!this._mapper.has(id1)) {
+        if (!this._trackToActivityMapper.has(id1)) {
             return;
         }
-        var activities = this._mapper.get(id1);
+        var activities = this._trackToActivityMapper.get(id1);
         var inRangeActivity = activities.filter((activity) => {
             var actor = activity.actors.filter((actor) => {
                 return actor.id1 === id1;
@@ -36,8 +37,12 @@ class AnnotationActivityContainer {
         return inRangeActivity;
     }
 
+    getItem(id1) {
+        return this._mapper.get(id1);
+    }
+
     getAllItems() {
-        return this._activities;
+        return Array.from(this._mapper.values());
     }
 
     getEnableState(id2) {

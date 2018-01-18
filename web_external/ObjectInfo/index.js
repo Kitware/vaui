@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 
 import TrackInfo from '../TrackInfo';
+import ActivityInfo from '../ActivityInfo';
 
 import './style.styl';
 
@@ -11,7 +12,13 @@ class ObjectInfo extends PureComponent {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Object Info</div>
                 <div className='panel-body'>
-                    {this.props.selectedTrackId !== null && <TrackInfo />}
+                    {this.props.selectedTrackId !== null &&
+                        this.props.treePanel === 'track' &&
+                        <TrackInfo />}
+                    {this.props.treePanel === 'activity' &&
+                        this.props.selectedActivityId !== null &&
+                        <ActivityInfo />
+                    }
                 </div>
             </div>
         </div>;
@@ -20,7 +27,9 @@ class ObjectInfo extends PureComponent {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        selectedTrackId: state.selectedTrackId
+        treePanel: state.treePanel,
+        selectedTrackId: state.selectedTrackId,
+        selectedActivityId: state.selectedActivityId
     };
 };
 
