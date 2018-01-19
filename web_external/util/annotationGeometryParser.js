@@ -1,77 +1,94 @@
+class AnnotationGeometryTrack {
+    constructor() {
+        this._frameRange = [0, 0];
+        this.enableState = true;
+    }
+
+    expandFrameRange(frame) {
+        this._frameRange[0] = Math.min(this._frameRange[0], frame);
+        this._frameRange[1] = Math.max(this._frameRange[1], frame);
+    }
+
+    get frameRange() {
+        return this._frameRange;
+    }
+}
+
 class AnnotationGeometryContainer {
     constructor() {
         this._itemId = null;
         this._id0 = 0;
+
+        this._trackMap = new Map(); // track id -> AnnotationGeometryTrack
         this._frameMap = new Map();
-        this._editedGeom = new Set();
+
         this._addedGeom = new Set();
-        this._trackIds = new Set();
-        this._trackRanges = new Map();
-        this._enableState = new Map();
+        this._editedGeom = new Set();
     }
 
     add(geometry) {
         this._itemId = geometry.itemId;
         this._id0 = Math.max(this._id0, geometry.id0);
-        var frameMap = this._frameMap;
-        if (!frameMap.has(geometry.ts0)) {
-            frameMap.set(geometry.ts0, []);
+
+        // Create frame if needed
+        if (!this._frameMap.has(geometry.ts0)) {
+            this._frameMap.set(geometry.ts0, []);
         }
-        frameMap.get(geometry.ts0).push(geometry);
-        if (!this._trackIds.has(geometry.id1)) {
-            this._trackIds.add(geometry.id1);
-            this._enableState.set(geometry.id1, true);
+
+        // Insert geometry into frame
+        this._frameMap.get(geometry.ts0).push(geometry);
+
+        // Create track if needed
+        if (!this._trackMap.has(geometry.id1)) {
+            this._trackMap.set(geometry.id1, new AnnotationGeometryTrack());
         }
-        if (!this._trackRanges.has(geometry.id1)) {
-            this._trackRanges.set(geometry.id1, [0, 0]);
-        }
+
+        // Update track time range
         this._updateTrackRange(geometry.id1, geometry.ts0);
     }
 
     _updateTrackRange(trackId, frame) {
-        var trackRange = this._trackRanges.get(trackId);
-        trackRange[0] = Math.min(trackRange[0], frame);
-        trackRange[1] = Math.max(trackRange[1], frame);
+        this._trackMap.get(trackId).expandFrameRange(frame);
     }
 
     getAllItems() {
-        return Array.from(this._trackIds);
+        return Array.from(this._trackMap.keys());
     }
 
     getEnableState(id1) {
-        return this._enableState.get(id1);
+        return this._trackMap.get(id1).enableState;
     }
 
     toggleState(id1, enabled) {
-        this._enableState.set(id1, enabled);
+        this._trackMap.get(id1).enableState = enabled;
         return this.copy();
     }
 
     getTrackFrameRange(id1) {
-        return this._trackRanges.get(id1);
+        return this._trackMap.get(id1).frameRange;
     }
 
     getNextTrackId() {
-        return Math.max(...Array.from(this._trackIds)) + 1;
+        return Math.max(...this._trackMap.keys()) + 1;
     }
 
     validateNewTrackId(trackId) {
-        return !this._trackIds.has(trackId);
+        return !this._trackMap.has(trackId);
     }
 
     newTrack(trackId) {
-        this._trackIds.add(trackId);
-        this._trackRanges.set(trackId, [0, 0]);
-        this._enableState.set(trackId, true);
+        this._trackMap.set(trackId, new AnnotationGeometryTrack());
         return this.copy();
     }
 
     changeTrack(trackId, newTrackId) {
         if (trackId !== newTrackId) {
-            this._trackIds.delete(trackId);
-            this._trackIds.add(newTrackId);
-            this._trackRanges.set(newTrackId, this._trackRanges.get(trackId));
-            this._enableState.set(newTrackId, this._enableState.get(trackId));
+            // Reassign track in track map
+            var track = this._trackMap.get(trackId);
+            this._trackMap.set(newTrackId, track);
+            this._trackMap.delete(trackId);
+
+            // Update all geometries
             _.flatten(Array.from(this._frameMap.values())).forEach((geom) => {
                 if (geom.id1 !== trackId) {
                     return;
