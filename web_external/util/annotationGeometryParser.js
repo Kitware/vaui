@@ -125,7 +125,7 @@ class AnnotationGeometryContainer {
         }
         else {
             var newGeom = new AnnotationGeometry({
-                id0: this._id0++,
+                id0: ++this._id0,
                 id1: trackId,
                 ts0: frame,
                 g0,
