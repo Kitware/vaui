@@ -42,7 +42,7 @@ class Viewer extends PureComponent {
     componentDidUpdate(prevProps, prevState) {
         if (this.state.videoMaxFrame !== prevState.videoMaxFrame) {
             this.props.dispatch({
-                type:MAX_FRAME_CHANGE,
+                type: MAX_FRAME_CHANGE,
                 payload: this.state.videoMaxFrame
             })
         }
@@ -296,7 +296,11 @@ class Viewer extends PureComponent {
                 }
                 this.props.dispatch({
                     type: NEW_TRACK,
-                    payload: { trackId, itemId: this.props.selectedItem._id }
+                    payload: {
+                        trackId,
+                        itemId: this.props.selectedItem._id,
+                        cset3: {}
+                    }
                 });
             }
         });

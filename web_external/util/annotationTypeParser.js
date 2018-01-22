@@ -21,33 +21,33 @@ class AnnotationTypeContainer {
             return type;
         }
         // Type could be non exists sometime
-        this.change(id1, null);
+        this.newType(id1, {});
         return this._mapper.get(id1);
     }
 
-    change(trackId, newTrackId, newTrackType) {
+    change(trackId, newTrackId, newCset3) {
         var typeToChange = this.getAllItems().find((type) => {
             return type.id1 === trackId
         });
-        if (typeToChange) {
-            Object.assign(typeToChange, {
-                id1: newTrackId,
-                obj_type: newTrackType
-            });
-            if (!this._added.has(typeToChange)) {
-                this._edited.add(typeToChange);
-            }
-            this._mapper.set(newTrackId, this._mapper.get(trackId));
+        Object.assign(typeToChange, {
+            id1: newTrackId,
+            cset3: newCset3
+        });
+        if (!this._added.has(typeToChange)) {
+            this._edited.add(typeToChange);
         }
-        else {
-            var newType = new AnnotationType({
-                id1: trackId,
-                obj_type: newTrackType,
-                itemId: this._itemId
-            });
-            this._added.add(newType);
-            this._mapper.set(trackId, newType);
-        }
+        this._mapper.set(newTrackId, this._mapper.get(trackId));
+        return this.copy();
+    }
+
+    newType(trackId, cset3) {
+        var type = new AnnotationType({
+            id1: trackId,
+            cset3,
+            itemId: this._itemId
+        });
+        this._added.add(type);
+        this._mapper.set(trackId, type);
         return this.copy();
     }
 
@@ -75,7 +75,7 @@ class AnnotationType {
         this._id = types._id;
         this.itemId = types.itemId;
         this.id1 = types.id1;
-        this.obj_type = types.obj_type;
+        this.cset3 = types.cset3;
     }
 }
 

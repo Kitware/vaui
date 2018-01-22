@@ -1,8 +1,4 @@
 module.exports = {
-    extends: [
-        process.cwd() + '/.eslintrc',
-        'plugin:react/recommended'
-    ],
     'plugins': [
         'react'
     ],

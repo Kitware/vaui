@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import bootbox from 'bootbox';
 
 import { CHANGE_ACTIVITY } from '../actions/types';
-import activityTypes from '../activityTypes';
+import activityTypes from '../activityTypes.json';
 import FrameNumberInput from '../widget/FrameNumberInput';
 
 import './style.styl';
@@ -17,7 +17,7 @@ class ActivityInfo extends PureComponent {
     _getInitialState(props) {
         var activity = props.annotationActivityContainer.getItem(props.selectedActivityId);
         return {
-            type: activity.act2 || '',
+            act2: activity.act2,
             fromFrame: this.getFromFrame(),
             toFrame: this.getToFrame(),
             changed: false
@@ -39,7 +39,8 @@ class ActivityInfo extends PureComponent {
     }
 
     render() {
-
+        var types = Object.keys(this.state.act2);
+        var type = types.length === 1 ? types[0] : 'multiple';
         return <div className='activity-info'>
             <form className='form-horizontal'>
                 <fieldset>
@@ -47,13 +48,14 @@ class ActivityInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>Type:</label>
                         <div className='col-sm-9'>
-                            <select className='form-control' value={this.state.type} onChange={(e) => {
+                            <select className='form-control' value={type} onChange={(e) => {
                                 this.setState({
-                                    type: e.target.value,
+                                    act2: { [e.target.value]: 1.0 },
                                     changed: true
                                 });
                             }} >
-                                <option value=''></option>
+                                <option value='' disabled></option>
+                                <option value='multiple' disabled>Multiple</option>
                                 {_.sortBy(activityTypes.map(activityTypes => activityTypes.type)).map((type) => {
                                     return <option key={type} value={type}>{type}</option>
                                 })}
@@ -92,7 +94,8 @@ class ActivityInfo extends PureComponent {
                     </div>
                 </fieldset>
             </form>
-            {this.state.changed &&
+            {
+                this.state.changed &&
                 <div className='row'>
                     <div className='col-sm-offset-8 col-sm-4'>
                         <div className='btn-group btn-group-sm' role='group' aria-label='...'>
@@ -104,15 +107,16 @@ class ActivityInfo extends PureComponent {
                                     type: CHANGE_ACTIVITY,
                                     payload: {
                                         activityId: this.props.selectedActivityId,
-                                        newActivityType: this.state.type,
+                                        newActivityAct2: this.state.act2,
                                         newTimespan: [this.state.fromFrame, this.state.toFrame]
                                     }
                                 });
                             }}><span className='glyphicon glyphicon-ok text-success'></span></button>
                         </div>
                     </div>
-                </div>}
-        </div>;
+                </div>
+            }
+        </div >;
     }
 }
 

@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import bootbox from 'bootbox';
 
 import { CHANGE_TRACK_ACTIVITY } from '../actions/types';
-import activityTypes from '../activityTypes';
 import FrameNumberInput from '../widget/FrameNumberInput';
 
 import './style.styl';

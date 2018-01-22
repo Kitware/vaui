@@ -56,10 +56,10 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
-    change(activityId, newAcitivityType, newTimespan) {
+    change(activityId, newActivityAct2, newTimespan) {
         var activityToChange = this.getItem(activityId);
         if (activityToChange) {
-            activityToChange.act2 = newAcitivityType;
+            activityToChange.act2 = newActivityAct2;
             var oldTimespan = activityToChange.timespan[0].tsr0;
             activityToChange.timespan[0].tsr0 = newTimespan;
             // Adjust timespan of Tracks of the activity accordingly
@@ -71,6 +71,9 @@ class AnnotationActivityContainer {
                 if (tsr0[1] === oldTimespan[1] || tsr0[1] >= newTimespan[1]) {
                     tsr0[1] = newTimespan[1];
                 }
+            }
+            if (!this._added.has(activityToChange)) {
+                this._edited.add(activityToChange);
             }
         }
         return this.copy();

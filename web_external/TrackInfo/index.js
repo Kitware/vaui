@@ -16,7 +16,7 @@ class TrackInfo extends PureComponent {
     _getInitialState(props) {
         return {
             id: props.selectedTrackId,
-            type: props.annotationTypeContainer.getItem(props.selectedTrackId).obj_type || '',
+            cset3: props.annotationTypeContainer.getItem(props.selectedTrackId).cset3,
             changed: false
         };
     }
@@ -27,6 +27,8 @@ class TrackInfo extends PureComponent {
 
     render() {
         var range = this.props.annotationGeometryContainer.getTrackFrameRange(this.props.selectedTrackId);
+        var types = Object.keys(this.state.cset3);
+        var type = types.length === 1 ? types[0] : 'multiple';
 
         return <div className='trackinfo-widget'>
             <form className='form-horizontal'>
@@ -65,13 +67,14 @@ class TrackInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>Type:</label>
                         <div className='col-sm-9'>
-                            <select className='form-control' value={this.state.type} onChange={(e) => {
+                            <select className='form-control' value={type} onChange={(e) => {
                                 this.setState({
-                                    type: e.target.value,
+                                    cset3: e.target.value ? { [e.target.value]: 1.0 } : null,
                                     changed: true
                                 });
                             }} >
                                 <option value=''></option>
+                                <option value='multiple' disabled>Multiple</option>
                                 {_.sortBy(trackTypes).map((type) => {
                                     return <option key={type} value={type}>{type}</option>
                                 })}
@@ -105,7 +108,7 @@ class TrackInfo extends PureComponent {
                                     payload: {
                                         trackId: this.props.selectedTrackId,
                                         newTrackId: this.state.id,
-                                        newTrackType: this.state.type ? this.state.type : null
+                                        newCset3: this.state.cset3
                                     }
                                 });
                             }}><span className='glyphicon glyphicon-ok text-success'></span></button>

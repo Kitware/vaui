@@ -44,6 +44,8 @@ class ActivityPanel extends BasePane {
             </div>
             <ul>
                 {activities.map((activity) => {
+                    var types = Object.keys(activity.act2);
+                    var typeLabel = types.length <= 1 ? types[0] : 'Multiple';
                     return <li key={activity.id2}>
                         <div className={'checkbox ' + (activity.id2 === this.props.selectedActivityId ? 'selected' : '')}>
                             <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
@@ -59,13 +61,17 @@ class ActivityPanel extends BasePane {
                                         type: SELECT_ACTIVITY,
                                         payload: (this.props.selectedActivityId === activity.id2 && !this.props.selectedTrackId) ? null : activity.id2
                                     });
-                                }}>{activity.act2}-{activity.id2}</span>
+                                }}>{typeLabel}-{activity.id2}</span>
                             </label>
                         </div>
                         <ul>
                             {activity.actors.map((actor) => {
                                 var type = typeContainer.getItem(actor.id1);
-                                var label = (type && type.obj_type) ? `${type.obj_type}-${actor.id1}` : actor.id1;
+                                if (type) {
+                                    var types = Object.keys(type.cset3);
+                                    var typeLabel = types.length === 1 ? types[0] : 'Multiple';
+                                }
+                                var label = (type && typeLabel) ? `${typeLabel}-${actor.id1}` : actor.id1;
                                 return <li key={actor.id1}>
                                     <div className={'checkbox ' + (actor.id1 === this.props.selectedTrackId ? 'selected' : '')}>
                                         <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>

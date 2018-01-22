@@ -67,11 +67,11 @@ function app(state, action) {
             return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.NEW_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.newTrack(action.payload.trackId);
-            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, null, null);
+            var annotationTypeContainer = state.annotationTypeContainer.newType(action.payload.trackId, action.payload.cset3);
             return { ...state, ...{ editingTrackId: action.payload.trackId, annotationGeometryContainer, annotationTypeContainer } };
         case types.CHANGE_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
-            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newTrackType);
+            var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newCset3);
             // to do change track id inside activity
             return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
         case types.SELECT_TRACK:
@@ -79,7 +79,7 @@ function app(state, action) {
         case types.SELECT_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
         case types.CHANGE_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityType, action.payload.newTimespan);
+            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.CHANGE_TRACK_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);

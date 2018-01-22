@@ -56,7 +56,11 @@ class TrackPane extends BasePane {
             <ul>
                 {sortedTrackIds.map((trackId) => {
                     var type = typeContainer.getItem(trackId);
-                    var label = ((type && type.obj_type) ? `${type.obj_type}-${trackId}` : trackId);
+                    if (type) {
+                        var types = Object.keys(type.cset3);
+                        var typeLabel = types.length <= 1 ? types[0] : 'Multiple';
+                    }
+                    var label = ((type && typeLabel) ? `${typeLabel}-${trackId}` : trackId);
                     return <li key={trackId}>
                         <ContextMenuTrigger id='track-menu'>
                             <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)}>
