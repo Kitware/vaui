@@ -73,7 +73,7 @@ class ActivityPanel extends BasePane {
                                 }
                                 var label = (type && typeLabel) ? `${typeLabel}-${actor.id1}` : actor.id1;
                                 return <li key={actor.id1}>
-                                    <div className={'checkbox ' + (actor.id1 === this.props.selectedTrackId ? 'selected' : '')}>
+                                    <div className={'checkbox ' + ((actor.id1 === this.props.selectedTrackId && activity.id2 === this.props.selectedActivityId) ? 'selected' : '')}>
                                         <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                             <input type='checkbox'
                                                 checked={geometryContainer.getEnableState(actor.id1)}

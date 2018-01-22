@@ -39,6 +39,12 @@ class ActivityInfo extends PureComponent {
     }
 
     render() {
+        var activity = this.props.annotationActivityContainer.getItem(this.props.selectedActivityId);
+        var trackRanges = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
+        for (var actor of activity.actors) {
+            let trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(actor.id1);
+            trackRanges = [Math.min(trackRanges[0], trackRange[0]), Math.max(trackRanges[1], trackRange[1])];
+        }
         var types = Object.keys(this.state.act2);
         var type = types.length === 1 ? types[0] : 'multiple';
         return <div className='activity-info'>
@@ -67,8 +73,8 @@ class ActivityInfo extends PureComponent {
                         <div className='col-sm-9'>
                             <FrameNumberInput className='form-control'
                                 value={this.state.fromFrame}
-                                min={0}
-                                max={Math.min(this.state.toFrame, this.props.maxFrame)}
+                                min={Math.max(0, trackRanges[0])}
+                                max={Math.min(this.state.toFrame, this.props.maxFrame, trackRanges[1])}
                                 onChange={(e) => {
                                     this.setState({
                                         fromFrame: e,
@@ -82,8 +88,8 @@ class ActivityInfo extends PureComponent {
                         <div className='col-sm-9'>
                             <FrameNumberInput className='form-control'
                                 value={this.state.toFrame}
-                                min={Math.max(0, this.state.fromFrame)}
-                                max={this.props.maxFrame}
+                                min={Math.max(0, this.state.fromFrame, trackRanges[0])}
+                                max={Math.min(this.props.maxFrame, trackRanges[1])}
                                 onChange={(e) => {
                                     this.setState({
                                         toFrame: e,
@@ -125,7 +131,6 @@ const mapStateToProps = (state, ownProps) => {
         maxFrame: state.maxFrame,
         selectedActivityId: state.selectedActivityId,
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationTypeContainer: state.annotationTypeContainer,
         annotationGeometryContainer: state.annotationGeometryContainer
     };
 };

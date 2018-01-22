@@ -17,6 +17,7 @@ class ActivityTrackInfo extends PureComponent {
         var activity = props.annotationActivityContainer.getItem(props.selectedActivityId);
         var trackActivity = activity.actors.find((trackActivity) => trackActivity.id1 === props.selectedTrackId);
         return {
+            trackActivity,
             fromFrame: trackActivity.timespan[0].tsr0[0],
             toFrame: trackActivity.timespan[0].tsr0[1],
             changed: false
@@ -28,7 +29,8 @@ class ActivityTrackInfo extends PureComponent {
     }
 
     render() {
-
+        var trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(this.state.trackActivity.id1);
+        console.log(trackRange);
         return <div className='activity-track-info'>
             <form className='form-horizontal'>
                 <fieldset>
@@ -38,8 +40,8 @@ class ActivityTrackInfo extends PureComponent {
                         <div className='col-sm-9'>
                             <FrameNumberInput className='form-control'
                                 value={this.state.fromFrame}
-                                min={0}
-                                max={Math.min(this.state.toFrame, this.props.maxFrame)}
+                                min={Math.max(0, trackRange[0])}
+                                max={Math.min(this.state.toFrame, this.props.maxFrame, trackRange[1])}
                                 onChange={(e) => {
                                     this.setState({
                                         fromFrame: e,
@@ -53,8 +55,8 @@ class ActivityTrackInfo extends PureComponent {
                         <div className='col-sm-9'>
                             <FrameNumberInput className='form-control'
                                 value={this.state.toFrame}
-                                min={Math.max(0, this.state.fromFrame)}
-                                max={this.props.maxFrame}
+                                min={Math.max(0, this.state.fromFrame, trackRange[0])}
+                                max={Math.min(this.props.maxFrame, trackRange[1])}
                                 onChange={(e) => {
                                     this.setState({
                                         toFrame: e,
@@ -95,7 +97,6 @@ const mapStateToProps = (state, ownProps) => {
         selectedActivityId: state.selectedActivityId,
         selectedTrackId: state.selectedTrackId,
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationTypeContainer: state.annotationTypeContainer,
         annotationGeometryContainer: state.annotationGeometryContainer
     };
 };
