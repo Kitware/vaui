@@ -1,6 +1,6 @@
 class AnnotationGeometryTrack {
     constructor() {
-        this._frameRange = [0, 0];
+        this._frameRange = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
         this.enableState = true;
     }
 
