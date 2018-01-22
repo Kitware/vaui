@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 
 import TrackInfo from '../TrackInfo';
 import ActivityInfo from '../ActivityInfo';
+import ActivityTrackInfo from '../ActivityTrackInfo';
 
 import './style.styl';
 
@@ -12,12 +13,18 @@ class ObjectInfo extends PureComponent {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Object Info</div>
                 <div className='panel-body'>
-                    {this.props.selectedTrackId !== null &&
-                        this.props.treePanel === 'track' &&
+                    {this.props.treePanel === 'track' &&
+                        this.props.selectedTrackId !== null &&
                         <TrackInfo />}
                     {this.props.treePanel === 'activity' &&
                         this.props.selectedActivityId !== null &&
+                        this.props.selectedTrackId === null &&
                         <ActivityInfo />
+                    }
+                    {this.props.treePanel === 'activity' &&
+                        this.props.selectedActivityId !== null &&
+                        this.props.selectedTrackId !== null &&
+                        <ActivityTrackInfo />
                     }
                 </div>
             </div>

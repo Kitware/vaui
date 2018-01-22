@@ -45,6 +45,24 @@ export default (save) => {
                     type._id = savedType._id;
                 });
             }),
+            annotationActivityContainer.getEdited().map((activity) => {
+                return restRequest({
+                    method: 'PUT',
+                    url: `/activities/${activity._id}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(activity)
+                });
+            }),
+            annotationActivityContainer.getAdded().map((activity) => {
+                return restRequest({
+                    method: 'POST',
+                    url: `/activities/${activity.itemId}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(activity)
+                }).then((savedActivity) => {
+                    activity._id = savedActivity._id;
+                });
+            })
         ).then(() => {
             annotationGeometryContainer = annotationGeometryContainer.reset();
             annotationTypeContainer = annotationTypeContainer.reset();

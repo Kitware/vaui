@@ -13,6 +13,7 @@ function app(state, action) {
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationGeometryContainer: null,
+            maxFrame: null,
             geomItem: null,
             selectedAnnotation: null,
             selectedTrackId: null,
@@ -45,7 +46,7 @@ function app(state, action) {
             var annotationGeometryContainer = state.annotationGeometryContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationGeometryContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.geometry.id1 : null, editingTrackId: null } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.geometry.id1 : null, editingTrackId: null, selectedActivityId: null } };
         case types.EDITING_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.SET_GEOM_ITEM:
@@ -59,11 +60,11 @@ function app(state, action) {
             return { ...state, ...action.payload, pendingSave: false, saving: false };
         case types.FOCUS_TRACK:
             var range = state.annotationGeometryContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload, editingTrackId: null } };
+            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.GOTO_TRACK_START:
         case types.GOTO_TRACK_END:
             var range = state.annotationGeometryContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, editingTrackId: null } };
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.NEW_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.newTrack(action.payload.trackId);
             var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, null, null);
@@ -71,11 +72,22 @@ function app(state, action) {
         case types.CHANGE_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
             var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newTrackType);
+            // to do change track id inside activity
             return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
         case types.SELECT_TRACK:
             return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.SELECT_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+        case types.CHANGE_ACTIVITY:
+            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityType, action.payload.newTimespan);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+        case types.CHANGE_TRACK_ACTIVITY:
+            var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+        case types.SELECT_TRACK_ACTIVITY:
+            return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
+        case types.MAX_FRAME_CHANGE:
+            return { ...state, ...{ maxFrame: action.payload } };
         default:
             return state;
     }

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import _ from 'underscore';
 
 import BasePane from '../BasePane';
-import { TOGGLE_ACTIVITY, SELECT_ACTIVITY, SELECT_TRACK, TOGGLE_TRACK } from '../../actions/types';
+import { TOGGLE_ACTIVITY, SELECT_ACTIVITY, SELECT_TRACK_ACTIVITY, TOGGLE_TRACK } from '../../actions/types';
 
 import './style.styl';
 
@@ -57,7 +57,7 @@ class ActivityPanel extends BasePane {
                                 <span onClick={(e) => {
                                     this.props.dispatch({
                                         type: SELECT_ACTIVITY,
-                                        payload: this.props.selectedActivityId === activity.id2 ? null : activity.id2
+                                        payload: (this.props.selectedActivityId === activity.id2 && !this.props.selectedTrackId) ? null : activity.id2
                                     });
                                 }}>{activity.act2}-{activity.id2}</span>
                             </label>
@@ -78,8 +78,11 @@ class ActivityPanel extends BasePane {
                                             />
                                             <span onClick={(e) => {
                                                 this.props.dispatch({
-                                                    type: SELECT_TRACK,
-                                                    payload: actor.id1 === this.props.selectedTrackId ? null : actor.id1
+                                                    type: SELECT_TRACK_ACTIVITY,
+                                                    payload: {
+                                                        trackId: actor.id1,
+                                                        activityId: activity.id2
+                                                    }
                                                 });
                                             }}>{label}</span>
                                         </label>

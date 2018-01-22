@@ -22,7 +22,7 @@ class AnnotationTypeContainer {
         }
         // Type could be non exists sometime
         this.change(id1, null);
-        return this._mapper.get(id1);;
+        return this._mapper.get(id1);
     }
 
     change(trackId, newTrackId, newTrackType) {

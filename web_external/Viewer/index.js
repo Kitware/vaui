@@ -4,7 +4,7 @@ import ReactBootstrapSlider from 'react-bootstrap-slider';
 import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK, MAX_FRAME_CHANGE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -38,6 +38,16 @@ class Viewer extends PureComponent {
             this.requestToFrame(nextProps.requestFrame.frame);
         }
     }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.videoMaxFrame !== prevState.videoMaxFrame) {
+            this.props.dispatch({
+                type:MAX_FRAME_CHANGE,
+                payload: this.state.videoMaxFrame
+            })
+        }
+    }
+
     componentDidMount() {
         mousetrap.bind('shift+t', () => this.newTrack());
         mousetrap.bind('left', () => this._previousFrame());

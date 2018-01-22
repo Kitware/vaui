@@ -69,11 +69,11 @@ class ActivitiesResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def updateActivity(self, activity, data, params):
+    def updateActivity(self, activities, data, params):
         data.pop('_id', None)
         data.pop('itemId', None)
-        activity.update(data)
-        return Activities().save(activity)
+        activities.update(data)
+        return Activities().save(activities)
 
     @autoDescribeRoute(
         Description('')
@@ -82,8 +82,8 @@ class ActivitiesResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def deleteActivity(self, activity, params):
-        Activities().remove(activity)
+    def deleteActivity(self, activities, params):
+        Activities().remove(activities)
         return ''
 
     @autoDescribeRoute(

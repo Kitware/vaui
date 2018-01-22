@@ -4,6 +4,7 @@ import bootbox from 'bootbox';
 
 import { CHANGE_ACTIVITY } from '../actions/types';
 import activityTypes from '../activityTypes';
+import FrameNumberInput from '../widget/FrameNumberInput';
 
 import './style.styl';
 
@@ -17,9 +18,20 @@ class ActivityInfo extends PureComponent {
         var activity = props.annotationActivityContainer.getItem(props.selectedActivityId);
         return {
             type: activity.act2 || '',
-            fromFrame: activity.timespan[0].tsr0[0],
-            toFrame: activity.timespan[0].tsr0[1]
+            fromFrame: this.getFromFrame(),
+            toFrame: this.getToFrame(),
+            changed: false
         };
+    }
+
+    getFromFrame() {
+        var activity = this.props.annotationActivityContainer.getItem(this.props.selectedActivityId);
+        return activity.timespan[0].tsr0[0];
+    }
+
+    getToFrame() {
+        var activity = this.props.annotationActivityContainer.getItem(this.props.selectedActivityId);
+        return activity.timespan[0].tsr0[1];
     }
 
     componentWillReceiveProps(nextProps) {
@@ -51,10 +63,14 @@ class ActivityInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>Start:</label>
                         <div className='col-sm-9'>
-                            <input type='number' className='form-control' id='trackId' value={this.state.fromFrame}
+                            <FrameNumberInput className='form-control'
+                                value={this.state.fromFrame}
+                                min={0}
+                                max={Math.min(this.state.toFrame, this.props.maxFrame)}
                                 onChange={(e) => {
                                     this.setState({
-                                        fromFrame: parseInt(e.target.value)
+                                        fromFrame: e,
+                                        changed: true
                                     });
                                 }} />
                         </div>
@@ -62,10 +78,14 @@ class ActivityInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>End:</label>
                         <div className='col-sm-9'>
-                            <input type='number' className='form-control' id='trackId' value={this.state.toFrame}
+                            <FrameNumberInput className='form-control'
+                                value={this.state.toFrame}
+                                min={Math.max(0, this.state.fromFrame)}
+                                max={this.props.maxFrame}
                                 onChange={(e) => {
                                     this.setState({
-                                        toFrame: parseInt(e.target.value)
+                                        toFrame: e,
+                                        changed: true
                                     });
                                 }} />
                         </div>
@@ -83,7 +103,9 @@ class ActivityInfo extends PureComponent {
                                 this.props.dispatch({
                                     type: CHANGE_ACTIVITY,
                                     payload: {
-
+                                        activityId: this.props.selectedActivityId,
+                                        newActivityType: this.state.type,
+                                        newTimespan: [this.state.fromFrame, this.state.toFrame]
                                     }
                                 });
                             }}><span className='glyphicon glyphicon-ok text-success'></span></button>
@@ -96,6 +118,7 @@ class ActivityInfo extends PureComponent {
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        maxFrame: state.maxFrame,
         selectedActivityId: state.selectedActivityId,
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTypeContainer: state.annotationTypeContainer,
