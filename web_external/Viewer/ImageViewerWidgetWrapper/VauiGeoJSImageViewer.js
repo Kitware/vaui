@@ -8,7 +8,8 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         this._annotationLeftClick = null;
         this._annotationRightClick = null;
         this.pendingFrame = null;
-        this.drawingModeEnabled = false;
+        this.editEnabled = false;
+        this.editMode = settings.editMode;
     },
 
     render() {
@@ -18,12 +19,8 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
         map.interactor().options(interactorOpts);
-        setTimeout(() => {
-            var interactorOpts = map.interactor().options();
-            interactorOpts.keyboard.focusHighlight = false;
-            interactorOpts.keyboard.actions = {};
-            map.interactor().options(interactorOpts);
-        }, 200);
+        window.annotationLayer = this.annotationLayer;
+        // this.annotationLayer.options({ clickToEdit: true });
         var ids = null;
         var siblings = new ItemCollection();
         siblings.pageLimit = 0;
@@ -42,6 +39,15 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 // create a second osm layer.  We use these as A-B buffers.  We start with
                 // them being identical
                 var l2 = map.createLayer('osm', l1._options);
+                // this.annotationLayer.options('clickToEdit', true);
+                // this.annotationLayer.geoOn(geo.event.annotation.state, (e) => {
+                //     console.log("geo.event.annotation.state", e);
+                //     console.log(e.annotation.state());
+                // });
+
+                // this.annotationLayer.geoOn(geo.event.annotation.update, (e) => {
+                //     console.log("geo.event.annotation.update", e);
+                // });
                 l1.zIndex(9);
                 l1.moveToBottom();
                 var frame = 0;
@@ -139,33 +145,61 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     }
                 };
 
-                this.drawingMode = (enabled) => {
-                    if (this.drawingModeEnabled === enabled) {
+                var annotationChanged = (annotation) => {
+                    var coordinates = annotation.coordinates();
+                    var g0 = [[Math.round(coordinates[0]['x']), Math.round(coordinates[0]['y'])], [Math.round(coordinates[2]['x']), Math.round(coordinates[2]['y'])]];
+                    this.trigger('annotationDrawn', g0);
+                };
+
+                this.edit = (enabled) => {
+                    if (this.editEnabled === enabled) {
                         return;
                     }
                     var layer = this.annotationLayer;
                     if (enabled) {
-                        window.annotationLayer = layer;
-                        layer.mode('rectangle');
-                        layer.geoOn(geo.event.annotation.state, (e) => {
-                            var geometry = layer.geojson().features[0].geometry;
-                            var coords = geometry.coordinates[0];
-                            var g0 = [[Math.round(coords[0][0]), Math.round(coords[0][1])], [Math.round(coords[2][0]), Math.round(coords[2][1])]];
-                            this.trigger('annotationDrawn', g0);
-                            layer.removeAllAnnotations();
-                        });
-                        layer.geoOn(geo.event.annotation.mode, (e) => {
-                            if (!e.mode) {
-                                layer.mode('rectangle');
-                            }
-                        });
+                        if (this.editMode === 'edit') {
+                            layer.options('clickToEdit', true);
+                            layer.mode('edit', layer.annotations()[0]);
+                            layer.geoOn(geo.event.annotation.state, (e) => {
+                                if (e.annotation.state() === 'done') {
+                                    annotationChanged(e.annotation);
+                                }
+                            });
+                        } else if (this.editMode === 'draw') {
+                            layer.mode('rectangle');
+                            layer.geoOn(geo.event.annotation.state, (e) => {
+                                annotationChanged(e.annotation);
+                            });
+                            layer.geoOn(geo.event.annotation.mode, (e) => {
+                                if (e.mode === null && e.oldMode === 'rectangle') {
+                                    layer.mode('rectangle');
+                                }
+                            });
+                        }
                     } else {
+                        layer.options('clickToEdit', false);
                         layer.geoOff(geo.event.annotation.state);
                         layer.geoOff(geo.event.annotation.mode);
                         layer.mode(null);
                     }
-                    this.drawingModeEnabled = enabled;
+                    this.annotationLayer.draw();
+                    this.editEnabled = enabled;
                 };
+
+                this.setEditMode = (mode) => {
+                    this.editMode = mode;
+                    // if (!this.editEnabled) {
+                    //     return;
+                    // } else {
+                    //     if (this.editMode === 'edit') {
+                    //         layer.mode(null);
+                    //         layer.options('clickToEdit', true);
+                    //     } else {
+                    //         layer.options('clickToEdit', false);
+                    //         layer.mode('rectangle');
+                    //     }
+                    // }
+                }
 
                 this._drawAnnotation = (frame) => {
                     if (this.lastFeatureFrame) {
@@ -176,11 +210,11 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (!result) {
                         return;
                     }
-                    var [data, style] = result;
+                    var { data, style, editingTrackId } = result;
                     var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true });
                     feature.data(data);
                     feature.polygon((d) => {
-                        var g0 = d.g0;
+                        var g0 = d.geometry.g0;
                         return {
                             outer: [{ x: g0[0][0], y: g0[0][1] },
                             { x: g0[1][0], y: g0[0][1] },
@@ -199,6 +233,42 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         }
                     });
                     this.lastFeatureFrame = feature;
+                    // this.annotationLayer.geoOn(geo.event.mouseclick,(a)=>console.log(a));
+
+                    var annotations = this.annotationLayer.annotations();
+                    this.annotationLayer.removeAllAnnotations(true);
+                    this.annotationLayer.mode(null);
+                    var record = data.find((record) => { return record.geometry.id1 === editingTrackId });
+                    if (record) {
+                        var g0 = record.geometry.g0;
+                        // this.annotationLayer.addAnnotation(geo.rectangleANnotation,)
+                        // this.annotationLayer.addAnnotation(
+                        //     geo.annotation.rectangleAnnotation({
+                        //         corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }]
+                        //     }));
+                        this.annotationLayer.geojson({
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Polygon',
+                                coordinates: [[
+                                    [g0[0][0], g0[0][1]],
+                                    [g0[1][0], g0[0][1]],
+                                    [g0[1][0], g0[1][1]],
+                                    [g0[0][0], g0[1][1]],
+                                    [g0[0][0], g0[0][1]]
+                                ]]
+                            },
+                            properties: {
+                                annotationType: 'rectangle',
+                                fill: false,
+                                stroke: true,
+                                strokeColor: '#80FFFF',
+                                strokeOpacity: 1,
+                                strokeWidth: 1
+                            }
+                        });
+                        this.annotationLayer.draw();
+                    }
                     this.viewer.draw();
                 };
 
