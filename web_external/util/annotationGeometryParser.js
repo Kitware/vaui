@@ -1,7 +1,13 @@
 class AnnotationGeometryTrack {
     constructor() {
-        this._frameRange = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
+        this._stateMap = new Map();
         this.enableState = true;
+        this.resetFrameRange();
+    }
+
+    resetFrameRange()
+    {
+        this._frameRange = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
     }
 
     expandFrameRange(frame) {
@@ -12,6 +18,10 @@ class AnnotationGeometryTrack {
     get frameRange() {
         return this._frameRange;
     }
+
+    get states() {
+        return this._stateMap;
+    }
 }
 
 class AnnotationGeometryContainer {
@@ -20,10 +30,10 @@ class AnnotationGeometryContainer {
         this._id0 = 0;
 
         this._trackMap = new Map(); // track id -> AnnotationGeometryTrack
-        this._frameMap = new Map();
+        this._frameMap = new Map(); // frame -> Map(track id -> geometries)
 
-        this._addedGeom = new Set();
-        this._editedGeom = new Set();
+        this._addedGeom = new Map();
+        this._editedGeom = new Map();
     }
 
     add(geometry) {
@@ -32,23 +42,23 @@ class AnnotationGeometryContainer {
 
         // Create frame if needed
         if (!this._frameMap.has(geometry.ts0)) {
-            this._frameMap.set(geometry.ts0, []);
+            this._frameMap.set(geometry.ts0, new Map());
         }
 
         // Insert geometry into frame
-        this._frameMap.get(geometry.ts0).push(geometry);
+        this._frameMap.get(geometry.ts0).set(geometry.id1, geometry);
 
         // Create track if needed
         if (!this._trackMap.has(geometry.id1)) {
             this._trackMap.set(geometry.id1, new AnnotationGeometryTrack());
         }
 
-        // Update track time range
-        this._updateTrackRange(geometry.id1, geometry.ts0);
-    }
+        // Insert geometry ID into track's state map
+        let track = this._trackMap.get(geometry.id1);
+        track.states.set(geometry.ts0, geometry.id0);
 
-    _updateTrackRange(trackId, frame) {
-        this._trackMap.get(trackId).expandFrameRange(frame);
+        // Update track time range
+        track.expandFrameRange(geometry.ts0);
     }
 
     getAllItems() {
@@ -84,47 +94,62 @@ class AnnotationGeometryContainer {
     changeTrack(trackId, newTrackId) {
         if (trackId !== newTrackId) {
             // Reassign track in track map
-            var track = this._trackMap.get(trackId);
+            let track = this._trackMap.get(trackId);
             this._trackMap.set(newTrackId, track);
             this._trackMap.delete(trackId);
 
             // Update all geometries
-            _.flatten(Array.from(this._frameMap.values())).forEach((geom) => {
-                if (geom.id1 !== trackId) {
-                    return;
+            for (let [ts0, geomSet] of this._frameMap) {
+                let geom = geomSet.get(trackId);
+                if (geom) {
+                    geom.id1 = newTrackId;
+                    geomSet.delete(trackId);
+                    geomSet.set(newTrackId, geom);
+
+                    if (!this._addedGeom.has(geom.id0)) {
+                        this._editedGeom.set(geom.id0, geom);
+                    }
                 }
-                geom.id1 = newTrackId;
-                if (!this._addedGeom.has(geom)) {
-                    this._editedGeom.add(geom);
-                }
-            });
+            };
         }
         return this.copy();
     }
 
     getFrame(frame) {
-        return this._frameMap.get(frame);
+        return Array.from(this._frameMap.get(frame).values());
     }
 
     get length() {
         return this._frameMap.size;
     }
 
+    _getState(frame, trackId) {
+        let track = this._trackMap.get(trackId);
+        if (track) {
+            return track.states.get(frame);
+        }
+        return undefined;
+    }
+
     change(frame, trackId, g0, itemId = null) {
-        var geomSet = this.getFrame(frame);
-        var geomToChange = Array.from(geomSet).find((geom) => {
-            return geom.id1 === trackId && geom.ts0 === frame;
-        });
-        if (geomToChange) {
-            Object.assign(geomToChange, {
-                g0
-            });
-            if (!this._addedGeom.has(geomToChange)) {
-                this._editedGeom.add(geomToChange);
+        // Look up ID of possibly existing geometry
+        let geomId = this._getState(frame, trackId);
+
+        if (geomId) {
+            // Geometry already exists for the specified state; look it up and
+            // modify it in place
+            let geomToChange = this._frameMap(frame).get(trackId);
+            Object.assign(geomToChange, {g0});
+
+            // Update modification records; if state was added, it is still
+            // added; otherwise, it is edited
+            if (!this._addedGeom.has(geomToChange.id0)) {
+                this._editedGeom.set(geomToChange.id0, geomToChange);
             }
         }
         else {
-            var newGeom = new AnnotationGeometry({
+            // Entirely new geometry; add it
+            let newGeom = new AnnotationGeometry({
                 id0: ++this._id0,
                 id1: trackId,
                 ts0: frame,
@@ -132,9 +157,11 @@ class AnnotationGeometryContainer {
                 itemId: this._itemId,
                 src: 'truth'
             });
-            this._addedGeom.add(newGeom);
-            this._frameMap.get(frame).push(newGeom);
-            this._updateTrackRange(trackId, frame);
+            this.add(newGeom);
+
+            // Update modification records; since there was no previous state,
+            // this is an addition
+            this._addedGeom.set(newGeom.id0, newGeom);
         }
         return this.copy();
     }
@@ -147,11 +174,11 @@ class AnnotationGeometryContainer {
     }
 
     getEdited() {
-        return Array.from(this._editedGeom).map(this._flattenGeom);
+        return [...this._editedGeom.values()].map(this._flattenGeom);
     }
 
     getAdded() {
-        return Array.from(this._addedGeom).map(this._flattenGeom);
+        return [...this._addedGeom.values()].map(this._flattenGeom);
     }
 
     reset() {
