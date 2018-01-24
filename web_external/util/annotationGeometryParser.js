@@ -15,6 +15,13 @@ class AnnotationGeometryTrack {
         this._frameRange[1] = Math.max(this._frameRange[1], frame);
     }
 
+    recomputeFrameRange() {
+        this.resetFrameRange();
+        for (let [ts0, geomId] of this._stateMap) {
+            this.expandFrameRange(ts0);
+        }
+    }
+
     get frameRange() {
         return this._frameRange;
     }
@@ -34,6 +41,7 @@ class AnnotationGeometryContainer {
 
         this._addedGeom = new Map();
         this._editedGeom = new Map();
+        this._removedGeom = new Map();
     }
 
     add(geometry) {
@@ -115,6 +123,18 @@ class AnnotationGeometryContainer {
         return this.copy();
     }
 
+    removeTrack(trackId) {
+        let track = this._trackMap.get(trackId);
+        if (track) {
+            for (let [ts0, geomId] of track.states) {
+                let frame = this._frameMap.get(ts0);
+                this._remove(frame, trackId, geomId);
+            }
+            this._trackMap.delete(trackId);
+        }
+        return this.copy();
+    }
+
     getFrame(frame) {
         return Array.from(this._frameMap.get(frame).values());
     }
@@ -166,24 +186,61 @@ class AnnotationGeometryContainer {
         return this.copy();
     }
 
+    _remove(geomSet, trackId, geomId) {
+        // Update modification records; if state was added, just discard the
+        // record; otherwise, add to removal records and ensure the state is
+        // not in the edit records
+        if (this._addedGeom.has(geomId)) {
+            this._addedGeom.delete(geomId);
+        }
+        else {
+            let geom = geomSet.get(trackId);
+
+            this._editedGeom.delete(geomId);
+            this._removedGeom.set(geomId, geom);
+        }
+
+        // Finally, remove the geometry from the frame
+        geomSet.delete(trackId);
+    }
+
+    remove(frame, trackId) {
+        // Look up ID of geometry
+        let geomId = this._getState(frame, trackId);
+
+        if (geomId) {
+            let track = this._trackMap.get(trackId);
+            track.states.delete(frame);
+            track.recomputeFrameRange();
+
+            this._remove(this._frameMap.get(frame), trackId, geomId);
+        }
+        return this.copy();
+    }
+
     _flattenGeom(geom) {
-        var newGeom = Object.assign({}, geom, geom.keyValues);
+        let newGeom = Object.assign({}, geom, geom.keyValues);
         delete newGeom.keyValues;
         return [newGeom, geom];
 
-    }
-
-    getEdited() {
-        return [...this._editedGeom.values()].map(this._flattenGeom);
     }
 
     getAdded() {
         return [...this._addedGeom.values()].map(this._flattenGeom);
     }
 
+    getEdited() {
+        return [...this._editedGeom.values()].map(this._flattenGeom);
+    }
+
+    getRemoved() {
+        return [...this._removedGeom.values()].map(this._flattenGeom);
+    }
+
     reset() {
-        this._editedGeom.clear();
         this._addedGeom.clear();
+        this._editedGeom.clear();
+        this._removedGeom.clear();
         return this.copy();
     }
 
