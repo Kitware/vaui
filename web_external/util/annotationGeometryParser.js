@@ -1,6 +1,7 @@
 class AnnotationGeometryContainer {
     constructor() {
         this._itemId = null;
+        this._id0 = 0;
         this._frameMap = new Map();
         this._editedGeom = new Set();
         this._addedGeom = new Set();
@@ -11,6 +12,7 @@ class AnnotationGeometryContainer {
 
     add(geometry) {
         this._itemId = geometry.itemId;
+        this._id0 = Math.max(this._id0, geometry.id0);
         var frameMap = this._frameMap;
         if (!frameMap.has(geometry.ts0)) {
             frameMap.set(geometry.ts0, []);
@@ -21,7 +23,7 @@ class AnnotationGeometryContainer {
             this._enableState.set(geometry.id1, true);
         }
         if (!this._trackRanges.has(geometry.id1)) {
-            this._trackRanges.set(geometry.id1, [Number.MAX_VALUE, Number.MIN_VALUE]);
+            this._trackRanges.set(geometry.id1, [0, 0]);
         }
         this._updateTrackRange(geometry.id1, geometry.ts0);
     }
@@ -59,8 +61,27 @@ class AnnotationGeometryContainer {
 
     newTrack(trackId) {
         this._trackIds.add(trackId);
-        this._trackRanges.set(trackId, new Array(Number.MAX_VALUE, Number.MIN_VALUE));
+        this._trackRanges.set(trackId, [0, 0]);
         this._enableState.set(trackId, true);
+        return this.copy();
+    }
+
+    changeTrack(trackId, newTrackId) {
+        if (trackId !== newTrackId) {
+            this._trackIds.delete(trackId);
+            this._trackIds.add(newTrackId);
+            this._trackRanges.set(newTrackId, this._trackRanges.get(trackId));
+            this._enableState.set(newTrackId, this._enableState.get(trackId));
+            _.flatten(Array.from(this._frameMap.values())).forEach((geom) => {
+                if (geom.id1 !== trackId) {
+                    return;
+                }
+                geom.id1 = newTrackId;
+                if (!this._addedGeom.has(geom)) {
+                    this._editedGeom.add(geom);
+                }
+            });
+        }
         return this.copy();
     }
 
@@ -81,14 +102,18 @@ class AnnotationGeometryContainer {
             Object.assign(geomToChange, {
                 g0
             });
-            this._editedGeom.add(geomToChange);
+            if (!this._addedGeom.has(geomToChange)) {
+                this._editedGeom.add(geomToChange);
+            }
         }
         else {
             var newGeom = new AnnotationGeometry({
+                id0: this._id0++,
                 id1: trackId,
                 ts0: frame,
                 g0,
-                itemId: this._itemId
+                itemId: this._itemId,
+                src: 'truth'
             });
             this._addedGeom.add(newGeom);
             this._frameMap.get(frame).push(newGeom);
@@ -100,7 +125,7 @@ class AnnotationGeometryContainer {
     _flattenGeom(geom) {
         var newGeom = Object.assign({}, geom, geom.keyValues);
         delete newGeom.keyValues;
-        return newGeom;
+        return [newGeom, geom];
 
     }
 

@@ -15,7 +15,7 @@ class InfoView extends PureComponent {
                             <li key={annotation.geometry.id0 + '-' + annotation.geometry.id1} className='track'>
                                 <div title='id1'>Track id: {annotation.geometry.id1}</div>
                                 {annotation.type &&
-                                    <div>type: {annotation.type.obj_type}</div>
+                                    <div>type: {Object.keys(annotation.type.cset3).join(',')}</div>
                                 }
                                 <div title='id0'>Geometry id: {annotation.geometry.id0}</div>
                                 <div>Frame id: {annotation.geometry.ts0}</div>
@@ -27,7 +27,7 @@ class InfoView extends PureComponent {
                                         {annotation.activities.map((activity) => {
                                             return <li key={activity.id2} className='activity'>
                                                 <div title='id2'>Activity id: {activity.id2}</div>
-                                                <div>Activity: {activity.act2}</div>
+                                                <div>Activity: {Object.keys(activity.act2).join(',')}</div>
                                             </li>;
                                         })}
                                     </ul>}

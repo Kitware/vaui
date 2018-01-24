@@ -11,6 +11,7 @@
     opacity: 0;
     pointer-events: none;
     font-size: 90%;
+    z-index: 1;
 }
 
 .react-contextmenu.react-contextmenu--visible {
@@ -27,7 +28,7 @@
 .react-contextmenu-item {
     padding: 2px 10px;
     white-space: nowrap;
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .react-contextmenu-item.react-contextmenu-item--active,

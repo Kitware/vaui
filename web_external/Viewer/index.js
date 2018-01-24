@@ -4,7 +4,7 @@ import ReactBootstrapSlider from 'react-bootstrap-slider';
 import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK, MAX_FRAME_CHANGE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -38,6 +38,16 @@ class Viewer extends PureComponent {
             this.requestToFrame(nextProps.requestFrame.frame);
         }
     }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.videoMaxFrame !== prevState.videoMaxFrame) {
+            this.props.dispatch({
+                type: MAX_FRAME_CHANGE,
+                payload: this.state.videoMaxFrame
+            })
+        }
+    }
+
     componentDidMount() {
         mousetrap.bind('shift+t', () => this.newTrack());
         mousetrap.bind('left', () => this._previousFrame());
@@ -256,7 +266,7 @@ class Viewer extends PureComponent {
                         return { r: 1, g: 0, b: 0.0 };
                     }
                 }
-                return { r: 0.851, g: 0.604, b: 0.0 };
+                return { r: 1, g: 0.87, b: 0.0 };
             },
             strokeWidth: 1.25,
             strokeOpacity: 0.8,
@@ -286,7 +296,11 @@ class Viewer extends PureComponent {
                 }
                 this.props.dispatch({
                     type: NEW_TRACK,
-                    payload: { trackId, itemId: this.props.selectedItem._id }
+                    payload: {
+                        trackId,
+                        itemId: this.props.selectedItem._id,
+                        cset3: {}
+                    }
                 });
             }
         });

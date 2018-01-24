@@ -18,6 +18,12 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
         map.interactor().options(interactorOpts);
+        setTimeout(() => {
+            var interactorOpts = map.interactor().options();
+            interactorOpts.keyboard.focusHighlight = false;
+            interactorOpts.keyboard.actions = {};
+            map.interactor().options(interactorOpts);
+        }, 200);
         var ids = null;
         var siblings = new ItemCollection();
         siblings.pageLimit = 0;

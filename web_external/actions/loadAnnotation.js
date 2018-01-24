@@ -11,7 +11,7 @@ export default (item) => {
         dispatch({
             type: `${LOAD_ANNOTATION}_PENDING`
         });
-        restRequest({
+        return restRequest({
             url: `/vaui-annotation/status/${item.folderId}`
         }).then((result) => {
             if (result) {
