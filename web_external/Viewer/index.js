@@ -4,7 +4,7 @@ import ReactBootstrapSlider from 'react-bootstrap-slider';
 import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, NEW_TRACK, MAX_FRAME_CHANGE } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, MAX_FRAME_CHANGE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -121,6 +121,13 @@ class Viewer extends PureComponent {
                                         frame: this.state.videoCurrentFrame,
                                         trackId: this.props.editingTrackId,
                                         g0
+                                    }
+                                })}
+                                annotationDeleted={() => this.props.dispatch({
+                                    type: DELETE_GEOM,
+                                    payload: {
+                                        frame: this.state.videoCurrentFrame,
+                                        trackId: this.props.editingTrackId
                                     }
                                 })}
                                 key={this.props.selectedItem._id} />,
