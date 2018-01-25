@@ -9,6 +9,7 @@ class AnnotationActivityContainer {
 
         this._added = new Set();
         this._edited = new Set();
+        this._removed = new Set();
     }
 
     add(activity) {
@@ -125,9 +126,70 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    remove(activityId) {
+        let activity = this._activities.get(activityId);
+        if (activity) {
+            // Remove activity from track maps
+            for (let actor of activity.actors) {
+                let map = this._trackActivityMap.get(actor.id1);
+                map.delete(activity);
+                if (map.size === 0) {
+                    this._trackActivityMap.delete(actor.id1);
+                }
+            }
+
+            // Update modification records; if activity was added, just discard the
+            // record; otherwise, add to removal records and ensure the activity is
+            // not in the edit records
+            if (this._added.has(activity)) {
+                this._added.delete(activity);
+            }
+            else {
+                this._edited.delete(activity);
+                this._removed.add(activity);
+            }
+
+            // Remove from primary maps
+            this._activities.delete(activityId);
+            this._enableState.delete(activityId);
+        }
+        return this.copy();
+    }
+
+    removeTrack(trackId) {
+        let map = this._trackActivityMap.get(trackId);
+        if (map) {
+            let activitiesToDelete = new Set();
+
+            // Remove track from all activities that use it
+            for (let activity of map) {
+                let actors = activity.actors.filter((actor) => {
+                    return actor.id1 !== trackId;
+                });
+                activity.actors = actors;
+
+                // Queue newly-emptied activities for deletion
+                if (actors.length === 0) {
+                    activitiesToDelete.add(activity.id2);
+                }
+            }
+
+            // Purge newly-emptied activities
+            for (let activityId of activitiesToDelete) {
+                this.remove(activityId);
+            }
+        }
+
+        return this.copy();
+    }
+
     getActivityFrameRange(activityId) {
         var activity = this._activities.get(activityId);
         return activity.timespan[0].tsr0;
+    }
+
+    getRemoved() {
+        return Array.from(this._removed);
     }
 
     getEdited() {
