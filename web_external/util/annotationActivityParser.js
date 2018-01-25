@@ -2,34 +2,36 @@ class AnnotationActivityContainer {
     constructor() {
         this._id2 = 0;
         this._itemId = null;
-        this._trackToActivityMapper = new Map();
-        this._mapper = new Map();
-        this._enableState = new Map();
-        this._edited = new Set();
+
+        this._activities = new Map(); // activity id -> activity
+        this._enableState = new Map(); // activity id -> enabled
+        this._trackActivityMap = new Map(); // track id -> Array(activity)
+
         this._added = new Set();
+        this._edited = new Set();
     }
 
     add(activity) {
         this._itemId = activity.itemId;
         this._id2 = Math.max(this._id2, activity.id2);
-        var trackToActivityMapper = this._trackToActivityMapper;
-        var mapper = this._mapper;
+
         activity.actors.forEach((actor) => {
             var id1 = actor.id1;
-            if (!trackToActivityMapper.has(id1)) {
-                trackToActivityMapper.set(id1, []);
+            if (!this._trackActivityMap.has(id1)) {
+                this._trackActivityMap.set(id1, []);
             }
-            trackToActivityMapper.get(id1).push(activity);
+            this._trackActivityMap.get(id1).push(activity);
         });
+
         this._enableState.set(activity.id2, true);
-        this._mapper.set(activity.id2, activity);
+        this._activities.set(activity.id2, activity);
     }
 
     getEnabledActivities(id1, frame) {
-        if (!this._trackToActivityMapper.has(id1)) {
+        if (!this._trackActivityMap.has(id1)) {
             return;
         }
-        var activities = this._trackToActivityMapper.get(id1);
+        var activities = this._trackActivityMap.get(id1);
         var inRangeActivity = activities.filter((activity) => {
             var actor = activity.actors.filter((actor) => {
                 return actor.id1 === id1;
@@ -44,11 +46,11 @@ class AnnotationActivityContainer {
     }
 
     getItem(id2) {
-        return this._mapper.get(id2);
+        return this._activities.get(id2);
     }
 
     getAllItems() {
-        return Array.from(this._mapper.values());
+        return Array.from(this._activities.values());
     }
 
     getEnableState(id2) {
@@ -110,7 +112,7 @@ class AnnotationActivityContainer {
     }
 
     getActivityFrameRange(activityId) {
-        var activity = this._mapper.get(activityId);
+        var activity = this._activities.get(activityId);
         return activity.timespan[0].tsr0;
     }
 
