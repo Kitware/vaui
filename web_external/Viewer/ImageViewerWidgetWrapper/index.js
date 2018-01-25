@@ -26,7 +26,7 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.editMode !== nextProps.editMode) {
             this.geojsViewer.setEditMode(nextProps.editMode);
         }
-        // redraw needs to happen before call edit()
+        // redraw redrawAnnotation() to happen before call edit() because the latter uses the result of the former some time
         if (this.props.geometryCotnainer !== nextProps.geometryCotnainer ||
             this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
             this.props.selectedTrackId !== nextProps.selectedTrackId ||
@@ -59,22 +59,18 @@ class ImageViewerWidgetWrapper extends Component {
                 this.props.onReady();
             }
         }).on('annotationLeftClick', (annotation) => {
-            console.log("annotationLeftClick");
             this.props.annotationLeftClick(annotation);
         }).on('annotationRightClick', (annotation) => {
-            console.log("annotationRightClick");
             this.props.annotationRightClick(annotation);
         }).on('annotationDrawn', (g0) => {
             this.props.annotationDrawn(g0);
         });
         this.trapCatch = mousetrap(this.container).bind('del', () => console.error('DELETE Not implemented'));
-        this.trapCatch.bind('mod', () => this.mode = this.mode === 'add' ? 'edit' : 'add');
     }
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
         this.trapCatch.unbind('del');
-        this.trapCatch.unbind('mod');
     }
 
     render() {

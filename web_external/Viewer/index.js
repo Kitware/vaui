@@ -12,7 +12,6 @@ import './style.styl';
 import './slider.styl';
 
 class Viewer extends PureComponent {
-
     constructor(props) {
         super(props);
         this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
@@ -76,9 +75,9 @@ class Viewer extends PureComponent {
                 <div className='panel-body'>
                     {this.props.selectedItem &&
                         [
-                            <div key='control-bar'>
+                            <div key='control-bar' className='control-bar'>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
-                                <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>
+                                {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
@@ -252,9 +251,6 @@ class Viewer extends PureComponent {
                 return d.trackEnabled;
             },
             strokeColor(a, b, d) {
-                // if (d.geometry.id1 === editingTrackId) {
-                //     return { r: 0.5, g: 1, b: 1 };
-                // }
                 if (d.geometry.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
@@ -278,7 +274,15 @@ class Viewer extends PureComponent {
             strokeOpacity: 0.8,
             uniformPolygon: true
         };
-        return { data, style, editingTrackId };
+        return {
+            data, style, editingTrackId, editingStyle: {
+                fill: false,
+                stroke: true,
+                strokeColor: { r: 0.5, g: 1, b: 1 },
+                strokeWidth: 1.25,
+                strokeOpacity: 0.8
+            }
+        };
     }
 
     newTrack() {
