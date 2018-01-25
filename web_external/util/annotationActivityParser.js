@@ -5,7 +5,7 @@ class AnnotationActivityContainer {
 
         this._activities = new Map(); // activity id -> activity
         this._enableState = new Map(); // activity id -> enabled
-        this._trackActivityMap = new Map(); // track id -> Array(activity)
+        this._trackActivityMap = new Map(); // track id -> Set(activity)
 
         this._added = new Set();
         this._edited = new Set();
@@ -15,13 +15,13 @@ class AnnotationActivityContainer {
         this._itemId = activity.itemId;
         this._id2 = Math.max(this._id2, activity.id2);
 
-        activity.actors.forEach((actor) => {
-            var id1 = actor.id1;
+        for (let actor of activity.actors) {
+            let id1 = actor.id1;
             if (!this._trackActivityMap.has(id1)) {
-                this._trackActivityMap.set(id1, []);
+                this._trackActivityMap.set(id1, new Set());
             }
-            this._trackActivityMap.get(id1).push(activity);
-        });
+            this._trackActivityMap.get(id1).add(activity);
+        }
 
         this._enableState.set(activity.id2, true);
         this._activities.set(activity.id2, activity);
@@ -31,18 +31,32 @@ class AnnotationActivityContainer {
         if (!this._trackActivityMap.has(id1)) {
             return;
         }
-        var activities = this._trackActivityMap.get(id1);
-        var inRangeActivity = activities.filter((activity) => {
-            var actor = activity.actors.filter((actor) => {
+
+        let activitiesInRange = new Set();
+        for (let activity of this._trackActivityMap.get(id1)) {
+            // Ignore activities that are not enabled
+            if (!this._enableState.get(activity.id2)) {
+                continue;
+            }
+
+            // Get this actor's frame range(s) within the activity
+            let actors = activity.actors.filter((actor) => {
                 return actor.id1 === id1;
-            })[0];
-            var frameRange = actor.timespan[0].tsr0;
-            return this._enableState.get(activity.id2) && frameRange[0] <= frame && frameRange[1] >= frame;
-        });
-        if (inRangeActivity.length === 0) {
+            });
+            for (let actor of actors) {
+                let frameRange = actor.timespan[0].tsr0;
+                if (frameRange[0] <= frame && frameRange[1] >= frame) {
+                    // Actor's range includes requested frame; add match
+                    activitiesInRange.add(activity);
+                }
+            }
+        }
+
+        // Return matching activities, if any
+        if (activitiesInRange.size === 0) {
             return;
         }
-        return inRangeActivity;
+        return [...activitiesInRange];
     }
 
     getItem(id2) {
