@@ -60,7 +60,9 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('annotationDrawn', (g0) => {
             this.props.annotationDrawn(g0);
         });
-        this.trapCatch = mousetrap(this.container).bind('del', () => console.error('DELETE Not implemented'));
+        this.trapCatch = mousetrap(this.container).bind('del', () => {
+            this.props.annotationDeleted();
+        });
     }
 
     componentWillUnmount() {

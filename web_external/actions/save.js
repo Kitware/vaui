@@ -9,6 +9,14 @@ export default (save) => {
             type: `${SAVE}_PENDING`
         });
         return Promise.all(
+            annotationGeometryContainer.getRemoved().map(([flattenGeom]) => {
+                return restRequest({
+                    method: 'DELETE',
+                    url: `/geom/${flattenGeom._id}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(flattenGeom)
+                });
+            }),
             annotationGeometryContainer.getEdited().map(([flattenGeom]) => {
                 return restRequest({
                     method: 'PUT',

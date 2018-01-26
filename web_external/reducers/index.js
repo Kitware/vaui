@@ -54,6 +54,9 @@ function app(state, action) {
         case types.CHANGE_GEOM:
             var annotationGeometryContainer = state.annotationGeometryContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
             return { ...state, ...{ annotationGeometryContainer, pendingSave: true } };
+        case types.DELETE_GEOM:
+            var annotationGeometryContainer = state.annotationGeometryContainer.remove(action.payload.frame, action.payload.trackId);
+            return { ...state, ...{ annotationGeometryContainer, pendingSave: true } };
         case types.SAVE + '_PENDING':
             return { ...state, ...{ saving: true } };
         case types.SAVE + '_FULFILLED':
