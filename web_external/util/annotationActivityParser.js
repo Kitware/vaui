@@ -108,6 +108,24 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    changeTrack(trackId, newTrackId) {
+        let map = this._trackActivityMap.get(trackId);
+        if (map) {
+            // Update actor records in all activities using this track
+            for (let activity of map) {
+                for (let actor of activity.actors) {
+                    if (actor.id1 === trackId) {
+                        actor.id1 = newTrackId;
+                    }
+                }
+            }
+
+            // Transfer records in track-to-activities map
+            this._trackActivityMap.set(newTrackId, map);
+            this._trackActivityMap.delete(trackId);
+        }
+    }
+
     changeTrackActivity(activityId, trackId, newTimespan) {
         var activity = this.getItem(activityId);
         var trackActivity = activity.actors.find((trackActivity) => trackActivity.id1 === trackId);

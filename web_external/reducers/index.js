@@ -77,8 +77,8 @@ function app(state, action) {
         case types.CHANGE_TRACK:
             var annotationGeometryContainer = state.annotationGeometryContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
             var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newCset3);
-            // to do change track id inside activity
-            return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
+            var annotationActivityContainer = state.annotationActivityContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
+            return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, annotationActivityContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
         case types.SELECT_TRACK:
             return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.GOTO_ACTIVITY_START:
