@@ -1,5 +1,7 @@
 class AnnotationActivityContainer {
     constructor() {
+        this._id2 = 0;
+        this._itemId = null;
         this._trackToActivityMapper = new Map();
         this._mapper = new Map();
         this._enableState = new Map();
@@ -8,6 +10,8 @@ class AnnotationActivityContainer {
     }
 
     add(activity) {
+        this._itemId = activity.itemId;
+        this._id2 = Math.max(this._id2, activity.id2);
         var trackToActivityMapper = this._trackToActivityMapper;
         var mapper = this._mapper;
         activity.actors.forEach((actor) => {
@@ -53,6 +57,14 @@ class AnnotationActivityContainer {
 
     toggleState(id2, enabled) {
         this._enableState.set(id2, enabled);
+        return this.copy();
+    }
+
+    new(activity) {
+        activity.id2 = ++this._id2;
+        activity.itemId = this._itemId;
+        this.add(activity);
+        this._added.add(activity);
         return this.copy();
     }
 

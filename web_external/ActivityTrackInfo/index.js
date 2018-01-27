@@ -69,7 +69,7 @@ class ActivityTrackInfo extends PureComponent {
             </form>
             {this.state.changed &&
                 <div className='row'>
-                    <div className='col-sm-offset-8 col-sm-4'>
+                    <div className='col-sm-offset-7 col-sm-4'>
                         <div className='btn-group btn-group-sm' role='group' aria-label='...'>
                             <button type='button' className='btn btn-default' onClick={(e) => {
                                 this.setState(this._getInitialState(this.props));

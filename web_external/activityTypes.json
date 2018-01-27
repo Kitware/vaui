@@ -1,202 +1,202 @@
 [
     {
-       "type":"Walking",
-       "minTrack":1
+        "type": "Entering",
+        "minTrack": 2
     },
     {
-       "type":"Entering",
-       "minTrack":2
+        "type": "Exiting",
+        "minTrack": 2
     },
     {
-       "type":"Exiting",
-       "minTrack":2
+        "type": "Opening",
+        "minTrack": 2
     },
     {
-       "type":"Opening",
-       "minTrack":2
+        "type": "Closing",
+        "minTrack": 2
     },
     {
-       "type":"Closing",
-       "minTrack":2
+        "type": "Pick_Up",
+        "minTrack": 2
     },
     {
-       "type":"Pick_Up",
-       "minTrack":2
+        "type": "Set_Down",
+        "minTrack": 2
     },
     {
-       "type":"Set_Down",
-       "minTrack":2
+        "type": "Drop",
+        "minTrack": 2
     },
     {
-       "type":"Drop",
-       "minTrack":2
+        "type": "Object_Transfer",
+        "minTrack": 2
     },
     {
-       "type":"Object_Transfer",
-       "minTrack":2
+        "type": "Talking",
+        "minTrack": 2
     },
     {
-       "type":"Talking",
-       "minTrack":2
+        "type": "Person_Person_Interaction",
+        "minTrack": 2
     },
     {
-       "type":"Person_Person_Interaction",
-       "minTrack":2
+        "type": "Interacts",
+        "minTrack": 2
     },
     {
-       "type":"Interacts",
-       "minTrack":2
+        "type": "Riding",
+        "minTrack": 2
     },
     {
-       "type":"Rtypeing",
-       "minTrack":2
+        "type": "Open_Trunk",
+        "minTrack": 2
     },
     {
-       "type":"Open_Trunk",
-       "minTrack":2
+        "type": "Closing_Trunk",
+        "minTrack": 2
     },
     {
-       "type":"Closing_Trunk",
-       "minTrack":2
+        "type": "Loading",
+        "minTrack": 2
     },
     {
-       "type":"Loading",
-       "minTrack":2
+        "type": "Unloading",
+        "minTrack": 2
     },
     {
-       "type":"Unloading",
-       "minTrack":2
+        "type": "PickUp_Person_Vehicle",
+        "minTrack": 2
     },
     {
-       "type":"PickUp_Person_Vehicle",
-       "minTrack":2
+        "type": "DropOff_Person_Vehicle",
+        "minTrack": 2
     },
     {
-       "type":"DropOff_Person_Vehicle",
-       "minTrack":2
+        "type": "Abandoning_Object",
+        "minTrack": 2
     },
     {
-       "type":"Abandoning_Object",
-       "minTrack":2
+        "type": "Transport_HeavyCarry",
+        "minTrack": 2
     },
     {
-       "type":"Transport_HeavyCarry",
-       "minTrack":2
+        "type": "Fighting",
+        "minTrack": 2
     },
     {
-       "type":"Fighting",
-       "minTrack":2
+        "type": "Push",
+        "minTrack": 2
     },
     {
-       "type":"Push",
-       "minTrack":2
+        "type": "Pull",
+        "minTrack": 2
     },
     {
-       "type":"Pull",
-       "minTrack":2
+        "type": "Misc",
+        "minTrack": 2
     },
     {
-       "type":"Misc",
-       "minTrack":2
+        "type": "activity_standing",
+        "minTrack": 1
     },
     {
-       "type":"Activity Standing",
-       "minTrack":1
+        "type": "activity_crouching",
+        "minTrack": 1
     },
     {
-       "type":"Activity Crouching",
-       "minTrack":1
+        "type": "activity_sitting",
+        "minTrack": 1
     },
     {
-       "type":"Activity Sitting",
-       "minTrack":1
+        "type": "activity_walking",
+        "minTrack": 1
     },
     {
-       "type":"Activity Running",
-       "minTrack":1
+        "type": "activity_running",
+        "minTrack": 1
     },
     {
-       "type":"Activity Falling",
-       "minTrack":1
+        "type": "activity_falling",
+        "minTrack": 1
     },
     {
-       "type":"Activity Carrying",
-       "minTrack":1
+        "type": "activity_carrying",
+        "minTrack": 1
     },
     {
-       "type":"Activity Gesturing",
-       "minTrack":1
+        "type": "activity_gesturing",
+        "minTrack": 1
     },
     {
-       "type":"Behavior Distress",
-       "minTrack":1
+        "type": "behavior_distress",
+        "minTrack": 1
     },
     {
-       "type":"Behavior Aggressive",
-       "minTrack":1
+        "type": "behavior_aggressive",
+        "minTrack": 1
     },
     {
-       "type":"Behavior Fighting",
-       "minTrack":1
+        "type": "behavior_fighting",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Talking_Phone",
-       "minTrack":1
+        "type": "specialized_talking_phone",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Texting_Phone",
-       "minTrack":1
+        "type": "specialized_texting_phone",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Photographin",
-       "minTrack":1
+        "type": "specialized_photographing",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Using_tool",
-       "minTrack":1
+        "type": "specialized_using_tool",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Digging",
-       "minTrack":1
+        "type": "specialized_digging",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Throwing",
-       "minTrack":1
+        "type": "specialized_throwing",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Umbrella",
-       "minTrack":1
+        "type": "specialized_umbrella",
+        "minTrack": 1
     },
     {
-       "type":"Specialized Miscellaneous",
-       "minTrack":1
+        "type": "specialized_miscellaneous",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Moving",
-       "minTrack":1
+        "type": "vehicle_moving",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Turning_Right",
-       "minTrack":1
+        "type": "vehicle_turing_right",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Turning_Left",
-       "minTrack":1
+        "type": "vehicle_turning_left",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Stopping",
-       "minTrack":1
+        "type": "vehicle_stopping",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Starting",
-       "minTrack":1
+        "type": "vehicle_starting",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle U_Turn",
-       "minTrack":1
+        "type": "vehicle_u_turn",
+        "minTrack": 1
     },
     {
-       "type":"Vehicle Construction_functio",
-       "minTrack":1
+        "type": "vehicle_construction_function",
+        "minTrack": 1
     }
- ]
+]

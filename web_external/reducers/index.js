@@ -13,6 +13,7 @@ function app(state, action) {
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationGeometryContainer: null,
+            currentFrame: 0,
             maxFrame: null,
             geomItem: null,
             selectedAnnotation: null,
@@ -21,7 +22,8 @@ function app(state, action) {
             editingTrackId: null,
             saving: false,
             pendingSave: false,
-            requestFrameRange: null
+            requestFrameRange: null,
+            creatingActivity: false
         };
     }
     switch (action.type) {
@@ -84,13 +86,22 @@ function app(state, action) {
         case types.CHANGE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+        case types.NEW_ACTIVITY:
+            var annotationActivityContainer = state.annotationActivityContainer.new(action.payload);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.CHANGE_TRACK_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.SELECT_TRACK_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
+        case types.CURRENT_FRAME_CHANGE:
+            return { ...state, ...{ currentFrame: action.payload } };
         case types.MAX_FRAME_CHANGE:
             return { ...state, ...{ maxFrame: action.payload } };
+        case types.CREATE_ACTIVITY_START:
+            return { ...state, ...{ creatingActivity: true } };
+        case types.CREATE_ACTIVITY_END:
+            return { ...state, ...{ creatingActivity: false } };
         default:
             return state;
     }

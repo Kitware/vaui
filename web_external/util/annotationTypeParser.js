@@ -25,6 +25,17 @@ class AnnotationTypeContainer {
         return this._mapper.get(id1);
     }
 
+    // Other code that calculate the label should use this function instead
+    getTrackDisplayLabel(id1) {
+        var type = this.getItem(id1);
+        if (type) {
+            var types = Object.keys(type.cset3);
+            var typeLabel = types.length <= 1 ? types[0] : 'Multiple';
+        }
+        var label = ((type && typeLabel) ? `${typeLabel}-${id1}` : id1);
+        return label;
+    }
+
     change(trackId, newTrackId, newCset3) {
         var typeToChange = this.getAllItems().find((type) => {
             return type.id1 === trackId
