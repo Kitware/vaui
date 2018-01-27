@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
 import InfoView from '../InfoView';
+import ActivityCreator from '../ActivityCreator';
 import ObjectInfo from '../ObjectInfo';
 
 import './style.styl';
@@ -20,14 +21,18 @@ class IndexView extends PureComponent {
                 </div>
             </div>
             <Viewer className='main' />
-            <InfoView className='right-sidebar' />
+            <div className='right-sidebar'>
+                {this.props.creatingActivity &&
+                    <ActivityCreator />}
+                <InfoView />
+            </div>
         </div>;
     }
 }
 
 const mapStateToProps = (state, ownProps) => {
     return {
-
+        creatingActivity: state.creatingActivity
     };
 };
 

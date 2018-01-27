@@ -28,7 +28,7 @@ class TrackInfo extends PureComponent {
     render() {
         var range = this.props.annotationGeometryContainer.getTrackFrameRange(this.props.selectedTrackId);
         var types = Object.keys(this.state.cset3);
-        var type = types.length === 1 ? types[0] : 'multiple';
+        var type = types.length === 0 ? '' : (types.length === 1 ? types[0] : 'multiple');
 
         return <div className='trackinfo-widget'>
             <form className='form-horizontal'>
@@ -73,7 +73,7 @@ class TrackInfo extends PureComponent {
                                     changed: true
                                 });
                             }} >
-                                <option value=''></option>
+                                <option value='' disabled></option>
                                 <option value='multiple' disabled>Multiple</option>
                                 {_.sortBy(trackTypes).map((type) => {
                                     return <option key={type} value={type}>{type}</option>
@@ -97,7 +97,7 @@ class TrackInfo extends PureComponent {
             </form>
             {this.state.changed &&
                 <div className='row'>
-                    <div className='col-sm-offset-8 col-sm-4'>
+                    <div className='col-sm-offset-7 col-sm-4'>
                         <div className='btn-group btn-group-sm' role='group' aria-label='...'>
                             <button type='button' className='btn btn-default' onClick={(e) => {
                                 this.setState(this._getInitialState(this.props));

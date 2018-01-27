@@ -69,7 +69,7 @@ class ActivityPanel extends BasePane {
                                 var type = typeContainer.getItem(actor.id1);
                                 if (type) {
                                     var types = Object.keys(type.cset3);
-                                    var typeLabel = types.length === 1 ? types[0] : 'Multiple';
+                                    var typeLabel = types.length <= 1 ? types[0] : 'Multiple';
                                 }
                                 var label = (type && typeLabel) ? `${typeLabel}-${actor.id1}` : actor.id1;
                                 return <li key={actor.id1}>

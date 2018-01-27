@@ -46,7 +46,7 @@ class ActivityInfo extends PureComponent {
             trackRanges = [Math.min(trackRanges[0], trackRange[0]), Math.max(trackRanges[1], trackRange[1])];
         }
         var types = Object.keys(this.state.act2);
-        var type = types.length === 1 ? types[0] : 'multiple';
+        var type = types.length === 0 ? '' : (types.length === 1 ? types[0] : 'multiple');
         return <div className='activity-info'>
             <form className='form-horizontal'>
                 <fieldset>
@@ -103,7 +103,7 @@ class ActivityInfo extends PureComponent {
             {
                 this.state.changed &&
                 <div className='row'>
-                    <div className='col-sm-offset-8 col-sm-4'>
+                    <div className='col-sm-offset-7 col-sm-4'>
                         <div className='btn-group btn-group-sm' role='group' aria-label='...'>
                             <button type='button' className='btn btn-default' onClick={(e) => {
                                 this.setState(this._getInitialState(this.props));
