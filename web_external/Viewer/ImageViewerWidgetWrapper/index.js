@@ -6,6 +6,7 @@ import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
 class ImageViewerWidgetWrapper extends Component {
     trapCatch = null
+    mode = 'add'
 
     shouldComponentUpdate() { // eslint-disable-line
         return false;
@@ -22,15 +23,18 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.currentFrame !== nextProps.currentFrame) {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
-        if (this.props.editingTrackId !== nextProps.editingTrackId) {
-            this.geojsViewer.drawingMode(nextProps.editingTrackId !== null);
+        if (this.props.editMode !== nextProps.editMode) {
+            this.geojsViewer.setEditMode(nextProps.editMode);
         }
+        // redraw redrawAnnotation() to happen before call edit() because the latter uses the result of the former some time
         if (this.props.geometryCotnainer !== nextProps.geometryCotnainer ||
             this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
             this.props.selectedTrackId !== nextProps.selectedTrackId ||
-            this.props.editingTrackId !== nextProps.editingTrackId
-        ) {
+            this.props.editingTrackId !== nextProps.editingTrackId) {
             this.geojsViewer.redrawAnnotation();
+        }
+        if (this.props.editingTrackId !== nextProps.editingTrackId) {
+            this.geojsViewer.edit(nextProps.editingTrackId !== null);
         }
     }
 
@@ -40,7 +44,8 @@ class ImageViewerWidgetWrapper extends Component {
             el: this.container,
             itemId: this.props.item._id,
             model: new ItemModel(this.props.item),
-            getAnnotation: this.props.getAnnotation
+            getAnnotation: this.props.getAnnotation,
+            editMode: this.props.editMode
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
                 this.props.onProgress(currentFrame, numberOfFrames);

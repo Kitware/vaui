@@ -20,7 +20,8 @@ class Viewer extends PureComponent {
             videoPlaying: false,
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
-            ready: false
+            ready: false,
+            editMode: 'draw'
         };
         this.draggingSlider = false;
     }
@@ -74,8 +75,9 @@ class Viewer extends PureComponent {
                 <div className='panel-body'>
                     {this.props.selectedItem &&
                         [
-                            <div key='control-bar'>
+                            <div key='control-bar' className='control-bar'>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
+                                {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
@@ -86,6 +88,7 @@ class Viewer extends PureComponent {
                                 getAnnotation={this.getAnnotationForAFrame}
                                 editingTrackId={this.props.editingTrackId}
                                 selectedTrackId={this.props.selectedTrackId}
+                                editMode={this.state.editMode}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
                                         this.setState({
@@ -232,7 +235,6 @@ class Viewer extends PureComponent {
         var data = annotationGeometries.map((geometry) => {
             var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
             return {
-                g0: geometry.g0,
                 activities,
                 trackEnabled: geometryContainer.getEnableState(geometry.id1),
                 geometry,
@@ -250,12 +252,12 @@ class Viewer extends PureComponent {
                 return d.activities ? 0.3 : 0;
             },
             stroke(d) {
+                if (d.geometry.id1 === editingTrackId) {
+                    return false;
+                }
                 return d.trackEnabled;
             },
             strokeColor(a, b, d) {
-                if (d.geometry.id1 === editingTrackId) {
-                    return { r: 0.5, g: 1, b: 1 };
-                }
                 if (d.geometry.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
@@ -279,7 +281,15 @@ class Viewer extends PureComponent {
             strokeOpacity: 0.8,
             uniformPolygon: true
         };
-        return [data, style];
+        return {
+            data, style, editingTrackId, editingStyle: {
+                fill: false,
+                stroke: true,
+                strokeColor: { r: 0.5, g: 1, b: 1 },
+                strokeWidth: 1.25,
+                strokeOpacity: 0.8
+            }
+        };
     }
 
     newTrack() {
