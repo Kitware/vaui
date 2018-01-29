@@ -148,7 +148,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (enabled) {
                         if (this.editMode === 'edit') {
                             layer.options('clickToEdit', true);
-                            layer.mode('edit', layer.annotations()[0]);
+                            // If there is an geom for current frame, change it to edit mode directly
+                            if (layer.annotations().length === 1) {
+                                layer.mode('edit', layer.annotations()[0]);
+                            }
                             layer.geoOn(geo.event.annotation.state, (e) => {
                                 if (e.annotation.state() === 'done') {
                                     annotationChanged(e.annotation);

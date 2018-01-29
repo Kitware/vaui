@@ -140,7 +140,7 @@ class Viewer extends PureComponent {
                                         g0
                                     }
                                 })}
-                                annotationDeleted={() => this.props.dispatch({
+                                deleteAnnotation={() => this.props.dispatch({
                                     type: DELETE_GEOM,
                                     payload: {
                                         frame: this.state.videoCurrentFrame,

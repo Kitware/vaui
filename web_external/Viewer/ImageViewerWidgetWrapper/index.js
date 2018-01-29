@@ -5,7 +5,6 @@ import mousetrap from 'mousetrap';
 import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
 
 class ImageViewerWidgetWrapper extends Component {
-    trapCatch = null
     mode = 'add'
 
     shouldComponentUpdate() { // eslint-disable-line
@@ -65,14 +64,16 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('annotationDrawn', (g0) => {
             this.props.annotationDrawn(g0);
         });
-        this.trapCatch = mousetrap(this.container).bind('del', () => {
-            this.props.annotationDeleted();
+        mousetrap.bind('del', () => {
+            if (this.props.editingTrackId !== null) {
+                this.props.deleteAnnotation();
+            }
         });
     }
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
-        this.trapCatch.unbind('del');
+        mousetrap.unbind('del');
     }
 
     render() {
