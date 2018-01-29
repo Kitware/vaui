@@ -2,53 +2,70 @@ class AnnotationActivityContainer {
     constructor() {
         this._id2 = 0;
         this._itemId = null;
-        this._trackToActivityMapper = new Map();
-        this._mapper = new Map();
-        this._enableState = new Map();
-        this._edited = new Set();
+
+        this._activities = new Map(); // activity id -> activity
+        this._enableState = new Map(); // activity id -> enabled
+        this._trackActivityMap = new Map(); // track id -> Set(activity)
+
         this._added = new Set();
+        this._edited = new Set();
+        this._removed = new Set();
     }
 
     add(activity) {
         this._itemId = activity.itemId;
         this._id2 = Math.max(this._id2, activity.id2);
-        var trackToActivityMapper = this._trackToActivityMapper;
-        var mapper = this._mapper;
-        activity.actors.forEach((actor) => {
-            var id1 = actor.id1;
-            if (!trackToActivityMapper.has(id1)) {
-                trackToActivityMapper.set(id1, []);
+
+        for (let actor of activity.actors) {
+            let id1 = actor.id1;
+            if (!this._trackActivityMap.has(id1)) {
+                this._trackActivityMap.set(id1, new Set());
             }
-            trackToActivityMapper.get(id1).push(activity);
-        });
+            this._trackActivityMap.get(id1).add(activity);
+        }
+
         this._enableState.set(activity.id2, true);
-        this._mapper.set(activity.id2, activity);
+        this._activities.set(activity.id2, activity);
     }
 
     getEnabledActivities(id1, frame) {
-        if (!this._trackToActivityMapper.has(id1)) {
+        if (!this._trackActivityMap.has(id1)) {
             return;
         }
-        var activities = this._trackToActivityMapper.get(id1);
-        var inRangeActivity = activities.filter((activity) => {
-            var actor = activity.actors.filter((actor) => {
+
+        let activitiesInRange = new Set();
+        for (let activity of this._trackActivityMap.get(id1)) {
+            // Ignore activities that are not enabled
+            if (!this._enableState.get(activity.id2)) {
+                continue;
+            }
+
+            // Get this actor's frame range(s) within the activity
+            let actors = activity.actors.filter((actor) => {
                 return actor.id1 === id1;
-            })[0];
-            var frameRange = actor.timespan[0].tsr0;
-            return this._enableState.get(activity.id2) && frameRange[0] <= frame && frameRange[1] >= frame;
-        });
-        if (inRangeActivity.length === 0) {
+            });
+            for (let actor of actors) {
+                let frameRange = actor.timespan[0].tsr0;
+                if (frameRange[0] <= frame && frameRange[1] >= frame) {
+                    // Actor's range includes requested frame; add match
+                    activitiesInRange.add(activity);
+                }
+            }
+        }
+
+        // Return matching activities, if any
+        if (activitiesInRange.size === 0) {
             return;
         }
-        return inRangeActivity;
+        return [...activitiesInRange];
     }
 
     getItem(id2) {
-        return this._mapper.get(id2);
+        return this._activities.get(id2);
     }
 
     getAllItems() {
-        return Array.from(this._mapper.values());
+        return Array.from(this._activities.values());
     }
 
     getEnableState(id2) {
@@ -91,6 +108,24 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    changeTrack(trackId, newTrackId) {
+        let map = this._trackActivityMap.get(trackId);
+        if (map) {
+            // Update actor records in all activities using this track
+            for (let activity of map) {
+                for (let actor of activity.actors) {
+                    if (actor.id1 === trackId) {
+                        actor.id1 = newTrackId;
+                    }
+                }
+            }
+
+            // Transfer records in track-to-activities map
+            this._trackActivityMap.set(newTrackId, map);
+            this._trackActivityMap.delete(trackId);
+        }
+    }
+
     changeTrackActivity(activityId, trackId, newTimespan) {
         var activity = this.getItem(activityId);
         var trackActivity = activity.actors.find((trackActivity) => trackActivity.id1 === trackId);
@@ -109,9 +144,70 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    remove(activityId) {
+        let activity = this._activities.get(activityId);
+        if (activity) {
+            // Remove activity from track maps
+            for (let actor of activity.actors) {
+                let map = this._trackActivityMap.get(actor.id1);
+                map.delete(activity);
+                if (map.size === 0) {
+                    this._trackActivityMap.delete(actor.id1);
+                }
+            }
+
+            // Update modification records; if activity was added, just discard the
+            // record; otherwise, add to removal records and ensure the activity is
+            // not in the edit records
+            if (this._added.has(activity)) {
+                this._added.delete(activity);
+            }
+            else {
+                this._edited.delete(activity);
+                this._removed.add(activity);
+            }
+
+            // Remove from primary maps
+            this._activities.delete(activityId);
+            this._enableState.delete(activityId);
+        }
+        return this.copy();
+    }
+
+    removeTrack(trackId) {
+        let map = this._trackActivityMap.get(trackId);
+        if (map) {
+            let activitiesToDelete = new Set();
+
+            // Remove track from all activities that use it
+            for (let activity of map) {
+                let actors = activity.actors.filter((actor) => {
+                    return actor.id1 !== trackId;
+                });
+                activity.actors = actors;
+
+                // Queue newly-emptied activities for deletion
+                if (actors.length === 0) {
+                    activitiesToDelete.add(activity.id2);
+                }
+            }
+
+            // Purge newly-emptied activities
+            for (let activityId of activitiesToDelete) {
+                this.remove(activityId);
+            }
+        }
+
+        return this.copy();
+    }
+
     getActivityFrameRange(activityId) {
-        var activity = this._mapper.get(activityId);
+        var activity = this._activities.get(activityId);
         return activity.timespan[0].tsr0;
+    }
+
+    getRemoved() {
+        return Array.from(this._removed);
     }
 
     getEdited() {

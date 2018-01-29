@@ -2,8 +2,10 @@ class AnnotationTypeContainer {
     constructor() {
         this._itemId = null;
         this._mapper = new Map();
-        this._edited = new Set();
+
         this._added = new Set();
+        this._edited = new Set();
+        this._removed = new Set();
     }
 
     add(types) {
@@ -37,17 +39,37 @@ class AnnotationTypeContainer {
     }
 
     change(trackId, newTrackId, newCset3) {
-        var typeToChange = this.getAllItems().find((type) => {
-            return type.id1 === trackId
-        });
-        Object.assign(typeToChange, {
-            id1: newTrackId,
-            cset3: newCset3
-        });
-        if (!this._added.has(typeToChange)) {
-            this._edited.add(typeToChange);
+        let typeToChange = this._mapper.get(trackId);
+        if (typeToChange) {
+            Object.assign(typeToChange, {
+                id1: newTrackId,
+                cset3: newCset3
+            });
+            if (!this._added.has(typeToChange)) {
+                this._edited.add(typeToChange);
+            }
+            if (newTrackId != trackId) {
+                this._mapper.set(newTrackId, typeToChange);
+                this._mapper.delete(trackId);
+            }
         }
-        this._mapper.set(newTrackId, this._mapper.get(trackId));
+        return this.copy();
+    }
+
+    remove(trackId) {
+        let typeToRemove = this._mapper.get(trackId);
+        if (typeToRemove) {
+            // Update modification records; if type was added, just discard the
+            // record; otherwise, add to removal records and ensure the type is
+            // not in the edit records
+            if (this._added.has(typeToRemove)) {
+                this._added.delete(typeToRemove);
+            }
+            else {
+                this._edited.delete(typeToRemove);
+                this._removed.add(typeToRemove);
+            }
+        }
         return this.copy();
     }
 
@@ -62,12 +84,16 @@ class AnnotationTypeContainer {
         return this.copy();
     }
 
+    getAdded() {
+        return Array.from(this._added);
+    }
+
     getEdited() {
         return Array.from(this._edited);
     }
 
-    getAdded() {
-        return Array.from(this._added);
+    getRemoved() {
+        return Array.from(this._removed);
     }
 
     reset() {

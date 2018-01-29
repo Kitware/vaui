@@ -4,7 +4,7 @@ import _ from 'underscore';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import BasePane from '../BasePane';
-import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK, EDITING_TRACK } from '../../actions/types';
+import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK, EDITING_TRACK, DELETE_TRACK } from '../../actions/types';
 
 import './style.styl';
 
@@ -108,6 +108,12 @@ class TrackPane extends BasePane {
                     payload: this.state.interactTrackId
                 })}>
                     Edit
+                </MenuItem>
+                <MenuItem onClick={(e) => this.props.dispatch({
+                    type: DELETE_TRACK,
+                    payload: this.state.interactTrackId
+                })}>
+                    Delete
                 </MenuItem>
             </ContextMenu>
         </div>;

@@ -35,6 +35,14 @@ export default (save) => {
                     geom._id = savedGeom._id;
                 });
             }),
+            annotationTypeContainer.getRemoved().map((type) => {
+                return restRequest({
+                    method: 'DELETE',
+                    url: `/types/${type._id}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(type)
+                });
+            }),
             annotationTypeContainer.getEdited().map((type) => {
                 return restRequest({
                     method: 'PUT',
@@ -51,6 +59,14 @@ export default (save) => {
                     data: JSON.stringify(type)
                 }).then((savedType) => {
                     type._id = savedType._id;
+                });
+            }),
+            annotationActivityContainer.getRemoved().map((activity) => {
+                return restRequest({
+                    method: 'DELETE',
+                    url: `/activities/${activity._id}`,
+                    contentType: 'application/json',
+                    data: JSON.stringify(activity)
                 });
             }),
             annotationActivityContainer.getEdited().map((activity) => {

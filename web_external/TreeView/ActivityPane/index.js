@@ -10,7 +10,8 @@ import {
     SELECT_TRACK_ACTIVITY,
     TOGGLE_TRACK,
     GOTO_ACTIVITY_START,
-    GOTO_ACTIVITY_END
+    GOTO_ACTIVITY_END,
+    DELETE_ACTIVITY
 } from '../../actions/types';
 
 import './style.styl';
@@ -128,6 +129,13 @@ class ActivityPanel extends BasePane {
                     payload: this.state.interactActivityId
                 })}>
                     Go to end
+                </MenuItem>
+                <MenuItem divider />
+                <MenuItem onClick={(e) => this.props.dispatch({
+                    type: DELETE_ACTIVITY,
+                    payload: this.state.interactActivityId
+                })}>
+                    Delete
                 </MenuItem>
             </ContextMenu>
         </div>;
