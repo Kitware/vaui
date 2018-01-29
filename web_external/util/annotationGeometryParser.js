@@ -155,10 +155,10 @@ class AnnotationGeometryContainer {
         // Look up ID of possibly existing geometry
         let geomId = this._getState(frame, trackId);
 
-        if (geomId) {
+        if (geomId !== undefined) {
             // Geometry already exists for the specified state; look it up and
             // modify it in place
-            let geomToChange = this._frameMap(frame).get(trackId);
+            let geomToChange = this._frameMap.get(frame).get(trackId);
             Object.assign(geomToChange, {g0});
 
             // Update modification records; if state was added, it is still
@@ -208,7 +208,7 @@ class AnnotationGeometryContainer {
         // Look up ID of geometry
         let geomId = this._getState(frame, trackId);
 
-        if (geomId) {
+        if (geomId !== undefined) {
             let track = this._trackMap.get(trackId);
             track.states.delete(frame);
             track.recomputeFrameRange();
