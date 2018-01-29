@@ -79,6 +79,11 @@ function app(state, action) {
             var annotationTypeContainer = state.annotationTypeContainer.change(action.payload.trackId, action.payload.newTrackId, action.payload.newCset3);
             var annotationActivityContainer = state.annotationActivityContainer.changeTrack(action.payload.trackId, action.payload.newTrackId);
             return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, annotationActivityContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
+        case types.DELETE_TRACK:
+            var annotationGeometryContainer = state.annotationGeometryContainer.removeTrack(action.payload);
+            var annotationTypeContainer = state.annotationTypeContainer.remove(action.payload);
+            var annotationActivityContainer = state.annotationActivityContainer.removeTrack(action.payload);
+            return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null } };
         case types.SELECT_TRACK:
             return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
         case types.GOTO_ACTIVITY_START:
