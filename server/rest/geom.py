@@ -16,6 +16,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 ##############################################################################
+import json
+from bson import ObjectId
+
 from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
@@ -36,6 +39,13 @@ class GeomResource(Resource):
         self.route('DELETE', (':geomId',), self.deleteGeom)
         self.route('GET', ('export', ':itemId',), self.exportKPF)
 
+    # The girder default serialization takes twice the time than this custom serializer. Since geom could be relatively big, it worth to use this custom serializer. 
+    class JSONEncoder(json.JSONEncoder):
+        def default(self, obj):
+            if isinstance(obj, ObjectId):
+                return str(obj)
+            return json.JSONEncoder.default(self, obj)
+
     @autoDescribeRoute(
         Description('')
         .modelParam('itemId', model=Item, level=AccessType.READ)
@@ -43,9 +53,12 @@ class GeomResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
+    @rawResponse
     def getGeomsOfItem(self, item, params):
+        setResponseHeader('Content-Type', 'application/json')
         cursor = Geom().findByItem(item)
-        return list(cursor)
+        jsonString = self.JSONEncoder().encode(list(cursor))
+        return jsonString
 
     @autoDescribeRoute(
         Description('')
@@ -100,7 +113,8 @@ class GeomResource(Resource):
 
     @staticmethod
     def generateKPFContent(item):
-        # The pyyaml without c yaml is not fast, so for geom, considering the size, we build the yaml by hand
+        # The pyyaml without c yaml is not fast, so for geom, considering the
+        # size, we build the yaml by hand
         cursor = Geom().findByItem(item)
         output = []
         for geom in cursor:
@@ -116,6 +130,7 @@ class GeomResource(Resource):
                 keyValues.append('{0}: {1}'.format(key, value))
             content = '- { geom: { ' + ', '.join(keyValues) + ' } }'
             output.append(content)
+
         def gen():
             yield '\n'.join(output)
         return gen
