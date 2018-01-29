@@ -30,7 +30,6 @@ class ActivityTrackInfo extends PureComponent {
 
     render() {
         var trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(this.state.trackActivity.id1);
-        console.log(trackRange);
         return <div className='activity-track-info'>
             <form className='form-horizontal'>
                 <fieldset>

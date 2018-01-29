@@ -81,6 +81,10 @@ function app(state, action) {
             return { ...state, ...{ annotationGeometryContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: action.payload.newTrackId } };
         case types.SELECT_TRACK:
             return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+        case types.GOTO_ACTIVITY_START:
+        case types.GOTO_ACTIVITY_END:
+            var range = state.annotationActivityContainer.getActivityFrameRange(action.payload);
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
         case types.SELECT_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
         case types.CHANGE_ACTIVITY:

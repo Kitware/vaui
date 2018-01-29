@@ -109,6 +109,11 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    getActivityFrameRange(activityId) {
+        var activity = this._mapper.get(activityId);
+        return activity.timespan[0].tsr0;
+    }
+
     getEdited() {
         return Array.from(this._edited);
     }

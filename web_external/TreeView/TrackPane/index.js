@@ -31,12 +31,6 @@ class TrackPane extends BasePane {
         });
     }
 
-    setInteractTarget(trackId) {
-        this.setState({
-            interactTrackId: trackId
-        });
-    }
-
     render() {
         if (!this.props.annotationTypeContainer || !this.props.annotationGeometryContainer) {
             return null;
@@ -63,7 +57,11 @@ class TrackPane extends BasePane {
                     var label = ((type && typeLabel) ? `${typeLabel}-${trackId}` : trackId);
                     return <li key={trackId}>
                         <ContextMenuTrigger id='track-menu'>
-                            <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => this.setInteractTarget(trackId)}>
+                            <div className={'checkbox ' + (trackId === this.props.selectedTrackId ? 'selected' : '')} onContextMenu={(e) => {
+                                this.setState({
+                                    interactTrackId: trackId
+                                });
+                            }}>
                                 <label className={trackId === this.props.editingTrackId ? 'editing' : ''} onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                     <input type='checkbox'
                                         checked={geometryContainer.getEnableState(trackId)}
