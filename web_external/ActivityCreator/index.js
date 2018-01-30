@@ -40,8 +40,9 @@ class ActivityCreator extends PureComponent {
         for (let [trackId, range] of this.state.trackFrameRangeMap) {
             var trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(trackId);
             range[0] = Math.max(trackRange[0], start);
-            range[1] = Math.min(trackRange[1], end);
+            range[1] = Math.max(trackRange[0], Math.min(trackRange[1], end));
         }
+        this.setState({ trackFrameRangeMap: new Map(this.state.trackFrameRangeMap) });
     }
 
     _dispatchNewAcitivty() {

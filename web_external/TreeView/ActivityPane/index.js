@@ -43,7 +43,7 @@ class ActivityPanel extends BasePane {
             return null;
         }
         var activityContainer = this.props.annotationActivityContainer;
-        var activities = activityContainer.getAllItems();
+        var activities = _.sortBy(activityContainer.getAllItems(), (activity) => activity.id2);
         var geometryContainer = this.props.annotationGeometryContainer;
         var typeContainer = this.props.annotationTypeContainer;
 
