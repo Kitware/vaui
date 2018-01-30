@@ -186,6 +186,11 @@ class AnnotationActivityContainer {
                 });
                 activity.actors = actors;
 
+                // Update modification records
+                if (!this._added.has(activity)) {
+                    this._edited.add(activity);
+                }
+
                 // Queue newly-emptied activities for deletion
                 if (actors.length === 0) {
                     activitiesToDelete.add(activity.id2);
