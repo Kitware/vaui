@@ -206,6 +206,28 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    removeActor(activityId, actorIndex) {
+        let activity = this._activities.get(activityId);
+        if (activity) {
+            if (actorIndex >= 0 && actorIndex < activity.actors.length) {
+                // Remove specified actor from the activity
+                activity.actors.splice(actorIndex, 1);
+
+                // Check if the activity is now empty
+                if (activity.actors.length === 0) {
+                    // Remove the activity
+                    this.remove(activityId);
+                }
+                else {
+                    // Otherwise, update modification records
+                    if (!this._added.has(activity)) {
+                        this._edited.add(activity);
+                    }
+                }
+            }
+        }
+    }
+
     getActivityFrameRange(activityId) {
         var activity = this._activities.get(activityId);
         return activity.timespan[0].tsr0;
