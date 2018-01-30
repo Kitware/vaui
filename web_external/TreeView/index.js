@@ -21,7 +21,7 @@ class TreeView extends Component {
                 <div className='panel panel-default'>
                     <div className='panel-heading'>
                         <Nav bsStyle='tabs'>
-                            <NavItem eventKey='track'>Track</NavItem>
+                            <NavItem eventKey='track'>Tracks</NavItem>
                             <NavItem eventKey='activity'>Activities</NavItem>
                         </Nav>
                     </div>
