@@ -25,3 +25,5 @@ Run `girder-server`
 Navigate to `localhost:8080` and create a user and a file assetstore and enable this Vaui plugin  
 Stop and restart the server  
 Navigate to `localhost:8080`  
+
+For detailed development envrionment setup see [here](development_environment.md)
