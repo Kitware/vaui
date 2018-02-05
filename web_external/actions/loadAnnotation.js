@@ -62,6 +62,10 @@ export default (item, reImport) => {
                     payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer }
                 });
             });
+        }).catch(() => {
+            dispatch({
+                type: LOAD_ANNOTATION + '_REJECTED'
+            });
         });
     };
 };
