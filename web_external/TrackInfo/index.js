@@ -84,13 +84,13 @@ class TrackInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>Start:</label>
                         <div className='col-sm-9'>
-                            <p className='form-control-static'>{range[0]} (frame)</p>
+                            <p className='form-control-static'>{this.props.annotationGeometryContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[0]} (frame)`}</p>
                         </div>
                     </div>
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>End:</label>
                         <div className='col-sm-9'>
-                            <p className='form-control-static'>{range[1]} (frame)</p>
+                            <p className='form-control-static'>{this.props.annotationGeometryContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[1]} (frame)`}</p>
                         </div>
                     </div>
                 </fieldset>

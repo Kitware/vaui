@@ -139,6 +139,10 @@ class AnnotationGeometryContainer {
         return Array.from(this._frameMap.get(frame).values());
     }
 
+    isTrackEmpty(trackId){
+        return !this._trackMap.get(trackId).states.size;
+    }
+
     get length() {
         return this._frameMap.size;
     }
@@ -222,7 +226,6 @@ class AnnotationGeometryContainer {
         let newGeom = Object.assign({}, geom, geom.keyValues);
         delete newGeom.keyValues;
         return [newGeom, geom];
-
     }
 
     getAdded() {

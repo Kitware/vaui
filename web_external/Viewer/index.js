@@ -132,7 +132,7 @@ class Viewer extends PureComponent {
                                     type: EDITING_TRACK,
                                     payload: annotation ? annotation.geometry.id1 : null
                                 })}
-                                annotationDrawn={(g0) => this.props.dispatch({
+                                rectangleDrawn={(g0) => this.props.dispatch({
                                     type: CHANGE_GEOM,
                                     payload: {
                                         frame: this.state.videoCurrentFrame,
@@ -140,7 +140,7 @@ class Viewer extends PureComponent {
                                         g0
                                     }
                                 })}
-                                annotationDeleted={() => this.props.dispatch({
+                                deleteAnnotation={() => this.props.dispatch({
                                     type: DELETE_GEOM,
                                     payload: {
                                         frame: this.state.videoCurrentFrame,

@@ -43,7 +43,7 @@ class ActivityPanel extends BasePane {
             return null;
         }
         var activityContainer = this.props.annotationActivityContainer;
-        var activities = activityContainer.getAllItems();
+        var activities = _.sortBy(activityContainer.getAllItems(), (activity) => activity.id2);
         var geometryContainer = this.props.annotationGeometryContainer;
         var typeContainer = this.props.annotationTypeContainer;
 
@@ -90,7 +90,7 @@ class ActivityPanel extends BasePane {
                                     }
                                     var label = (type && typeLabel) ? `${typeLabel}-${actor.id1}` : actor.id1;
                                     return <li key={actor.id1}>
-                                        <div className={'checkbox ' + ((actor.id1 === this.props.selectedTrackId && activity.id2 === this.props.selectedActivityId) ? 'selected' : '')}>
+                                        <div className={'checkbox ' + ((actor.id1 === this.props.selectedTrackId) ? 'selected' : '')}>
                                             <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                                 <input type='checkbox'
                                                     checked={geometryContainer.getEnableState(actor.id1)}

@@ -124,6 +124,7 @@ class AnnotationActivityContainer {
             this._trackActivityMap.set(newTrackId, map);
             this._trackActivityMap.delete(trackId);
         }
+        return this.copy();
     }
 
     changeTrackActivity(activityId, trackId, newTimespan) {

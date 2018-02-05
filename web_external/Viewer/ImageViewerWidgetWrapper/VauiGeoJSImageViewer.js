@@ -137,7 +137,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 var annotationChanged = (annotation) => {
                     var coordinates = annotation.coordinates();
                     var g0 = [[Math.round(coordinates[0]['x']), Math.round(coordinates[0]['y'])], [Math.round(coordinates[2]['x']), Math.round(coordinates[2]['y'])]];
-                    this.trigger('annotationDrawn', g0);
+                    this.trigger('rectangleDrawn', g0);
                 };
 
                 this.edit = (enabled) => {
@@ -148,7 +148,10 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (enabled) {
                         if (this.editMode === 'edit') {
                             layer.options('clickToEdit', true);
-                            layer.mode('edit', layer.annotations()[0]);
+                            // If there is an geom for current frame, change it to edit mode directly
+                            if (layer.annotations().length === 1) {
+                                layer.mode('edit', layer.annotations()[0]);
+                            }
                             layer.geoOn(geo.event.annotation.state, (e) => {
                                 if (e.annotation.state() === 'done') {
                                     annotationChanged(e.annotation);
