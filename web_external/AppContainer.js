@@ -18,8 +18,8 @@ class AppContainer extends PureComponent {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (this.props.saving !== nextProps.saving) {
-            if (nextProps.saving) {
+        if (this.props.saving !== nextProps.saving || this.props.loadingAnnotation != nextProps.loadingAnnotation) {
+            if (nextProps.saving || nextProps.loadingAnnotation) {
                 $(window).on('beforeunload', this.unloadConfirmation);
             } else {
                 $(window).off('beforeunload');
@@ -43,7 +43,8 @@ class AppContainer extends PureComponent {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        saving: state.saving
+        saving: state.saving,
+        loadingAnnotation: state.loadingAnnotation
     };
 };
 

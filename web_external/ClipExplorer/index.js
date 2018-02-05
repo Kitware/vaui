@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import React, { Component } from 'react';
-import { Modal, Button, Row, Col, Glyphicon } from 'react-bootstrap';
+import { Modal, Button, Row, Col, Glyphicon, Form, Checkbox } from 'react-bootstrap';
 import { restRequest } from 'girder/rest';
 
 import './style.styl';
@@ -15,7 +15,8 @@ class ClipExplorer extends Component {
             annotationFolders: new Set(),
             selectedItem: null,
             selectedFolder: null,
-            showMode: 'all'
+            showMode: 'all',
+            reImport: false
         };
         this.folderCache = new Map();
     }
@@ -177,8 +178,8 @@ class ClipExplorer extends Component {
                         </span>
                     </Col>
                 </Row>
-                <Row className='folders-container'>
-                    <Col xs={11} xsOffset={1}>
+                <Row>
+                    <Col xs={10} xsOffset={1} className='folders-container'>
                         {this.state.loading && <span>Loading...</span>}
                         {!this.state.loading && folders.length === 0 && <span>Empty</span>}
                         {folders.length !== 0 &&
@@ -206,7 +207,7 @@ class ClipExplorer extends Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Col xs={11} xsOffset={1}>
+                    <Col xs={5} xsOffset={1}>
                         <select value={this.state.showMode} onChange={(e) => this.setState({ showMode: e.target.value })}>
                             <option value='all'>All</option>
                             <option value='not-annotated'>Not annotated</option>
@@ -214,11 +215,16 @@ class ClipExplorer extends Component {
                         </select>
                     </Col>
                 </Row>
+                <Row>
+                    <Col xs={4} xsOffset={1} className='reimport-container'>
+                        <Checkbox value={this.state.reImport} onChange={(e) => { this.setState({ reImport: e.target.checked }) }}>Re-import from KPF</Checkbox>
+                    </Col>
+                </Row>
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={() => this.tryClose()}>Cancel</Button>
                 <Button bsStyle='primary'
-                    onClick={(e) => { this.props.onItemSelected(this.state.selectedFolder, this.state.selectedItem); }}
+                    onClick={(e) => { this.props.onItemSelected(this.state.selectedFolder, this.state.selectedItem, this.state.reImport); }}
                     disabled={!this.state.selectedItem}>Select</Button>
             </Modal.Footer>
         </Modal>;
