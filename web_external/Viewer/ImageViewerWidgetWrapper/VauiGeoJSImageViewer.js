@@ -137,7 +137,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 var annotationChanged = (annotation) => {
                     var coordinates = annotation.coordinates();
                     var g0 = [[Math.round(coordinates[0]['x']), Math.round(coordinates[0]['y'])], [Math.round(coordinates[2]['x']), Math.round(coordinates[2]['y'])]];
-                    this.trigger('annotationDrawn', g0);
+                    this.trigger('rectangleDrawn', g0);
                 };
 
                 this.edit = (enabled) => {

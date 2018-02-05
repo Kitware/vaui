@@ -61,8 +61,8 @@ class ImageViewerWidgetWrapper extends Component {
             this.props.annotationLeftClick(annotation);
         }).on('annotationRightClick', (annotation) => {
             this.props.annotationRightClick(annotation);
-        }).on('annotationDrawn', (g0) => {
-            this.props.annotationDrawn(g0);
+        }).on('rectangleDrawn', (g0) => {
+            this.props.rectangleDrawn(g0);
         });
         mousetrap.bind('del', () => {
             if (this.props.editingTrackId !== null) {

@@ -39,7 +39,9 @@ class GeomResource(Resource):
         self.route('DELETE', (':geomId',), self.deleteGeom)
         self.route('GET', ('export', ':itemId',), self.exportKPF)
 
-    # The girder default serialization takes twice the time than this custom serializer. Since geom could be relatively big, it worth to use this custom serializer. 
+    # The girder default serialization takes twice the time
+    # as this custom serializer. Since geom could be relatively big,
+    # it is worthwhile to use this custom serializer.
     class JSONEncoder(json.JSONEncoder):
         def default(self, obj):
             if isinstance(obj, ObjectId):
