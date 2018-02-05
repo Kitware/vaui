@@ -99,6 +99,7 @@ class AnnotationTypeContainer {
     reset() {
         this._edited.clear();
         this._added.clear();
+        this._removed.clear();
         return this.copy();
     }
 

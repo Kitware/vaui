@@ -90,11 +90,13 @@ export default (save) => {
         ).then(() => {
             annotationGeometryContainer = annotationGeometryContainer.reset();
             annotationTypeContainer = annotationTypeContainer.reset();
+            annotationActivityContainer = annotationActivityContainer.reset();
             dispatch({
                 type: `${SAVE}_FULFILLED`,
                 payload: {
                     annotationGeometryContainer,
-                    annotationTypeContainer
+                    annotationTypeContainer,
+                    annotationActivityContainer
                 }
             });
         });

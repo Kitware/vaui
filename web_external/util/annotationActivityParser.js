@@ -224,6 +224,13 @@ class AnnotationActivityContainer {
         return Array.from(this._added);
     }
 
+    reset() {
+        this._edited.clear();
+        this._added.clear();
+        this._removed.clear();
+        return this.copy();
+    }
+
     copy() {
         return Object.assign(new AnnotationActivityContainer(), this);
     }
