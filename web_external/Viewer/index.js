@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START  } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -102,6 +102,7 @@ class Viewer extends PureComponent {
                                 getAnnotation={this.getAnnotationForAFrame}
                                 editingTrackId={this.props.editingTrackId}
                                 selectedTrackId={this.props.selectedTrackId}
+                                selectedActivityId={this.props.selectedActivityId}
                                 editMode={this.state.editMode}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
@@ -258,13 +259,27 @@ class Viewer extends PureComponent {
             return data.activities || data.trackEnabled;
         });
         var selectedTrackId = this.props.selectedTrackId;
+        var selectedActivityId = this.props.selectedActivityId;
         var editingTrackId = this.props.editingTrackId;
         var style = {
-            fill: true,
-            fillColor: { r: 1.0, g: 0.839, b: 0.439 },
-            fillOpacity(a, b, d) {
-                return d.activities ? 0.3 : 0;
+            fill(d) {
+                if (!d.activities) {
+                    return false;
+                }
+                return true;
             },
+            fillColor(a, b, d) {
+                if (!d.activities) {
+                    return 'black';
+                }
+                for (let activity of d.activities) {
+                    if (activity.id2 === selectedActivityId) {
+                        return { r: 1, g: 0.08, b: 0.58 };
+                    }
+                }
+                return { r: 1.0, g: 0.839, b: 0.439 };
+            },
+            fillOpacity: 0.3,
             stroke(d) {
                 if (d.geometry.id1 === editingTrackId) {
                     return false;
@@ -373,6 +388,7 @@ const mapStateToProps = (state, ownProps) => {
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTypeContainer: state.annotationTypeContainer,
         selectedTrackId: state.selectedTrackId,
+        selectedActivityId: state.selectedActivityId,
         editingTrackId: state.editingTrackId,
         requestFrameRange: state.requestFrameRange,
         requestFrame: state.requestFrame

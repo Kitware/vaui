@@ -18,6 +18,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         var interactorOpts = map.interactor().options();
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
+        interactorOpts.actions.splice(3, 2);
         map.interactor().options(interactorOpts);
         var ids = null;
         var siblings = new ItemCollection();
