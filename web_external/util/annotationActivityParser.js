@@ -109,20 +109,22 @@ class AnnotationActivityContainer {
     }
 
     changeTrack(trackId, newTrackId) {
-        let map = this._trackActivityMap.get(trackId);
-        if (map) {
+        let activities = this._trackActivityMap.get(trackId);
+        if (activities) {
+            this._trackActivityMap.delete(trackId);
             // Update actor records in all activities using this track
-            for (let activity of map) {
+            for (let activity of activities) {
                 for (let actor of activity.actors) {
                     if (actor.id1 === trackId) {
                         actor.id1 = newTrackId;
                     }
                 }
+                if (!this._added.has(activity)) {
+                    this._edited.add(activity);
+                }
             }
-
             // Transfer records in track-to-activities map
-            this._trackActivityMap.set(newTrackId, map);
-            this._trackActivityMap.delete(trackId);
+            this._trackActivityMap.set(newTrackId, activities);
         }
         return this.copy();
     }
