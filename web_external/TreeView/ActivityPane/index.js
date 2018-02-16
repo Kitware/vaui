@@ -48,12 +48,6 @@ class ActivityPanel extends BasePane {
         var typeContainer = this.props.annotationTypeContainer;
 
         return <div className={['v-activity-pane', this.props.className].join(' ')}>
-            <div className='checkbox'>
-                <label>
-                    <input type='checkbox' checked={this.allChecked()} onChange={(e) => this.allClick()} />
-                    All
-                </label>
-            </div>
             <ul>
                 {activities.map((activity) => {
                     var types = Object.keys(activity.act2);
@@ -117,6 +111,10 @@ class ActivityPanel extends BasePane {
                     </li>;
                 })}
             </ul>
+            <div className='btn-group selection-buttons' role='group'>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.checkAll(); }}>Show all</button>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.uncheckAll(); }}>Hide all</button>
+            </div>
             <ContextMenu id="activity-menu">
                 <MenuItem onClick={(e) => this.props.dispatch({
                     type: GOTO_ACTIVITY_START,

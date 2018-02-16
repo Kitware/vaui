@@ -6,7 +6,7 @@ import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 
-export default (item) => {
+export default (item, reImport) => {
     return (dispatch, getState) => {
         dispatch({
             type: `${LOAD_ANNOTATION}_PENDING`
@@ -14,9 +14,7 @@ export default (item) => {
         return restRequest({
             url: `/vaui-annotation/status/${item.folderId}`
         }).then((result) => {
-            if (result) {
-
-            } else {
+            if (!result || reImport) {
                 return restRequest({
                     method: 'POST',
                     url: `/vaui-annotation/import/${item.folderId}`
@@ -56,13 +54,17 @@ export default (item) => {
                         url: `/geom/${items[0]._id}`
                     });
                 }).then((geoms) => {
-                        return annotationGeometryParser(geoms);
+                    return annotationGeometryParser(geoms);
                 })
             ]).then(([annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer]) => {
                 dispatch({
                     type: LOAD_ANNOTATION + '_FULFILLED',
                     payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer }
                 });
+            });
+        }).catch(() => {
+            dispatch({
+                type: LOAD_ANNOTATION + '_REJECTED'
             });
         });
     };

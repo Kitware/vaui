@@ -8,8 +8,8 @@ export default (save) => {
         dispatch({
             type: `${SAVE}_PENDING`
         });
-        return Promise.all(
-            annotationGeometryContainer.getRemoved().map(([flattenGeom]) => {
+        return Promise.all([
+            ...annotationGeometryContainer.getRemoved().map(([flattenGeom]) => {
                 return restRequest({
                     method: 'DELETE',
                     url: `/geom/${flattenGeom._id}`,
@@ -17,7 +17,7 @@ export default (save) => {
                     data: JSON.stringify(flattenGeom)
                 });
             }),
-            annotationGeometryContainer.getEdited().map(([flattenGeom]) => {
+            ...annotationGeometryContainer.getEdited().map(([flattenGeom]) => {
                 return restRequest({
                     method: 'PUT',
                     url: `/geom/${flattenGeom._id}`,
@@ -25,7 +25,7 @@ export default (save) => {
                     data: JSON.stringify(flattenGeom)
                 });
             }),
-            annotationGeometryContainer.getAdded().map(([flattenGeom, geom]) => {
+            ...annotationGeometryContainer.getAdded().map(([flattenGeom, geom]) => {
                 return restRequest({
                     method: 'POST',
                     url: `/geom/${flattenGeom.itemId}`,
@@ -35,7 +35,7 @@ export default (save) => {
                     geom._id = savedGeom._id;
                 });
             }),
-            annotationTypeContainer.getRemoved().map((type) => {
+            ...annotationTypeContainer.getRemoved().map((type) => {
                 return restRequest({
                     method: 'DELETE',
                     url: `/types/${type._id}`,
@@ -43,7 +43,7 @@ export default (save) => {
                     data: JSON.stringify(type)
                 });
             }),
-            annotationTypeContainer.getEdited().map((type) => {
+            ...annotationTypeContainer.getEdited().map((type) => {
                 return restRequest({
                     method: 'PUT',
                     url: `/types/${type._id}`,
@@ -51,7 +51,7 @@ export default (save) => {
                     data: JSON.stringify(type)
                 });
             }),
-            annotationTypeContainer.getAdded().map((type) => {
+            ...annotationTypeContainer.getAdded().map((type) => {
                 return restRequest({
                     method: 'POST',
                     url: `/types/${type.itemId}`,
@@ -61,7 +61,7 @@ export default (save) => {
                     type._id = savedType._id;
                 });
             }),
-            annotationActivityContainer.getRemoved().map((activity) => {
+            ...annotationActivityContainer.getRemoved().map((activity) => {
                 return restRequest({
                     method: 'DELETE',
                     url: `/activities/${activity._id}`,
@@ -69,7 +69,7 @@ export default (save) => {
                     data: JSON.stringify(activity)
                 });
             }),
-            annotationActivityContainer.getEdited().map((activity) => {
+            ...annotationActivityContainer.getEdited().map((activity) => {
                 return restRequest({
                     method: 'PUT',
                     url: `/activities/${activity._id}`,
@@ -77,7 +77,7 @@ export default (save) => {
                     data: JSON.stringify(activity)
                 });
             }),
-            annotationActivityContainer.getAdded().map((activity) => {
+            ...annotationActivityContainer.getAdded().map((activity) => {
                 return restRequest({
                     method: 'POST',
                     url: `/activities/${activity.itemId}`,
@@ -87,14 +87,16 @@ export default (save) => {
                     activity._id = savedActivity._id;
                 });
             })
-        ).then(() => {
+        ]).then(() => {
             annotationGeometryContainer = annotationGeometryContainer.reset();
             annotationTypeContainer = annotationTypeContainer.reset();
+            annotationActivityContainer = annotationActivityContainer.reset();
             dispatch({
                 type: `${SAVE}_FULFILLED`,
                 payload: {
                     annotationGeometryContainer,
-                    annotationTypeContainer
+                    annotationTypeContainer,
+                    annotationActivityContainer
                 }
             });
         });

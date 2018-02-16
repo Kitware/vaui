@@ -1,9 +1,14 @@
 .v-track-pane
-  padding-left 25px
+  height 100%
+  display flex
+  flex-direction column
 
   ul
     list-style none
-    padding-left 20px
+    flex 1
+    overflow-y auto
+    margin-bottom 5px
+    padding-left 25px
 
   div.checkbox
     margin-top 0
@@ -20,3 +25,9 @@
         // overwrite base girder
         background-color inherit
         font-weight bold
+
+  .selection-buttons
+    width 100%
+
+    button
+      width 50%

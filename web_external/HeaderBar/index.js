@@ -57,7 +57,7 @@ class HeaderBar extends PureComponent {
                     </div>
                 }
             </div>
-            <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(folder, item) => this.itemSelected(folder, item)} />
+            <ClipExplorer show={this.state.showClipExplorer} key={this.state.modalKey} onTryClose={() => this.handleClipExplorerTryClose()} onItemSelected={(folder, item, reImport) => this.itemSelected(folder, item, reImport)} />
         </div>;
     }
 
@@ -65,7 +65,7 @@ class HeaderBar extends PureComponent {
         this.setState({ showClipExplorer: false });
     }
 
-    itemSelected(folder, item) {
+    itemSelected(folder, item, reImport) {
         // this.setState({ selectedFolder: folder });
         this.props.dispatch({
             type: SELECTED_FOLDER_CHANGE,
@@ -75,7 +75,7 @@ class HeaderBar extends PureComponent {
             type: SELECTED_ITEM_CHANGE,
             payload: item
         });
-        this.props.dispatch(loadAnnotation(item));
+        this.props.dispatch(loadAnnotation(item, reImport));
         this.handleClipExplorerTryClose();
     }
 }

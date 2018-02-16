@@ -16,20 +16,6 @@ class BasePane extends Component {
         throw new Error('not implemented');
     }
 
-    allClick() {
-        if (this.allChecked()) {
-            this.uncheckAll();
-        } else {
-            this.checkAll();
-        }
-    }
-
-    allChecked() {
-        var container = this.getContainer();
-        var items = container.getAllItems();
-        return _.every(items.map((item) => container.getEnableState(this.getItemId(item))));
-    }
-
     checkAll() {
         var container = this.getContainer();
         var items = container.getAllItems();
