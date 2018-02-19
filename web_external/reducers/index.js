@@ -24,7 +24,8 @@ function app(state, action) {
             saving: false,
             pendingSave: false,
             requestFrameRange: null,
-            creatingActivity: false
+            creatingActivity: false,
+            interpolationWidget: false
         };
     }
     switch (action.type) {
@@ -111,12 +112,16 @@ function app(state, action) {
             return { ...state, ...{ currentFrame: action.payload } };
         case types.MAX_FRAME_CHANGE:
             return { ...state, ...{ maxFrame: action.payload } };
-        case types.CREATE_ACTIVITY_START:
+        case types.CREATE_ACTIVITY_SHOW:
             return { ...state, ...{ creatingActivity: true } };
-        case types.CREATE_ACTIVITY_END:
+        case types.CREATE_ACTIVITY_HIDE:
             return { ...state, ...{ creatingActivity: false } };
         case types.IMPORT_PROGRESS_CHANGE:
             return { ...state, ...{ importProgress: action.payload } };
+        case types.INTERPOLATE_SHOW:
+            return { ...state, ...{ interpolationWidget: true } };
+        case types.INTERPOLATE_HIDE:
+            return { ...state, ...{ interpolationWidget: false } };
         default:
             return state;
     }

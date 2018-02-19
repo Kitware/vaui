@@ -6,6 +6,7 @@ import Viewer from '../Viewer';
 import InfoView from '../InfoView';
 import ActivityCreator from '../ActivityCreator';
 import ObjectInfo from '../ObjectInfo';
+import InterpolationWidget from '../InterpolationWidget';
 
 import './style.styl';
 
@@ -24,6 +25,8 @@ class IndexView extends PureComponent {
             <div className='right-sidebar'>
                 {this.props.creatingActivity &&
                     <ActivityCreator />}
+                {this.props.interpolationWidget &&
+                    <InterpolationWidget />}
                 <InfoView />
             </div>
         </div>;
@@ -32,7 +35,8 @@ class IndexView extends PureComponent {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        creatingActivity: state.creatingActivity
+        creatingActivity: state.creatingActivity,
+        interpolationWidget: state.interpolationWidget
     };
 };
 

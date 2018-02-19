@@ -11,6 +11,10 @@
     flex-direction column
     padding-top 10px
 
+    form.form-horizontal
+      display flex
+      flex-direction column
+
   .frame-button-container
     text-align right
   
@@ -21,6 +25,9 @@
   ul.tracks
     list-style none
     padding 0
+    overflow-y auto
+    overflow-x hidden
+    flex 1
 
     li
       .remove-button
@@ -33,10 +40,5 @@
   .no-padding[class^="col-xs-"]
     padding 0
 
-  .action-buttons-container
-    text-align right
-
   .bottom-row
-    position absolute
-    width 100%
-    bottom 10px
+    text-align right

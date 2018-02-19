@@ -2,7 +2,7 @@ import { restRequest } from 'girder/rest';
 
 import { SAVE } from './types';
 
-export default (save) => {
+export default () => {
     return (dispatch, getState) => {
         var { annotationGeometryContainer, annotationTypeContainer, annotationActivityContainer } = getState();
         dispatch({

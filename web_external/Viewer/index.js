@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_SHOW, INTERPOLATE_SHOW } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -89,8 +89,11 @@ class Viewer extends PureComponent {
                             <div key='control-bar' className='control-bar'>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
-                                    type: CREATE_ACTIVITY_START
+                                    type: CREATE_ACTIVITY_SHOW
                                 })}>New Activity</button>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
+                                    type: INTERPOLATE_SHOW
+                                })}>Interpolate</button>
                                 {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
