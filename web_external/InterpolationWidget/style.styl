@@ -11,9 +11,21 @@
     flex-direction column
     padding-top 10px
 
-    ol.geometries
-      overflow-y auto
+    .geometries-label
+      margin-top 10px
+
+    .geometries-container
       flex 1
+      overflow-y auto
+      overflow-x hidden
+
+      .geometry
+        button
+          visibility hidden
+
+        &:hover
+          button
+            visibility visible
 
   .bottom-row
     text-align right

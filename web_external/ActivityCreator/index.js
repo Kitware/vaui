@@ -131,7 +131,7 @@ class ActivityCreator extends PureComponent {
                                 var range = this.state.trackFrameRangeMap.get(trackId);
                                 return <li key={trackId}>
                                     <div className='row'>
-                                        <div className='col-xs-1 remove-button'>
+                                        <div className='col-xs-1'>
                                             <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
                                                 var trackIds = this.state.trackIds;
                                                 trackIds.splice(trackIds.indexOf(trackId), 1);
