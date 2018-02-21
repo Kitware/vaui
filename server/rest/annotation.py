@@ -17,7 +17,13 @@
 #  limitations under the License.
 ##############################################################################
 
-import yaml
+from yaml import load
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    import sys
+    sys.stderr.write('Failed to import LibYAML, using PyYAML instead, which will be slower\n')
+    from yaml import Loader
 import datetime
 
 from girder.api import access
@@ -53,14 +59,26 @@ class AnnotationResource(Resource):
         .errorResponse()
         .errorResponse('Write access was denied on the item.', 403)
     )
+    @rawResponse
     @access.user
     def importAnnotation(self, folder, params):
         # TODO: Check if is a clip folder
         geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
-        self._importActivities(activitiesItem)
-        self._importTypes(typesItem)
-        self._importGeom(geomItem)
-        return
+
+        setResponseHeader('Content-Length', 1000000)
+
+        def gen():
+            self._importActivities(activitiesItem)
+            self._importTypes(typesItem)
+            lastProgress = 0
+            import math
+            for percentage in self._importGeom(geomItem):
+                progress = int(math.floor(percentage * 100))
+                if lastProgress != progress:
+                    yield '1' * (progress - lastProgress) * 10000
+                    lastProgress = progress
+            yield '1' * (100 - lastProgress) * 10000
+        return gen
 
     def _getAnnotationItems(self, folder):
         geomItem = Item().findOne(query={
@@ -98,8 +116,10 @@ class AnnotationResource(Resource):
 
         print 'fileContent'
         print datetime.datetime.utcnow()
-        for line in fileContent.splitlines():
-            obj = yaml.load(line)[0]
+        lines = fileContent.splitlines()
+        lineCount = float(len(lines))
+        for i, line in enumerate(lines):
+            obj = load(line, Loader=Loader)[0]
             if 'geom' not in obj:
                 continue
             geom = obj['geom']
@@ -110,6 +130,7 @@ class AnnotationResource(Resource):
                 [int(values[2]), int(values[3])]
             ]
             Geom().save(geom)
+            yield i / lineCount
         print 'finish _importGeom()'
         print datetime.datetime.utcnow()
 
@@ -117,7 +138,7 @@ class AnnotationResource(Resource):
         Activities().removeWithQuery(query={'itemId': item['_id']})
 
         for line in AnnotationResource._readKPF(item):
-            obj = yaml.load(line)[0]
+            obj = load(line, Loader=Loader)[0]
             if 'act' not in obj:
                 continue
             activity = obj['act']
@@ -128,7 +149,7 @@ class AnnotationResource(Resource):
         Types().removeWithQuery(query={'itemId': item['_id']})
 
         for line in AnnotationResource._readKPF(item):
-            obj = yaml.load(line)[0]
+            obj = load(line, Loader=Loader)[0]
             if 'types' not in obj:
                 continue
             types = obj['types']

@@ -10,6 +10,7 @@ function app(state, action) {
             selectedFolder: null,
             selectedItem: null,
             loadingAnnotation: false,
+            importProgress: null,
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationGeometryContainer: null,
@@ -114,6 +115,8 @@ function app(state, action) {
             return { ...state, ...{ creatingActivity: true } };
         case types.CREATE_ACTIVITY_END:
             return { ...state, ...{ creatingActivity: false } };
+        case types.IMPORT_PROGRESS_CHANGE:
+            return { ...state, ...{ importProgress: action.payload } };
         default:
             return state;
     }
