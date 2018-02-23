@@ -1,7 +1,8 @@
 
 import { restRequest } from 'girder/rest';
+import { getCurrentToken } from 'girder/auth';
 
-import { LOAD_ANNOTATION, SET_GEOM_ITEM } from '../actions/types';
+import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, SET_GEOM_ITEM } from '../actions/types';
 import annotationGeometryParser from '../util/annotationGeometryParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
@@ -15,9 +16,24 @@ export default (item, reImport) => {
             url: `/vaui-annotation/status/${item.folderId}`
         }).then((result) => {
             if (!result || reImport) {
-                return restRequest({
-                    method: 'POST',
-                    url: `/vaui-annotation/import/${item.folderId}`
+                return new Promise((resolve, reject) => {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', `/api/v1/vaui-annotation/import/${item.folderId}`, true);
+                    xhr.setRequestHeader('Girder-Token', getCurrentToken());
+                    xhr.onprogress = (e) => {
+                        dispatch({
+                            type: IMPORT_PROGRESS_CHANGE,
+                            payload: Math.round(e.loaded * 100 / e.total)
+                        });
+                    };
+                    xhr.onload = () => {
+                        dispatch({
+                            type: IMPORT_PROGRESS_CHANGE,
+                            payload: null
+                        });
+                        resolve();
+                    };
+                    xhr.send();
                 });
             }
         }).then(() => {

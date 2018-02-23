@@ -227,9 +227,12 @@ class Viewer extends PureComponent {
 
     _getMessage() {
         if (this.props.loadingAnnotation || !this.state.ready) {
-            return { text: 'Loading...', classes: 'message info-message' };
-        }
-        if (!this.props.loadingAnnotation && !this.props.annotationGeometryContainer) {
+            if (this.props.importProgress !== null) {
+                return { text: `Importing kpf ${this.props.importProgress}%`, classes: 'message info-message' };
+            } else {
+                return { text: 'Loading...', classes: 'message info-message' };
+            }
+        } else if (!this.props.annotationGeometryContainer) {
             return { text: 'No annotation', classes: 'message error-message' };
         }
     }
@@ -383,6 +386,7 @@ class Viewer extends PureComponent {
 const mapStateToProps = (state, ownProps) => {
     return {
         selectedItem: state.selectedItem,
+        importProgress: state.importProgress,
         loadingAnnotation: state.loadingAnnotation,
         annotationGeometryContainer: state.annotationGeometryContainer,
         annotationActivityContainer: state.annotationActivityContainer,
