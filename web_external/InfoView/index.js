@@ -10,16 +10,16 @@ class InfoView extends PureComponent {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Info</div>
                 <div className='panel-body'>
-                    <ul className='geometry'>
+                    <ul className='detection'>
                         {annotation &&
-                            <li key={annotation.geometry.id0 + '-' + annotation.geometry.id1} className='track'>
-                                <div title='id1'>Track id: {annotation.geometry.id1}</div>
+                            <li key={annotation.detection.id0 + '-' + annotation.detection.id1} className='track'>
+                                <div title='id1'>Track id: {annotation.detection.id1}</div>
                                 {annotation.type &&
                                     <div>type: {Object.keys(annotation.type.cset3).join(',')}</div>
                                 }
-                                <div title='id0'>Geometry id: {annotation.geometry.id0}</div>
-                                <div>Frame id: {annotation.geometry.ts0}</div>
-                                {Object.entries(annotation.geometry.keyValues).map(([key, value], index) => {
+                                <div title='id0'>Detection id: {annotation.detection.id0}</div>
+                                <div>Frame id: {annotation.detection.ts0}</div>
+                                {Object.entries(annotation.detection.keyValues).map(([key, value], index) => {
                                     return <div key={index}>{key}: {value}</div>;
                                 })}
                                 {annotation.activities && annotation.activities.length !== 0 &&

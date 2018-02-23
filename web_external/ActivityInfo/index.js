@@ -42,7 +42,7 @@ class ActivityInfo extends PureComponent {
         var activity = this.props.annotationActivityContainer.getItem(this.props.selectedActivityId);
         var trackRanges = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
         for (var actor of activity.actors) {
-            let trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(actor.id1);
+            let trackRange = this.props.annotationDetectionContainer.getTrackFrameRange(actor.id1);
             trackRanges = [Math.min(trackRanges[0], trackRange[0]), Math.max(trackRanges[1], trackRange[1])];
         }
         var types = Object.keys(this.state.act2);
@@ -131,7 +131,7 @@ const mapStateToProps = (state, ownProps) => {
         maxFrame: state.maxFrame,
         selectedActivityId: state.selectedActivityId,
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationGeometryContainer: state.annotationGeometryContainer
+        annotationDetectionContainer: state.annotationDetectionContainer
     };
 };
 

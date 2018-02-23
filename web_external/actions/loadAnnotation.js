@@ -2,8 +2,9 @@
 import { restRequest } from 'girder/rest';
 import { getCurrentToken } from 'girder/auth';
 
-import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, SET_GEOM_ITEM } from '../actions/types';
-import annotationGeometryParser from '../util/annotationGeometryParser';
+
+import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, SET_DETECTION_ITEM } from '../actions/types';
+import annotationDetectionParser from '../util/annotationDetectionParser';
 import annotationActivityParser from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 
@@ -63,19 +64,19 @@ export default (item, reImport) => {
                     }
                 }).then((items) => {
                     dispatch({
-                        type: SET_GEOM_ITEM,
+                        type: SET_DETECTION_ITEM,
                         payload: items[0]
                     });
                     return restRequest({
-                        url: `/geom/${items[0]._id}`
+                        url: `/detection/${items[0]._id}`
                     });
-                }).then((geoms) => {
-                    return annotationGeometryParser(geoms);
+                }).then((detections) => {
+                    return annotationDetectionParser(detections);
                 })
-            ]).then(([annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer]) => {
+            ]).then(([annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer]) => {
                 dispatch({
                     type: LOAD_ANNOTATION + '_FULFILLED',
-                    payload: { annotationActivityContainer, annotationTypeContainer, annotationGeometryContainer }
+                    payload: { annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer }
                 });
             });
         }).catch(() => {

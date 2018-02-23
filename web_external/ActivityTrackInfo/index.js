@@ -29,7 +29,7 @@ class ActivityTrackInfo extends PureComponent {
     }
 
     render() {
-        var trackRange = this.props.annotationGeometryContainer.getTrackFrameRange(this.state.trackActivity.id1);
+        var trackRange = this.props.annotationDetectionContainer.getTrackFrameRange(this.state.trackActivity.id1);
         return <div className='activity-track-info'>
             <form className='form-horizontal'>
                 <fieldset>
@@ -96,7 +96,7 @@ const mapStateToProps = (state, ownProps) => {
         selectedActivityId: state.selectedActivityId,
         selectedTrackId: state.selectedTrackId,
         annotationActivityContainer: state.annotationActivityContainer,
-        annotationGeometryContainer: state.annotationGeometryContainer
+        annotationDetectionContainer: state.annotationDetectionContainer
     };
 };
 

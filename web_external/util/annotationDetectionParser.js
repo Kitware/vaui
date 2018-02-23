@@ -1,4 +1,4 @@
-class AnnotationGeometryTrack {
+class AnnotationDetectionTrack {
     constructor() {
         this._stateMap = new Map();
         this.enableState = true;
@@ -17,7 +17,7 @@ class AnnotationGeometryTrack {
 
     recomputeFrameRange() {
         this.resetFrameRange();
-        for (let [ts0, geomId] of this._stateMap) {
+        for (let [ts0, detectionId] of this._stateMap) {
             this.expandFrameRange(ts0);
         }
     }
@@ -31,42 +31,42 @@ class AnnotationGeometryTrack {
     }
 }
 
-class AnnotationGeometryContainer {
+class AnnotationDetectionContainer {
     constructor() {
         this._itemId = null;
         this._id0 = 0;
 
-        this._trackMap = new Map(); // track id -> AnnotationGeometryTrack
-        this._frameMap = new Map(); // frame -> Map(track id -> geometries)
+        this._trackMap = new Map(); // track id -> AnnotationDetectionTrack
+        this._frameMap = new Map(); // frame -> Map(track id -> detections)
 
-        this._addedGeom = new Map();
-        this._editedGeom = new Map();
-        this._removedGeom = new Map();
+        this._addedDetection = new Map();
+        this._editedDetection = new Map();
+        this._removedDetection = new Map();
     }
 
-    add(geometry) {
-        this._itemId = geometry.itemId;
-        this._id0 = Math.max(this._id0, geometry.id0);
+    add(detection) {
+        this._itemId = detection.itemId;
+        this._id0 = Math.max(this._id0, detection.id0);
 
         // Create frame if needed
-        if (!this._frameMap.has(geometry.ts0)) {
-            this._frameMap.set(geometry.ts0, new Map());
+        if (!this._frameMap.has(detection.ts0)) {
+            this._frameMap.set(detection.ts0, new Map());
         }
 
-        // Insert geometry into frame
-        this._frameMap.get(geometry.ts0).set(geometry.id1, geometry);
+        // Insert detection into frame
+        this._frameMap.get(detection.ts0).set(detection.id1, detection);
 
         // Create track if needed
-        if (!this._trackMap.has(geometry.id1)) {
-            this._trackMap.set(geometry.id1, new AnnotationGeometryTrack());
+        if (!this._trackMap.has(detection.id1)) {
+            this._trackMap.set(detection.id1, new AnnotationDetectionTrack());
         }
 
-        // Insert geometry ID into track's state map
-        let track = this._trackMap.get(geometry.id1);
-        track.states.set(geometry.ts0, geometry.id0);
+        // Insert detection ID into track's state map
+        let track = this._trackMap.get(detection.id1);
+        track.states.set(detection.ts0, detection.id0);
 
         // Update track time range
-        track.expandFrameRange(geometry.ts0);
+        track.expandFrameRange(detection.ts0);
     }
 
     getAllItems() {
@@ -95,7 +95,7 @@ class AnnotationGeometryContainer {
     }
 
     newTrack(trackId) {
-        this._trackMap.set(trackId, new AnnotationGeometryTrack());
+        this._trackMap.set(trackId, new AnnotationDetectionTrack());
         return this.copy();
     }
 
@@ -106,16 +106,16 @@ class AnnotationGeometryContainer {
             this._trackMap.set(newTrackId, track);
             this._trackMap.delete(trackId);
 
-            // Update all geometries
-            for (let [ts0, geomSet] of this._frameMap) {
-                let geom = geomSet.get(trackId);
-                if (geom) {
-                    geom.id1 = newTrackId;
-                    geomSet.delete(trackId);
-                    geomSet.set(newTrackId, geom);
+            // Update all detections
+            for (let [ts0, detectionSet] of this._frameMap) {
+                let detection = detectionSet.get(trackId);
+                if (detection) {
+                    detection.id1 = newTrackId;
+                    detectionSet.delete(trackId);
+                    detectionSet.set(newTrackId, detection);
 
-                    if (!this._addedGeom.has(geom.id0)) {
-                        this._editedGeom.set(geom.id0, geom);
+                    if (!this._addedDetection.has(detection.id0)) {
+                        this._editedDetection.set(detection.id0, detection);
                     }
                 }
             };
@@ -126,9 +126,9 @@ class AnnotationGeometryContainer {
     removeTrack(trackId) {
         let track = this._trackMap.get(trackId);
         if (track) {
-            for (let [ts0, geomId] of track.states) {
+            for (let [ts0, detectionId] of track.states) {
                 let frame = this._frameMap.get(ts0);
-                this._remove(frame, trackId, geomId);
+                this._remove(frame, trackId, detectionId);
             }
             this._trackMap.delete(trackId);
         }
@@ -156,24 +156,24 @@ class AnnotationGeometryContainer {
     }
 
     change(frame, trackId, g0, itemId = null) {
-        // Look up ID of possibly existing geometry
-        let geomId = this._getState(frame, trackId);
+        // Look up ID of possibly existing detection
+        let detectionId = this._getState(frame, trackId);
 
-        if (geomId !== undefined) {
-            // Geometry already exists for the specified state; look it up and
+        if (detectionId !== undefined) {
+            // Detection already exists for the specified state; look it up and
             // modify it in place
-            let geomToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(geomToChange, {g0});
+            let detectionToChange = this._frameMap.get(frame).get(trackId);
+            Object.assign(detectionToChange, {g0});
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
-            if (!this._addedGeom.has(geomToChange.id0)) {
-                this._editedGeom.set(geomToChange.id0, geomToChange);
+            if (!this._addedDetection.has(detectionToChange.id0)) {
+                this._editedDetection.set(detectionToChange.id0, detectionToChange);
             }
         }
         else {
-            // Entirely new geometry; add it
-            let newGeom = new AnnotationGeometry({
+            // Entirely new detection; add it
+            let newDetection = new AnnotationDetection({
                 id0: ++this._id0,
                 id1: trackId,
                 ts0: frame,
@@ -181,69 +181,69 @@ class AnnotationGeometryContainer {
                 itemId: this._itemId,
                 src: 'truth'
             });
-            this.add(newGeom);
+            this.add(newDetection);
 
             // Update modification records; since there was no previous state,
             // this is an addition
-            this._addedGeom.set(newGeom.id0, newGeom);
+            this._addedDetection.set(newDetection.id0, newDetection);
         }
         return this.copy();
     }
 
-    _remove(geomSet, trackId, geomId) {
+    _remove(detectionSet, trackId, detectionId) {
         // Update modification records; if state was added, just discard the
         // record; otherwise, add to removal records and ensure the state is
         // not in the edit records
-        if (this._addedGeom.has(geomId)) {
-            this._addedGeom.delete(geomId);
+        if (this._addedDetection.has(detectionId)) {
+            this._addedDetection.delete(detectionId);
         }
         else {
-            let geom = geomSet.get(trackId);
+            let detection = detectionSet.get(trackId);
 
-            this._editedGeom.delete(geomId);
-            this._removedGeom.set(geomId, geom);
+            this._editedDetection.delete(detectionId);
+            this._removedDetection.set(detectionId, detection);
         }
 
-        // Finally, remove the geometry from the frame
-        geomSet.delete(trackId);
+        // Finally, remove the detection from the frame
+        detectionSet.delete(trackId);
     }
 
     remove(frame, trackId) {
-        // Look up ID of geometry
-        let geomId = this._getState(frame, trackId);
+        // Look up ID of detection
+        let detectionId = this._getState(frame, trackId);
 
-        if (geomId !== undefined) {
+        if (detectionId !== undefined) {
             let track = this._trackMap.get(trackId);
             track.states.delete(frame);
             track.recomputeFrameRange();
 
-            this._remove(this._frameMap.get(frame), trackId, geomId);
+            this._remove(this._frameMap.get(frame), trackId, detectionId);
         }
         return this.copy();
     }
 
-    _flattenGeom(geom) {
-        let newGeom = Object.assign({}, geom, geom.keyValues);
-        delete newGeom.keyValues;
-        return [newGeom, geom];
+    _flattenDetection(detection) {
+        let newDetection = Object.assign({}, detection, detection.keyValues);
+        delete newDetection.keyValues;
+        return [newDetection, detection];
     }
 
     getAdded() {
-        return [...this._addedGeom.values()].map(this._flattenGeom);
+        return [...this._addedDetection.values()].map(this._flattenDetection);
     }
 
     getEdited() {
-        return [...this._editedGeom.values()].map(this._flattenGeom);
+        return [...this._editedDetection.values()].map(this._flattenDetection);
     }
 
     getRemoved() {
-        return [...this._removedGeom.values()].map(this._flattenGeom);
+        return [...this._removedDetection.values()].map(this._flattenDetection);
     }
 
     reset() {
-        this._addedGeom.clear();
-        this._editedGeom.clear();
-        this._removedGeom.clear();
+        this._addedDetection.clear();
+        this._editedDetection.clear();
+        this._removedDetection.clear();
         return this.copy();
     }
 
@@ -252,8 +252,8 @@ class AnnotationGeometryContainer {
     }
 }
 
-class AnnotationGeometry {
-    constructor(geom) {
+class AnnotationDetection {
+    constructor(detection) {
         this.id0 = 0;
         this.id1 = 0;
         this.ts0 = 0;
@@ -261,8 +261,8 @@ class AnnotationGeometry {
         this.g0 = null;
         this.src = 'truth';
         this.keyValues = {};
-        for (let key in geom) {
-            this.set(key, geom[key]);
+        for (let key in detection) {
+            this.set(key, detection[key]);
         }
     }
     set(key, value) {
@@ -284,17 +284,17 @@ class AnnotationGeometry {
     }
 }
 
-function annotationGeometryParser(geoms) {
-    var annotationGeometryContainer = new AnnotationGeometryContainer();
-    for (let geom of geoms) {
-        var annotationGeometry = new AnnotationGeometry(geom);
-        annotationGeometryContainer.add(annotationGeometry);
+function annotationDetectionParser(detections) {
+    var annotationDetectionContainer = new AnnotationDetectionContainer();
+    for (let detection of detections) {
+        var annotationDetection = new AnnotationDetection(detection);
+        annotationDetectionContainer.add(annotationDetection);
     }
-    return annotationGeometryContainer;
+    return annotationDetectionContainer;
 }
 
 export {
-    AnnotationGeometry,
-    AnnotationGeometryContainer
+    AnnotationDetection,
+    AnnotationDetectionContainer
 };
-export default annotationGeometryParser;
+export default annotationDetectionParser;

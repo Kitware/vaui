@@ -44,7 +44,7 @@ class ActivityPanel extends BasePane {
         }
         var activityContainer = this.props.annotationActivityContainer;
         var activities = _.sortBy(activityContainer.getAllItems(), (activity) => activity.id2);
-        var geometryContainer = this.props.annotationGeometryContainer;
+        var detectionContainer = this.props.annotationDetectionContainer;
         var typeContainer = this.props.annotationTypeContainer;
 
         return <div className={['v-activity-pane', this.props.className].join(' ')}>
@@ -87,7 +87,7 @@ class ActivityPanel extends BasePane {
                                         <div className={'checkbox ' + ((actor.id1 === this.props.selectedTrackId) ? 'selected' : '')}>
                                             <label onClick={(e) => { if (e.target.type !== 'checkbox') { e.preventDefault(); } }}>
                                                 <input type='checkbox'
-                                                    checked={geometryContainer.getEnableState(actor.id1)}
+                                                    checked={detectionContainer.getEnableState(actor.id1)}
                                                     onChange={(e) => this.props.dispatch({
                                                         type: TOGGLE_TRACK,
                                                         payload: { track: actor.id1, enabled: e.target.checked }
@@ -142,7 +142,7 @@ class ActivityPanel extends BasePane {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        annotationGeometryContainer: state.annotationGeometryContainer,
+        annotationDetectionContainer: state.annotationDetectionContainer,
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTypeContainer: state.annotationTypeContainer,
         selectedActivityId: state.selectedActivityId,

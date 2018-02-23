@@ -149,7 +149,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (enabled) {
                         if (this.editMode === 'edit') {
                             layer.options('clickToEdit', true);
-                            // If there is an geom for current frame, change it to edit mode directly
+                            // If there is an detection for current frame, change it to edit mode directly
                             if (layer.annotations().length === 1) {
                                 layer.mode('edit', layer.annotations()[0]);
                             }
@@ -202,7 +202,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true });
                     feature.data(data);
                     feature.polygon((d) => {
-                        var g0 = d.geometry.g0;
+                        var g0 = d.detection.g0;
                         return {
                             outer: [{ x: g0[0][0], y: g0[0][1] },
                             { x: g0[1][0], y: g0[0][1] },
@@ -223,9 +223,9 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     this.lastFeatureFrame = feature;
                     this.annotationLayer.removeAllAnnotations(true);
                     this.annotationLayer.mode(null);
-                    var record = data.find((record) => { return record.geometry.id1 === editingTrackId });
+                    var record = data.find((record) => { return record.detection.id1 === editingTrackId });
                     if (record) {
-                        var g0 = record.geometry.g0;
+                        var g0 = record.detection.g0;
                         var rect = geo.annotation.rectangleAnnotation({
                             corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }],
                             style: editingStyle,

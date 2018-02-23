@@ -26,7 +26,7 @@ class ImageViewerWidgetWrapper extends Component {
             this.geojsViewer.setEditMode(nextProps.editMode);
         }
         // redraw redrawAnnotation() to happen before call edit() because the latter uses the result of the former some time
-        if (this.props.geometryCotnainer !== nextProps.geometryCotnainer ||
+        if (this.props.detectionContainer !== nextProps.detectionContainer ||
             this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
             this.props.selectedTrackId !== nextProps.selectedTrackId ||
             this.props.selectedActivityId !== nextProps.selectedActivityId ||

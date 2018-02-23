@@ -4,7 +4,7 @@
 import os
 from girder.utility.webroot import Webroot
 from rest import track
-from rest import geom
+from rest import detection
 from rest import annotation, types, activities
 
 
@@ -22,7 +22,7 @@ def load(info):
     info['serverRoot'].api = info['serverRoot'].girder.api
 
     info['apiRoot'].video = track.TrackResource()
-    info['apiRoot'].geom = geom.GeomResource()
+    info['apiRoot'].detection = detection.DetectionResource()
     info['apiRoot'].vaui_annotation = annotation.AnnotationResource()
     info['apiRoot'].activities = activities.ActivitiesResource()
     info['apiRoot'].types = types.TypesResource()

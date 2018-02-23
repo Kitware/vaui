@@ -4,35 +4,35 @@ import { SAVE } from './types';
 
 export default () => {
     return (dispatch, getState) => {
-        var { annotationGeometryContainer, annotationTypeContainer, annotationActivityContainer } = getState();
+        var { annotationDetectionContainer, annotationTypeContainer, annotationActivityContainer } = getState();
         dispatch({
             type: `${SAVE}_PENDING`
         });
         return Promise.all([
-            ...annotationGeometryContainer.getRemoved().map(([flattenGeom]) => {
+            ...annotationDetectionContainer.getRemoved().map(([flattenDetection]) => {
                 return restRequest({
                     method: 'DELETE',
-                    url: `/geom/${flattenGeom._id}`,
+                    url: `/detection/${flattenDetection._id}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenGeom)
+                    data: JSON.stringify(flattenDetection)
                 });
             }),
-            ...annotationGeometryContainer.getEdited().map(([flattenGeom]) => {
+            ...annotationDetectionContainer.getEdited().map(([flattenDetection]) => {
                 return restRequest({
                     method: 'PUT',
-                    url: `/geom/${flattenGeom._id}`,
+                    url: `/detection/${flattenDetection._id}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenGeom)
+                    data: JSON.stringify(flattenDetection)
                 });
             }),
-            ...annotationGeometryContainer.getAdded().map(([flattenGeom, geom]) => {
+            ...annotationDetectionContainer.getAdded().map(([flattenDetection, detection]) => {
                 return restRequest({
                     method: 'POST',
-                    url: `/geom/${flattenGeom.itemId}`,
+                    url: `/detection/${flattenDetection.itemId}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenGeom)
-                }).then((savedGeom) => {
-                    geom._id = savedGeom._id;
+                    data: JSON.stringify(flattenDetection)
+                }).then((savedDetection) => {
+                    detection._id = savedDetection._id;
                 });
             }),
             ...annotationTypeContainer.getRemoved().map((type) => {
@@ -88,13 +88,13 @@ export default () => {
                 });
             })
         ]).then(() => {
-            annotationGeometryContainer = annotationGeometryContainer.reset();
+            annotationDetectionContainer = annotationDetectionContainer.reset();
             annotationTypeContainer = annotationTypeContainer.reset();
             annotationActivityContainer = annotationActivityContainer.reset();
             dispatch({
                 type: `${SAVE}_FULFILLED`,
                 payload: {
-                    annotationGeometryContainer,
+                    annotationDetectionContainer,
                     annotationTypeContainer,
                     annotationActivityContainer
                 }

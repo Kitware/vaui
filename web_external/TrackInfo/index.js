@@ -26,7 +26,7 @@ class TrackInfo extends PureComponent {
     }
 
     render() {
-        var range = this.props.annotationGeometryContainer.getTrackFrameRange(this.props.selectedTrackId);
+        var range = this.props.annotationDetectionContainer.getTrackFrameRange(this.props.selectedTrackId);
         var types = Object.keys(this.state.cset3);
         var type = types.length === 0 ? '' : (types.length === 1 ? types[0] : 'multiple');
 
@@ -43,7 +43,7 @@ class TrackInfo extends PureComponent {
                                     if (newTrackId === this.props.selectedTrackId) {
                                         return;
                                     }
-                                    if (!this.props.annotationGeometryContainer.validateNewTrackId(newTrackId)) {
+                                    if (!this.props.annotationDetectionContainer.validateNewTrackId(newTrackId)) {
                                         bootbox.alert({
                                             size: 'small',
                                             message: 'A track with this id already exists'
@@ -84,13 +84,13 @@ class TrackInfo extends PureComponent {
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>Start:</label>
                         <div className='col-sm-9'>
-                            <p className='form-control-static'>{this.props.annotationGeometryContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[0]} (frame)`}</p>
+                            <p className='form-control-static'>{this.props.annotationDetectionContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[0]} (frame)`}</p>
                         </div>
                     </div>
                     <div className='form-group form-group-xs'>
                         <label className='col-sm-2 control-label'>End:</label>
                         <div className='col-sm-9'>
-                            <p className='form-control-static'>{this.props.annotationGeometryContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[1]} (frame)`}</p>
+                            <p className='form-control-static'>{this.props.annotationDetectionContainer.isTrackEmpty(this.props.selectedTrackId) ? 'N/A' : `${range[1]} (frame)`}</p>
                         </div>
                     </div>
                 </fieldset>
@@ -123,7 +123,7 @@ const mapStateToProps = (state, ownProps) => {
     return {
         selectedTrackId: state.selectedTrackId,
         annotationTypeContainer: state.annotationTypeContainer,
-        annotationGeometryContainer: state.annotationGeometryContainer
+        annotationDetectionContainer: state.annotationDetectionContainer
     };
 };
 

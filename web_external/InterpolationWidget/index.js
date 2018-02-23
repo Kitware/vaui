@@ -11,24 +11,24 @@ class InterpolationWidget extends PureComponent {
         super(props);
         this.state = {
             trackId: null,
-            geometries: []
+            detections: []
         }
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.selectedTrackId && nextProps.selectedTrackId !== this.props.selectedTrackId) {
-            this.setState({ trackId: nextProps.selectedTrackId, geometries: [] });
+            this.setState({ trackId: nextProps.selectedTrackId, detections: [] });
         }
         if (nextProps.selectedAnnotation !== this.props.selectedAnnotation) {
-            if (nextProps.selectedAnnotation.geometry.id1 === this.state.trackId) {
-                if (!this.state.geometries.find((geometry) => geometry.id0 === nextProps.selectedAnnotation.geometry.id0)) {
-                    var geometries = _.sortBy([...this.state.geometries, nextProps.selectedAnnotation.geometry], (geometry) => geometry.ts0);
-                    this.setState({ geometries });
+            if (nextProps.selectedAnnotation.detection.id1 === this.state.trackId) {
+                if (!this.state.detections.find((detection) => detection.id0 === nextProps.selectedAnnotation.detection.id0)) {
+                    var detections = _.sortBy([...this.state.detections, nextProps.selectedAnnotation.detection], (detection) => detection.ts0);
+                    this.setState({ detections });
                 }
             } else {
                 this.setState({
-                    trackId: nextProps.selectedAnnotation.geometry.id1,
-                    geometries: [nextProps.selectedAnnotation.geometry]
+                    trackId: nextProps.selectedAnnotation.detection.id1,
+                    detections: [nextProps.selectedAnnotation.detection]
                 });
             }
         }
@@ -52,27 +52,27 @@ class InterpolationWidget extends PureComponent {
                                 <div>type: {this.props.annotationTypeContainer.getTrackDisplayLabel(this.state.trackId)}</div>
                             </div>
                         </div>
-                        <label className='geometries-label'>Geometries</label>
-                        {this.state.geometries.length <= 1 &&
+                        <label className='detections-label'>Detections</label>
+                        {this.state.detections.length <= 1 &&
                             <div className='row'>
                                 <div className='col-sm-11 col-sm-offset-1'>(All Detections of this Track will be used)</div>
                             </div>}
-                        {this.state.geometries.length > 1 &&
-                            [<div key='1' className='row geometries font-sm bold'>
+                        {this.state.detections.length > 1 &&
+                            [<div key='1' className='row detections font-sm bold'>
                                 <div className='col-sm-1'></div>
                                 <div className='col-sm-5'>Frame</div>
                                 <div className='col-sm-5'>ID</div>
                             </div>,
-                            <div key='2' className='geometries-container'>
-                                {this.state.geometries.map((geometry) => {
-                                    return <div key={geometry.id0} className='row geometry'>
+                            <div key='2' className='detections-container'>
+                                {this.state.detections.map((detection) => {
+                                    return <div key={detection.id0} className='row detection'>
                                         <div className='col-sm-1'>
                                             <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
-                                                this.setState({ geometries: remove(this.state.geometries, geometry) });
+                                                this.setState({ detections: remove(this.state.detections, detection) });
                                             }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
                                         </div>
-                                        <div className='col-sm-5'>{geometry.ts0}</div>
-                                        <div className='col-sm-5'>{geometry.id0}</div>
+                                        <div className='col-sm-5'>{detection.ts0}</div>
+                                        <div className='col-sm-5'>{detection.id0}</div>
                                     </div>
                                 })}
                             </div>]
