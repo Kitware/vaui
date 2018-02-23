@@ -4,6 +4,7 @@ import _ from 'underscore';
 
 import { INTERPOLATE_HIDE } from '../actions/types';
 import { remove } from '../util/array';
+import interpolate from '../actions/interpolate';
 import './style.styl';
 
 class InterpolationWidget extends PureComponent {
