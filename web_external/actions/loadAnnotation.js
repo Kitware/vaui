@@ -2,7 +2,6 @@
 import { restRequest } from 'girder/rest';
 import { getCurrentToken } from 'girder/auth';
 
-
 import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, SET_DETECTION_ITEM } from '../actions/types';
 import annotationDetectionParser from '../util/annotationDetectionParser';
 import annotationActivityParser from '../util/annotationActivityParser';

@@ -249,7 +249,7 @@ class Viewer extends PureComponent {
         var typeContainer = this.props.annotationTypeContainer;
         var detectionContainer = this.props.annotationDetectionContainer;
         var activityContainer = this.props.annotationActivityContainer;
-        var detections = detectionContainer.getFrame(frame);
+        var detections = detectionContainer.getByFrame(frame);
         if (!detections) {
             return;
         }

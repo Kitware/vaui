@@ -1,12 +1,11 @@
 class AnnotationDetectionTrack {
     constructor() {
-        this._stateMap = new Map();
+        this._map = new Map(); // frame => detection id
         this.enableState = true;
         this.resetFrameRange();
     }
 
-    resetFrameRange()
-    {
+    resetFrameRange() {
         this._frameRange = [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER];
     }
 
@@ -17,7 +16,7 @@ class AnnotationDetectionTrack {
 
     recomputeFrameRange() {
         this.resetFrameRange();
-        for (let [ts0, detectionId] of this._stateMap) {
+        for (let [ts0, detectionId] of this._map) {
             this.expandFrameRange(ts0);
         }
     }
@@ -26,8 +25,8 @@ class AnnotationDetectionTrack {
         return this._frameRange;
     }
 
-    get states() {
-        return this._stateMap;
+    get map() {
+        return this._map;
     }
 }
 
@@ -39,9 +38,9 @@ class AnnotationDetectionContainer {
         this._trackMap = new Map(); // track id -> AnnotationDetectionTrack
         this._frameMap = new Map(); // frame -> Map(track id -> detections)
 
-        this._addedDetection = new Map();
-        this._editedDetection = new Map();
-        this._removedDetection = new Map();
+        this._added = new Map();
+        this._edited = new Map();
+        this._removed = new Map();
     }
 
     add(detection) {
@@ -61,9 +60,9 @@ class AnnotationDetectionContainer {
             this._trackMap.set(detection.id1, new AnnotationDetectionTrack());
         }
 
-        // Insert detection ID into track's state map
+        // Insert detection ID into track's map
         let track = this._trackMap.get(detection.id1);
-        track.states.set(detection.ts0, detection.id0);
+        track.map.set(detection.ts0, detection.id0);
 
         // Update track time range
         track.expandFrameRange(detection.ts0);
@@ -107,15 +106,15 @@ class AnnotationDetectionContainer {
             this._trackMap.delete(trackId);
 
             // Update all detections
-            for (let [ts0, detectionSet] of this._frameMap) {
-                let detection = detectionSet.get(trackId);
+            for (let [ts0, map] of this._frameMap) {
+                let detection = map.get(trackId);
                 if (detection) {
                     detection.id1 = newTrackId;
-                    detectionSet.delete(trackId);
-                    detectionSet.set(newTrackId, detection);
+                    map.delete(trackId);
+                    map.set(newTrackId, detection);
 
-                    if (!this._addedDetection.has(detection.id0)) {
-                        this._editedDetection.set(detection.id0, detection);
+                    if (!this._added.has(detection.id0)) {
+                        this._edited.set(detection.id0, detection);
                     }
                 }
             };
@@ -126,7 +125,7 @@ class AnnotationDetectionContainer {
     removeTrack(trackId) {
         let track = this._trackMap.get(trackId);
         if (track) {
-            for (let [ts0, detectionId] of track.states) {
+            for (let [ts0, detectionId] of track.map) {
                 let frame = this._frameMap.get(ts0);
                 this._remove(frame, trackId, detectionId);
             }
@@ -135,12 +134,25 @@ class AnnotationDetectionContainer {
         return this.copy();
     }
 
-    getFrame(frame) {
+    getByFrame(frame) {
         return Array.from(this._frameMap.get(frame).values());
     }
 
-    isTrackEmpty(trackId){
-        return !this._trackMap.get(trackId).states.size;
+    getByTrackId(trackId) {
+        var track = this._trackMap.get(trackId);
+        var frameRange = track.frameRange;
+        var trackDetections = [];
+        for (let i = frameRange[0]; i < frameRange[1] + 1; i++) {
+            var detection = this._frameMap.get(i).get(trackId);
+            if (detection) {
+                trackDetections = [...trackDetections, detection];
+            }
+        }
+        return trackDetections;
+    }
+
+    isTrackEmpty(trackId) {
+        return !this._trackMap.get(trackId).map.size;
     }
 
     get length() {
@@ -150,12 +162,12 @@ class AnnotationDetectionContainer {
     _getState(frame, trackId) {
         let track = this._trackMap.get(trackId);
         if (track) {
-            return track.states.get(frame);
+            return track.map.get(frame);
         }
         return undefined;
     }
 
-    change(frame, trackId, g0, itemId = null) {
+    change(frame, trackId, g0, attributes) {
         // Look up ID of possibly existing detection
         let detectionId = this._getState(frame, trackId);
 
@@ -163,49 +175,52 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(detectionToChange, {g0});
+            Object.assign(detectionToChange, { g0 });
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
-            if (!this._addedDetection.has(detectionToChange.id0)) {
-                this._editedDetection.set(detectionToChange.id0, detectionToChange);
+            if (!this._added.has(detectionToChange.id0)) {
+                this._edited.set(detectionToChange.id0, detectionToChange);
             }
         }
         else {
             // Entirely new detection; add it
             let newDetection = new AnnotationDetection({
-                id0: ++this._id0,
-                id1: trackId,
-                ts0: frame,
-                g0,
-                itemId: this._itemId,
-                src: 'truth'
+                ...{
+                    id0: ++this._id0,
+                    id1: trackId,
+                    ts0: frame,
+                    g0,
+                    itemId: this._itemId,
+                    src: 'truth'
+                },
+                ...attributes
             });
             this.add(newDetection);
 
             // Update modification records; since there was no previous state,
             // this is an addition
-            this._addedDetection.set(newDetection.id0, newDetection);
+            this._added.set(newDetection.id0, newDetection);
         }
         return this.copy();
     }
 
-    _remove(detectionSet, trackId, detectionId) {
+    _remove(trackIdToDetectionMap, trackId, detectionId) {
         // Update modification records; if state was added, just discard the
         // record; otherwise, add to removal records and ensure the state is
         // not in the edit records
-        if (this._addedDetection.has(detectionId)) {
-            this._addedDetection.delete(detectionId);
+        if (this._added.has(detectionId)) {
+            this._added.delete(detectionId);
         }
         else {
-            let detection = detectionSet.get(trackId);
+            let detection = trackIdToDetectionMap.get(trackId);
 
-            this._editedDetection.delete(detectionId);
-            this._removedDetection.set(detectionId, detection);
+            this._edited.delete(detectionId);
+            this._removed.set(detectionId, detection);
         }
 
         // Finally, remove the detection from the frame
-        detectionSet.delete(trackId);
+        trackIdToDetectionMap.delete(trackId);
     }
 
     remove(frame, trackId) {
@@ -214,7 +229,7 @@ class AnnotationDetectionContainer {
 
         if (detectionId !== undefined) {
             let track = this._trackMap.get(trackId);
-            track.states.delete(frame);
+            track.map.delete(frame);
             track.recomputeFrameRange();
 
             this._remove(this._frameMap.get(frame), trackId, detectionId);
@@ -229,21 +244,21 @@ class AnnotationDetectionContainer {
     }
 
     getAdded() {
-        return [...this._addedDetection.values()].map(this._flattenDetection);
+        return [...this._added.values()].map(this._flattenDetection);
     }
 
     getEdited() {
-        return [...this._editedDetection.values()].map(this._flattenDetection);
+        return [...this._edited.values()].map(this._flattenDetection);
     }
 
     getRemoved() {
-        return [...this._removedDetection.values()].map(this._flattenDetection);
+        return [...this._removed.values()].map(this._flattenDetection);
     }
 
     reset() {
-        this._addedDetection.clear();
-        this._editedDetection.clear();
-        this._removedDetection.clear();
+        this._added.clear();
+        this._edited.clear();
+        this._removed.clear();
         return this.copy();
     }
 

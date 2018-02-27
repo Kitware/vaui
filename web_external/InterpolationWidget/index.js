@@ -84,6 +84,9 @@ class InterpolationWidget extends PureComponent {
                             <div className='col-xs-12'>
                                 <div className='btn-group btn-group-sm' role='group'>
                                     <button type='button' className='btn btn-default' title='Run' disabled={!canExecute} onClick={(e) => {
+                                        var trackId = this.state.trackId;
+                                        var detections = this.state.detections.length > 1 ? this.state.detections : _.sortBy(this.props.annotationDetectionContainer.getByTrackId(trackId),(detection)=>detection.ts0);
+                                        this.props.dispatch(interpolate(trackId, detections));
                                     }}><span className='glyphicon glyphicon-cog text-success'></span></button>
                                     <button type='button' className='btn btn-default' onClick={(e) => this.props.dispatch({
                                         type: INTERPOLATE_HIDE
@@ -101,7 +104,8 @@ const mapStateToProps = (state, ownProps) => {
     return {
         selectedTrackId: state.selectedTrackId,
         selectedAnnotation: state.selectedAnnotation,
-        annotationTypeContainer: state.annotationTypeContainer
+        annotationTypeContainer: state.annotationTypeContainer,
+        annotationDetectionContainer: state.annotationDetectionContainer
     };
 };
 

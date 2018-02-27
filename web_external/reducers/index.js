@@ -122,6 +122,12 @@ function app(state, action) {
             return { ...state, ...{ interpolationWidget: true } };
         case types.INTERPOLATE_HIDE:
             return { ...state, ...{ interpolationWidget: false } };
+        case types.INTERPOLATE + '_FULFILLED':
+            var annotationDetectionContainer = state.annotationDetectionContainer;
+            for (let detection of action.payload.newDetections) {
+                annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, detection.g0, { src: detection.src });
+            }
+            return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         default:
             return state;
     }
