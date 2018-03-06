@@ -6,20 +6,20 @@ install mongodb https://www.digitalocean.com/community/tutorials/how-to-install-
 install node v8 with npm v5  
   
 Open a termimal  
-git clone -b 2.x-maintenance https://github.com/girder/girder.git  
-git clone https://github.com/girder/large_image.git  
-git clone -b v0.1 https://github.com/Kitware/vaui.git  
+`git clone -b 2.x-maintenance https://github.com/girder/girder.git`  
+`git clone https://github.com/girder/large_image.git`  
+`git clone https://github.com/Kitware/vaui.git`  
 (Switch to master branch for latest development)  
   
 (create a python virtual environment if you want to)  
-cd girder  
-pip install -r requirements-dev.txt  
-pip install -e .  
-pip install --user numpy==1.10.2  
-girder-install plugin -s ../large_image/  
-girder-install plugin -s ../vaui/  
-girder-install web --dev --plugins vaui  
-girder-server  
+`cd girder`  
+`pip install -r requirements-dev.txt`  
+`pip install -e .`  
+`pip install --user numpy==1.10.2`  
+`girder-install plugin -s ../large_image/`  
+`girder-install plugin -s ../vaui/`  
+`girder-install web --dev --plugins vaui`  
+`girder-server`  
 (the server will start running)  
   
 navigate to http://localhost:8080  
@@ -33,3 +33,18 @@ girder-server
 navigate to http://localhost:8080, and the VAUI interface should be shown  
 (with VAUI enabled, the girder interface is available at http://localhost:8080/girder)  
 At this moment, you will need clip frames and KPFs to see annotations  
+
+## LibYAML, Optional for performance  
+Within the server virtual environment  
+`curl -O http://pyyaml.org/download/libyaml/yaml-0.1.7.tar.gz`  
+`tar -xvzf yaml-0.1.7.tar.gz`  
+`cd yaml-0.1.7`  
+`./configure`  
+`make`  
+`sudo make install`  
+`cd ..`  
+`curl -O http://pyyaml.org/download/pyyaml/PyYAML-3.12.tar.gz`  
+`tar -xvzf PyYAML-3.12.tar.gz`  
+`cd PyYAML-3.12`  
+`sudo python setup.py --with-libyaml install`  
+Restart server  
