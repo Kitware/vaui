@@ -97,6 +97,9 @@ function app(state, action) {
         case types.CHANGE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+        case types.CHANGE_ACTIVITY2:
+            var annotationActivityContainer = state.annotationActivityContainer.change2(action.payload.id2, action.payload);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.DELETE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.remove(action.payload);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: null } };

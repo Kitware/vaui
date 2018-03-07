@@ -24,7 +24,7 @@ class IndexView extends PureComponent {
             <Viewer className='main' />
             <div className='right-sidebar'>
                 {(this.props.creatingActivity || this.props.selectedActivityId) &&
-                    <ActivityEditor />}
+                    <ActivityEditor key={this.props.creatingActivity ? 'new' : this.props.selectedActivityId} />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
                 <InfoView />

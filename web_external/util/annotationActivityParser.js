@@ -85,6 +85,7 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    // TODO: Deprecate
     change(activityId, newActivityAct2, newTimespan) {
         var activityToChange = this.getItem(activityId);
         if (activityToChange) {
@@ -104,6 +105,15 @@ class AnnotationActivityContainer {
             if (!this._added.has(activityToChange)) {
                 this._edited.add(activityToChange);
             }
+        }
+        return this.copy();
+    }
+
+    change2(activityId, activity) {
+        var activityToChange = this.getItem(activityId);
+        Object.assign(activityToChange, activity);
+        if (!this._added.has(activityToChange)) {
+            this._edited.add(activityToChange);
         }
         return this.copy();
     }
