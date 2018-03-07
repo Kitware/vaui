@@ -8,7 +8,7 @@ import { AnnotationActivity } from '../util/annotationActivityParser';
 
 import './style.styl';
 
-class ActivityCreator extends PureComponent {
+class ActivityEditor extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
@@ -188,4 +188,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActivityCreator);
+export default connect(mapStateToProps, mapDispatchToProps)(ActivityEditor);
