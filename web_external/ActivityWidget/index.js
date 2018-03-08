@@ -8,7 +8,7 @@ import { AnnotationActivity } from '../util/annotationActivityParser';
 
 import './style.styl';
 
-class ActivityEditor extends PureComponent {
+class ActivityWidget extends PureComponent {
     constructor(props) {
         super(props);
         this.state = this._getInitialState(props);
@@ -267,4 +267,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActivityEditor);
+export default connect(mapStateToProps, mapDispatchToProps)(ActivityWidget);

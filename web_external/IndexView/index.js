@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
 import InfoView from '../InfoView';
-import ActivityEditor from '../ActivityEditor';
+import ActivityWidget from '../ActivityWidget';
 import ObjectInfo from '../ObjectInfo';
 import InterpolationWidget from '../InterpolationWidget';
 
@@ -24,7 +24,7 @@ class IndexView extends PureComponent {
             <Viewer className='main' />
             <div className='right-sidebar'>
                 {(this.props.creatingActivity || this.props.editingActivityId || this.props.selectedActivityId) &&
-                    <ActivityEditor />}
+                    <ActivityWidget />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
                 <InfoView />
