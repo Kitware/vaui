@@ -23,8 +23,8 @@ class IndexView extends PureComponent {
             </div>
             <Viewer className='main' />
             <div className='right-sidebar'>
-                {(this.props.creatingActivity || this.props.selectedActivityId) &&
-                    <ActivityEditor key={this.props.creatingActivity ? 'new' : this.props.selectedActivityId} />}
+                {(this.props.creatingActivity || this.props.editingActivityId || this.props.selectedActivityId) &&
+                    <ActivityEditor />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
                 <InfoView />
@@ -36,6 +36,7 @@ class IndexView extends PureComponent {
 const mapStateToProps = (state, ownProps) => {
     return {
         creatingActivity: state.creatingActivity,
+        editingActivityId: state.editingActivityId,
         selectedActivityId: state.selectedActivityId,
         interpolationWidget: state.interpolationWidget
     };

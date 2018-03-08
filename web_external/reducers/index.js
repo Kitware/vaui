@@ -19,8 +19,9 @@ function app(state, action) {
             detectionItem: null,
             selectedAnnotation: null,
             selectedTrackId: null,
-            selectedActivityId: null,
             editingTrackId: null,
+            selectedActivityId: null,
+            editingActivityId: null,
             saving: false,
             pendingSave: false,
             requestFrameRange: null,
@@ -51,7 +52,7 @@ function app(state, action) {
             return { ...state, ...{ annotationDetectionContainer } };
         case types.ANNOTATION_CLICKED:
             return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, editingTrackId: null, selectedActivityId: null } };
-        case types.EDITING_TRACK:
+        case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.SET_DETECTION_ITEM:
             return { ...state, ...{ detectionItem: action.payload } };
@@ -94,18 +95,24 @@ function app(state, action) {
             return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
         case types.SELECT_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+        case types.EDIT_ACTIVITY_START:
+            return { ...state, ...{ editingActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+        case types.EDIT_ACTIVITY_STOP:
+            return { ...state, ...{ editingActivityId: null, selectedActivityId: action.payload } };
         case types.CHANGE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.CHANGE_ACTIVITY2:
-            var annotationActivityContainer = state.annotationActivityContainer.change2(action.payload.id2, action.payload);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+            var activity = action.payload;
+            var annotationActivityContainer = state.annotationActivityContainer.change2(activity.id2, activity);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.DELETE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.remove(action.payload);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: null } };
-        case types.NEW_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.new(action.payload);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+        case types.ADD_ACTIVITY:
+            var activity = action.payload;
+            var annotationActivityContainer = state.annotationActivityContainer.new(activity);
+            return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.CHANGE_TRACK_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
@@ -115,9 +122,9 @@ function app(state, action) {
             return { ...state, ...{ currentFrame: action.payload } };
         case types.MAX_FRAME_CHANGE:
             return { ...state, ...{ maxFrame: action.payload } };
-        case types.CREATE_ACTIVITY_SHOW:
+        case types.CREATE_ACTIVITY_START:
             return { ...state, ...{ creatingActivity: true } };
-        case types.CREATE_ACTIVITY_HIDE:
+        case types.CREATE_ACTIVITY_STOP:
             return { ...state, ...{ creatingActivity: false } };
         case types.IMPORT_PROGRESS_CHANGE:
             return { ...state, ...{ importProgress: action.payload } };

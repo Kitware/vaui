@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import _ from 'underscore';
 
 import activityTypes from '../activityTypes.json';
-import { NEW_ACTIVITY, CHANGE_ACTIVITY2, CREATE_ACTIVITY_HIDE } from '../actions/types';
+import { ADD_ACTIVITY, EDIT_ACTIVITY_START, EDIT_ACTIVITY_STOP, CHANGE_ACTIVITY2, CREATE_ACTIVITY_STOP } from '../actions/types';
 import { AnnotationActivity } from '../util/annotationActivityParser';
 
 import './style.styl';
@@ -11,63 +11,58 @@ import './style.styl';
 class ActivityEditor extends PureComponent {
     constructor(props) {
         super(props);
-        if (this.props.creatingActivity) {
-            this.state = {
+        this.state = this._getInitialState(props);
+    }
+
+    _getInitialState(props) {
+        if (props.creatingActivity) {
+            return {
                 id2: null,
                 act2: {},
                 start: 0,
                 end: 0,
                 trackIds: [],
                 trackFrameRangeMap: new Map(),
+                editing: true,
+                changed: false
+            }
+        } else {
+            let activity = props.annotationActivityContainer.getItem(props.editingActivityId || props.selectedActivityId);
+            let trackIds = activity.actors.map((actor) => actor.id1);
+            let trackFrameRangeMap = new Map();
+            for (let trackId of trackIds) {
+                let trackRange = props.annotationDetectionContainer.getTrackFrameRange(trackId);
+                trackFrameRangeMap.set(trackId, trackRange);
+            }
+            var activityRange = activity.timespan[0].tsr0;
+            return {
+                id2: activity.id2,
+                act2: activity.act2,
+                start: activityRange[0],
+                end: activityRange[1],
+                trackIds,
+                trackFrameRangeMap,
+                editing: !!props.editingActivityId,
                 changed: false
             }
         }
-        else {
-            this.state = this._getInitialState();
-        }
-    }
 
-    _getInitialState() {
-        let activity = this.props.annotationActivityContainer.getItem(this.props.selectedActivityId);
-        let trackIds = activity.actors.map((actor) => actor.id1);
-        let trackFrameRangeMap = new Map();
-        for (let trackId of trackIds) {
-            let trackRange = this.props.annotationDetectionContainer.getTrackFrameRange(trackId);
-            trackFrameRangeMap.set(trackId, trackRange);
-        }
-        var activityRange = activity.timespan[0].tsr0;
-        return {
-            id2: this.props.selectedActivityId,
-            act2: activity.act2,
-            start: activityRange[0],
-            end: activityRange[1],
-            trackIds,
-            trackFrameRangeMap,
-            changed: false
-        }
     }
 
     componentWillReceiveProps(nextProps) {
-        if (nextProps.selectedTrackId && nextProps.selectedTrackId !== this.props.selectedTrackId) {
+        if (this.props.editingActivityId !== nextProps.editingActivityId ||
+            this.props.creatingActivity !== nextProps.creatingActivity ||
+            (!nextProps.editingActivityId && !this.props.creatingActivity && (this.props.selectedActivityId !== nextProps.selectedActivityId))) {
+            this.setState(this._getInitialState(nextProps));
+        }
+        if (this.state.editing && nextProps.selectedTrackId !== null && nextProps.selectedTrackId !== this.props.selectedTrackId) {
             var trackId = nextProps.selectedTrackId;
             this.setState({
                 trackIds: _.union(this.state.trackIds, [trackId]),
-                trackFrameRangeMap: new Map(this.state.trackFrameRangeMap.set(trackId, [this.state.start, this.state.end]))
+                trackFrameRangeMap: new Map(this.state.trackFrameRangeMap.set(trackId, [this.state.start, this.state.end])),
+                changed: true
             }, () => this._updateTrackFrameRangeMap(this.state.start, this.state.end));
         }
-    }
-
-    componentWillUpdate(nextProps, nextState) {
-        if (nextState.start !== this.state.start || nextState.end !== this.state.end) {
-            this._updateTrackFrameRangeMap(nextState.start, nextState.end);
-        }
-        if (this.state.changed === nextState.changed && this._stateChanged(this.state, nextState, ['act2', 'start', 'end', 'trackIds'])) {
-            this.setState({ changed: true });
-        }
-    }
-
-    _stateChanged(stateA, stateB, fields = []) {
-        return _.some(fields, (field) => stateA[field] !== stateB[field]);
     }
 
     _updateTrackFrameRangeMap(start, end) {
@@ -95,11 +90,11 @@ class ActivityEditor extends PureComponent {
         });
         if (this.props.creatingActivity) {
             this.props.dispatch({
-                type: NEW_ACTIVITY,
+                type: ADD_ACTIVITY,
                 payload: activity
             });
             this.props.dispatch({
-                type: CREATE_ACTIVITY_HIDE
+                type: CREATE_ACTIVITY_STOP
             });
         } else {
             activity.id2 = this.state.id2;
@@ -108,11 +103,15 @@ class ActivityEditor extends PureComponent {
                 type: CHANGE_ACTIVITY2,
                 payload: activity
             });
+            this.props.dispatch({
+                type: EDIT_ACTIVITY_STOP,
+                payload: this.state.id2
+            });
         }
     }
 
     render() {
-        var canCommit = this.state.act2 && this.state.trackIds.length && this.state.start !== this.state.end;
+        var canCommit = this.state.changed && this.state.act2 && this.state.trackIds.length && this.state.start !== this.state.end;
         var types = Object.keys(this.state.act2);
         var type = types.length === 0 ? '' : (types.length === 1 ? types[0] : 'multiple');
         return <div className={['v-activity-creator', this.props.className].join(' ')}>
@@ -124,11 +123,15 @@ class ActivityEditor extends PureComponent {
                         <div className='form-group form-group-xs'>
                             <label className='col-sm-2 control-label'>Type:</label>
                             <div className='col-sm-9'>
-                                <select className='form-control' value={type} onChange={(e) => {
-                                    this.setState({
-                                        act2: e.target.value ? { [e.target.value]: 1.0 } : null,
-                                    });
-                                }} >
+                                <select className='form-control'
+                                    value={type}
+                                    disabled={!this.state.editing}
+                                    onChange={(e) => {
+                                        this.setState({
+                                            act2: e.target.value ? { [e.target.value]: 1.0 } : null,
+                                            changed: true
+                                        });
+                                    }} >
                                     <option value='' disabled></option>
                                     <option value='multiple' disabled>Multiple</option>
                                     {_.sortBy(activityTypes.map(activityTypes => activityTypes.type)).map((type) => {
@@ -143,12 +146,15 @@ class ActivityEditor extends PureComponent {
                                 <p className='form-control-static'>{this.state.start} (frame)</p>
                             </div>
                             <div className='col-sm-4 frame-button-container'>
-                                <button type='button' className='btn btn-default btn-xs' onClick={(e) => {
-                                    this.setState({
-                                        start: this.props.currentFrame,
-                                        end: Math.max(this.props.currentFrame, this.state.end)
-                                    });
-                                }}>Start here</button>
+                                {this.state.editing &&
+                                    <button type='button' className='btn btn-default btn-xs' onClick={(e) => {
+                                        var start = this.props.currentFrame;
+                                        var end = Math.max(this.props.currentFrame, this.state.end);
+                                        this.setState({
+                                            start, end, changed: true
+                                        });
+                                        this._updateTrackFrameRangeMap(start, end);
+                                    }}>Start here</button>}
                             </div>
                         </div>
                         <div className='form-group form-group-xs'>
@@ -157,12 +163,15 @@ class ActivityEditor extends PureComponent {
                                 <p className='form-control-static'>{this.state.end} (frame)</p>
                             </div>
                             <div className='col-sm-4 frame-button-container'>
-                                <button type='button' className='btn btn-default btn-xs' onClick={(e) => {
-                                    this.setState({
-                                        start: Math.min(this.props.currentFrame, this.state.start),
-                                        end: this.props.currentFrame
-                                    });
-                                }}>End here</button>
+                                {this.state.editing &&
+                                    <button type='button' className='btn btn-default btn-xs' onClick={(e) => {
+                                        var start = Math.min(this.props.currentFrame, this.state.start);
+                                        var end = this.props.currentFrame;
+                                        this.setState({
+                                            start, end, changed: true
+                                        });
+                                        this._updateTrackFrameRangeMap(start, end);
+                                    }}>End here</button>}
                             </div>
                         </div>
                         <label>Tracks</label>
@@ -179,16 +188,18 @@ class ActivityEditor extends PureComponent {
                                 return <li key={trackId}>
                                     <div className='row'>
                                         <div className='col-xs-1'>
-                                            <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
-                                                var trackIds = this.state.trackIds;
-                                                trackIds.splice(trackIds.indexOf(trackId), 1);
-                                                var trackFrameRangeMap = this.state.trackFrameRangeMap;
-                                                trackFrameRangeMap.delete(trackId);
-                                                this.setState({
-                                                    trackIds: trackIds.slice(),
-                                                    trackFrameRangeMap: new Map(trackFrameRangeMap)
-                                                });
-                                            }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
+                                            {this.state.editing &&
+                                                <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
+                                                    var trackIds = this.state.trackIds;
+                                                    trackIds.splice(trackIds.indexOf(trackId), 1);
+                                                    var trackFrameRangeMap = this.state.trackFrameRangeMap;
+                                                    trackFrameRangeMap.delete(trackId);
+                                                    this.setState({
+                                                        trackIds: trackIds.slice(),
+                                                        trackFrameRangeMap: new Map(trackFrameRangeMap),
+                                                        changed: true
+                                                    });
+                                                }}><span className='glyphicon glyphicon-remove text-danger'></span></button>}
                                         </div>
                                         <div className='col-xs-5'>
                                             {this.props.annotationTypeContainer.getTrackDisplayLabel(trackId)}
@@ -200,26 +211,37 @@ class ActivityEditor extends PureComponent {
                                 </li>
                             })}
                         </ul>
-                        {this.state.changed && <div className='bottom-row'>
+                        <div className='bottom-row'>
                             <div className='row'>
                                 <div className='col-xs-11'>
-                                    <div className='btn-group btn-group-sm' role='group'>
-                                        <button type='button' className='btn btn-default' onClick={(e) => {
-                                            if (this.props.creatingActivity) {
-                                                this.props.dispatch({
-                                                    type: CREATE_ACTIVITY_HIDE
-                                                })
-                                            } else {
-                                                this.setState({ ...this._getInitialState(), ...{ changed: false } });
-                                            }
-                                        }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
-                                        <button type='button' className='btn btn-default' disabled={!canCommit} onClick={(e) => {
-                                            this._dispatchAcitivty()
-                                        }}><span className='glyphicon glyphicon-ok text-success'></span></button>
-                                    </div>
+                                    {!this.state.editing &&
+                                        <button type='button' className='btn btn-default btn-sm' onClick={(e) => {
+                                            this.props.dispatch({
+                                                type: EDIT_ACTIVITY_START,
+                                                payload: this.state.id2
+                                            });
+                                        }}><span className='glyphicon glyphicon-wrench'></span></button>}
+                                    {this.state.editing &&
+                                        <div className='btn-group btn-group-sm' role='group'>
+                                            <button type='button' className='btn btn-default' onClick={(e) => {
+                                                if (this.props.creatingActivity) {
+                                                    this.props.dispatch({
+                                                        type: CREATE_ACTIVITY_STOP
+                                                    })
+                                                } else {
+                                                    this.props.dispatch({
+                                                        type: EDIT_ACTIVITY_STOP,
+                                                        payload: this.state.id2
+                                                    });
+                                                }
+                                            }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
+                                            <button type='button' className='btn btn-default' disabled={!canCommit} onClick={(e) => {
+                                                this._dispatchAcitivty()
+                                            }}><span className='glyphicon glyphicon-ok text-success'></span></button>
+                                        </div>}
                                 </div>
                             </div>
-                        </div>}
+                        </div>
                     </form>
                 </div>
             </div>
@@ -230,6 +252,7 @@ const mapStateToProps = (state, ownProps) => {
     return {
         creatingActivity: state.creatingActivity,
         selectedActivityId: state.selectedActivityId,
+        editingActivityId: state.editingActivityId,
         currentFrame: state.currentFrame,
         selectedTrackId: state.selectedTrackId,
         annotationDetectionContainer: state.annotationDetectionContainer,
