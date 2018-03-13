@@ -49,7 +49,6 @@ class ActivityWidget extends PureComponent {
                 changed: false
             }
         }
-
     }
 
     componentWillReceiveProps(nextProps) {
@@ -175,9 +174,10 @@ class ActivityWidget extends PureComponent {
     }
 
     render() {
-        var canCommit = this.state.changed && !_.isEmpty(this.state.act2) && this.state.trackIds.length && this.state.start !== this.state.end;
         var types = Object.keys(this.state.act2);
         var type = types.length === 0 ? '' : (types.length === 1 ? types[0] : 'multiple');
+        var activityTypeDefinition = activityTypes.find((activityType) => activityType.type === type);
+        var canCommit = this.state.changed && !_.isEmpty(this.state.act2) && this.state.trackIds.length && this.state.start !== this.state.end && (activityTypeDefinition === null || this.state.trackIds.length >= activityTypeDefinition.minTrack);
         var { maxActivityRange, minActivityRange } = this._getActivityRangeLimits();
         var startMin = Math.max(0, maxActivityRange[0]);
         var startMax = Math.min(maxActivityRange[1], minActivityRange[0]);
@@ -216,7 +216,7 @@ class ActivityWidget extends PureComponent {
         };
         return <div className={['v-activity-creator', this.props.className].join(' ')}>
             <div className='panel panel-default'>
-                <div className='panel-heading'>{this.props.creatingActivity ? 'Create Activity' : 'Edit Activity'}</div>
+                <div className='panel-heading'>{!this.state.editing ? 'Activity' : (this.props.creatingActivity ? 'Create Activity' : 'Edit Activity')}</div>
                 <div className='panel-body'>
                     <form className='form-horizontal'>
                         <label>Activity</label>
@@ -314,109 +314,113 @@ class ActivityWidget extends PureComponent {
                             </div>
                         </div>
                         <label>Tracks</label>
-                        {this.state.trackIds.length !== 0 &&
-                            <div className='clearfix tracks-header track-item'>
-                                <div className='col-xs-5 no-padding'>Track</div>
-                                <div className='col-xs-3 no-padding'>Start</div>
-                                <div className='col-xs-3 no-padding'>End</div>
-                            </div>}
-                        <ul className='tracks'>
-                            {this.state.trackIds.map((trackId) => {
-                                var activityTrackRange = this.state.activityTrackFrameRangeMap.get(trackId);
-                                var trackRange = annotationDetectionContainer.getTrackFrameRange(trackId);
-                                var setActivityTrackRangeStart = (start) => {
-                                    activityTrackRange[0] = start;
-                                    if (start > activityTrackRange[1]) {
-                                        activityTrackRange[1] = start;
-                                    }
-                                    if (start < this.state.start) {
-                                        this.setState({ start });
-                                    }
-                                    if (start > this.state.end) {
-                                        this.setState({ end: start });
-                                    }
-                                    this.setState({
-                                        activityTrackFrameRangeMap: new Map(this.state.activityTrackFrameRangeMap),
-                                        changed: true
-                                    });
-                                };
-                                var setActivityTrackRangeEnd = (end) => {
-                                    activityTrackRange[1] = end;
-                                    if (end < activityTrackRange[0]) {
-                                        activityTrackRange[0] = end;
-                                    }
-                                    if (end < this.state.start) {
-                                        this.setState({ start: end });
-                                    }
-                                    if (end > this.state.end) {
-                                        this.setState({ end });
-                                    }
-                                    this.setState({
-                                        activityTrackFrameRangeMap: new Map(this.state.activityTrackFrameRangeMap),
-                                        changed: true
-                                    });
-                                };
-                                return <li key={trackId}>
-                                    <div className='form-group form-group-xs track-item'>
-                                        <div className='col-xs-5 no-padding' title={`Range ${trackRange[0]}-${trackRange[1]}`}>
-                                            {this.props.annotationTypeContainer.getTrackDisplayLabel(trackId)}
+                        <div className='tracks'>
+                            {this.state.trackIds.length !== 0 &&
+                                <div className='clearfix tracks-header'>
+                                    <div className='col-xs-5 no-padding'>Track</div>
+                                    <div className='col-xs-3 no-padding'>Start</div>
+                                    <div className='col-xs-3 no-padding'>End</div>
+                                </div>}
+                            <ul>
+                                {this.state.trackIds.map((trackId) => {
+                                    var activityTrackRange = this.state.activityTrackFrameRangeMap.get(trackId);
+                                    var trackRange = annotationDetectionContainer.getTrackFrameRange(trackId);
+                                    var setActivityTrackRangeStart = (start) => {
+                                        activityTrackRange[0] = start;
+                                        if (start > activityTrackRange[1]) {
+                                            activityTrackRange[1] = start;
+                                        }
+                                        if (start < this.state.start) {
+                                            this.setState({ start });
+                                        }
+                                        if (start > this.state.end) {
+                                            this.setState({ end: start });
+                                        }
+                                        this.setState({
+                                            activityTrackFrameRangeMap: new Map(this.state.activityTrackFrameRangeMap),
+                                            changed: true
+                                        });
+                                    };
+                                    var setActivityTrackRangeEnd = (end) => {
+                                        activityTrackRange[1] = end;
+                                        if (end < activityTrackRange[0]) {
+                                            activityTrackRange[0] = end;
+                                        }
+                                        if (end < this.state.start) {
+                                            this.setState({ start: end });
+                                        }
+                                        if (end > this.state.end) {
+                                            this.setState({ end });
+                                        }
+                                        this.setState({
+                                            activityTrackFrameRangeMap: new Map(this.state.activityTrackFrameRangeMap),
+                                            changed: true
+                                        });
+                                    };
+                                    return <li key={trackId}>
+                                        <div className='form-group form-group-xs'>
+                                            <div className='col-xs-5 no-padding' title={`Range ${trackRange[0]}-${trackRange[1]}`}>
+                                                {this.props.annotationTypeContainer.getTrackDisplayLabel(trackId)}
+                                            </div>
+                                            <div className='col-xs-3 range'>
+                                                {!this.state.editing && <p className='form-control-static'>{activityTrackRange[0]}</p>}
+                                                {this.state.editing &&
+                                                    <FrameNumberInput className='form-control'
+                                                        value={activityTrackRange[0]}
+                                                        min={trackRange[0]}
+                                                        max={trackRange[1]}
+                                                        onChange={setActivityTrackRangeStart} />}
+                                                {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
+                                                    var start = this.props.currentFrame;
+                                                    if (start > trackRange[1]) {
+                                                        start = trackRange[1];
+                                                    }
+                                                    if (start < trackRange[0]) {
+                                                        start = trackRange[0];
+                                                    }
+                                                    setActivityTrackRangeStart(start);
+                                                }}>Start here</button>}
+                                            </div>
+                                            <div className='col-xs-3 range'>
+                                                {!this.state.editing && <p className='form-control-static'>{activityTrackRange[1]}</p>}
+                                                {this.state.editing &&
+                                                    <FrameNumberInput className='form-control'
+                                                        value={activityTrackRange[1]}
+                                                        min={trackRange[0]}
+                                                        max={trackRange[1]}
+                                                        onChange={setActivityTrackRangeEnd} />}
+                                                {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
+                                                    var end = this.props.currentFrame;
+                                                    if (end > trackRange[1]) {
+                                                        end = trackRange[1];
+                                                    }
+                                                    if (end < trackRange[0]) {
+                                                        end = trackRange[0];
+                                                    }
+                                                    setActivityTrackRangeEnd(end);
+                                                }}>End here</button>}
+                                            </div>
+                                            <div className='col-xs-1 no-padding'>
+                                                {this.state.editing &&
+                                                    <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
+                                                        var trackIds = this.state.trackIds;
+                                                        trackIds.splice(trackIds.indexOf(trackId), 1);
+                                                        var activityTrackFrameRangeMap = this.state.activityTrackFrameRangeMap;
+                                                        activityTrackFrameRangeMap.delete(trackId);
+                                                        this.setState({
+                                                            trackIds: trackIds.slice(),
+                                                            activityTrackFrameRangeMap: new Map(activityTrackFrameRangeMap),
+                                                            changed: true
+                                                        }, () => { this._limitActivityRange(); });
+                                                    }}><span className='glyphicon glyphicon-remove text-danger'></span></button>}
+                                            </div>
                                         </div>
-                                        <div className='col-xs-3 range'>
-                                            {!this.state.editing && <p className='form-control-static'>{activityTrackRange[0]}</p>}
-                                            {this.state.editing &&
-                                                <FrameNumberInput className='form-control'
-                                                    value={activityTrackRange[0]}
-                                                    min={trackRange[0]}
-                                                    max={trackRange[1]}
-                                                    onChange={setActivityTrackRangeStart} />}
-                                            {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                var start = this.props.currentFrame;
-                                                if (start > trackRange[1]) {
-                                                    start = trackRange[1];
-                                                }
-                                                if (start < trackRange[0]) {
-                                                    start = trackRange[0];
-                                                }
-                                                setActivityTrackRangeStart(start);
-                                            }}>Start here</button>}
-                                        </div>
-                                        <div className='col-xs-3 range'>
-                                            {!this.state.editing && <p className='form-control-static'>{activityTrackRange[1]}</p>}
-                                            {this.state.editing &&
-                                                <FrameNumberInput className='form-control'
-                                                    value={activityTrackRange[1]}
-                                                    min={trackRange[0]}
-                                                    max={trackRange[1]}
-                                                    onChange={setActivityTrackRangeEnd} />}
-                                            {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                var end = this.props.currentFrame;
-                                                if (end > trackRange[1]) {
-                                                    end = trackRange[1];
-                                                }
-                                                if (end < trackRange[0]) {
-                                                    end = trackRange[0];
-                                                }
-                                                setActivityTrackRangeEnd(end);
-                                            }}>End here</button>}
-                                        </div>
-                                        <div className='col-xs-1 no-padding'>
-                                            {this.state.editing &&
-                                                <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
-                                                    var trackIds = this.state.trackIds;
-                                                    trackIds.splice(trackIds.indexOf(trackId), 1);
-                                                    var activityTrackFrameRangeMap = this.state.activityTrackFrameRangeMap;
-                                                    activityTrackFrameRangeMap.delete(trackId);
-                                                    this.setState({
-                                                        trackIds: trackIds.slice(),
-                                                        activityTrackFrameRangeMap: new Map(activityTrackFrameRangeMap),
-                                                        changed: true
-                                                    }, () => { this._limitActivityRange(); });
-                                                }}><span className='glyphicon glyphicon-remove text-danger'></span></button>}
-                                        </div>
-                                    </div>
-                                </li>
-                            })}
-                        </ul>
+                                    </li>
+                                })}
+                            </ul>
+                            {activityTypeDefinition && activityTypeDefinition.minTrack > this.state.trackIds.length &&
+                                <div>({activityTypeDefinition && activityTypeDefinition.minTrack - this.state.trackIds.length} or more tracks needed)</div>}
+                        </div>
                         <div className='bottom-row'>
                             <div className='row'>
                                 <div className='col-xs-11'>
