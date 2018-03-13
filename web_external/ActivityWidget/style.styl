@@ -22,6 +22,13 @@
     font-size 12px
     font-weight bold
 
+  .track-item
+    margin-bottom 2px
+    margin-left 10px
+
+  .form-group
+    margin-bottom 2px
+
   ul.tracks
     list-style none
     padding 0
@@ -30,16 +37,19 @@
     flex 1
 
     li
-      button
-        display none
-        height 0
+      .form-group
+        margin-right 0
 
-      &:hover
         button
-          display block
+          display none
 
-  .no-padding[class^="col-xs-"]
-    padding 0
+        &:hover
+          button
+            display block
+
+        .range
+          padding-left 0
+          padding-right 5px
 
   .bottom-row
     text-align right
