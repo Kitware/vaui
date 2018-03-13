@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_SHOW, INTERPOLATE_SHOW } from '../actions/types';
+import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, INTERPOLATE_SHOW } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -89,7 +89,7 @@ class Viewer extends PureComponent {
                             <div key='control-bar' className='control-bar'>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
-                                    type: CREATE_ACTIVITY_SHOW
+                                    type: CREATE_ACTIVITY_START
                                 })}>New Activity</button>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
                                     type: INTERPOLATE_SHOW
@@ -133,7 +133,7 @@ class Viewer extends PureComponent {
                                     payload: annotation
                                 })}
                                 annotationRightClick={(annotation) => this.props.dispatch({
-                                    type: EDITING_TRACK,
+                                    type: EDIT_TRACK,
                                     payload: annotation ? annotation.detection.id1 : null
                                 })}
                                 rectangleDrawn={(g0) => this.props.dispatch({

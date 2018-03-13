@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
 import InfoView from '../InfoView';
-import ActivityCreator from '../ActivityCreator';
+import ActivityWidget from '../ActivityWidget';
 import ObjectInfo from '../ObjectInfo';
 import InterpolationWidget from '../InterpolationWidget';
 
@@ -23,8 +23,8 @@ class IndexView extends PureComponent {
             </div>
             <Viewer className='main' />
             <div className='right-sidebar'>
-                {this.props.creatingActivity &&
-                    <ActivityCreator />}
+                {(this.props.creatingActivity || this.props.editingActivityId || this.props.selectedActivityId) &&
+                    <ActivityWidget />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
                 <InfoView />
@@ -36,6 +36,8 @@ class IndexView extends PureComponent {
 const mapStateToProps = (state, ownProps) => {
     return {
         creatingActivity: state.creatingActivity,
+        editingActivityId: state.editingActivityId,
+        selectedActivityId: state.selectedActivityId,
         interpolationWidget: state.interpolationWidget
     };
 };

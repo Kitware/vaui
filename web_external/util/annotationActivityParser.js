@@ -85,6 +85,7 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
+    // TODO: Deprecate
     change(activityId, newActivityAct2, newTimespan) {
         var activityToChange = this.getItem(activityId);
         if (activityToChange) {
@@ -104,6 +105,21 @@ class AnnotationActivityContainer {
             if (!this._added.has(activityToChange)) {
                 this._edited.add(activityToChange);
             }
+        }
+        return this.copy();
+    }
+
+    change2(id2, activity) {
+        var activityToChange = this.getItem(id2);
+        Object.assign(activityToChange, activity);
+        if (!this._added.has(activityToChange)) {
+            this._edited.add(activityToChange);
+        }
+        if (id2 !== activity.id2) {
+            this._enableState.set(activity.id2, this._enableState.get(id2));
+            this._enableState.delete(id2);
+            this._activities.set(activity.id2, activityToChange);
+            this._activities.delete(id2);
         }
         return this.copy();
     }
@@ -212,6 +228,10 @@ class AnnotationActivityContainer {
     getActivityFrameRange(activityId) {
         var activity = this._activities.get(activityId);
         return activity.timespan[0].tsr0;
+    }
+
+    validateNewActivityId(activityId) {
+        return !this._activities.has(activityId);
     }
 
     getRemoved() {

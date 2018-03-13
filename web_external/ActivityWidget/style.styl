@@ -1,0 +1,58 @@
+.v-activity-creator
+  flex 1
+
+  .panel
+    display flex
+    flex-direction column
+
+  .panel-body
+    flex 1 1 0
+    display flex
+    flex-direction column
+    padding-top 10px
+
+    form.form-horizontal
+      display flex
+      flex-direction column
+
+  .frame-button-container
+    text-align right
+
+  .form-group
+    margin-bottom 2px
+  
+  .tracks
+    margin-bottom 10px
+    margin-left 10px
+
+    .tracks-header
+      font-size 12px
+      font-weight bold
+      margin-bottom 2px
+
+    ul
+      list-style none
+      padding 0
+      overflow-y auto
+      overflow-x hidden
+      flex 1
+      margin-bottom 0
+
+      li
+        .form-group
+          margin-right 0
+          margin-left 0
+
+          button
+            display none
+
+          &:hover
+            button
+              display block
+
+          .range
+            padding-left 0
+            padding-right 5px
+
+  .bottom-row
+    text-align right
