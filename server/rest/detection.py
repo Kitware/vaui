@@ -24,23 +24,23 @@ from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
 from girder.models.item import Item
-from girder.plugins.vaui.models.geom import Geom
+from girder.plugins.vaui.models.detection import Detection
 
 
-class GeomResource(Resource):
+class DetectionResource(Resource):
 
     def __init__(self):
-        super(GeomResource, self).__init__()
+        super(DetectionResource, self).__init__()
 
-        self.resourceName = 'geom'
-        self.route('GET', (':itemId',), self.getGeomsOfItem)
-        self.route('POST', (':itemId',), self.addGeomToItem)
-        self.route('PUT', (':geomId',), self.updateGeom)
-        self.route('DELETE', (':geomId',), self.deleteGeom)
+        self.resourceName = 'detection'
+        self.route('GET', (':itemId',), self.getDetectionsOfItem)
+        self.route('POST', (':itemId',), self.addDetectionToItem)
+        self.route('PUT', (':detectionId',), self.updateDetection)
+        self.route('DELETE', (':detectionId',), self.deleteDetection)
         self.route('GET', ('export', ':itemId',), self.exportKPF)
 
     # The girder default serialization takes twice the time
-    # as this custom serializer. Since geom could be relatively big,
+    # as this custom serializer. Since detection could be relatively big,
     # it is worthwhile to use this custom serializer.
     class JSONEncoder(json.JSONEncoder):
         def default(self, obj):
@@ -56,47 +56,47 @@ class GeomResource(Resource):
     )
     @access.user
     @rawResponse
-    def getGeomsOfItem(self, item, params):
+    def getDetectionsOfItem(self, item, params):
         setResponseHeader('Content-Type', 'application/json')
-        cursor = Geom().findByItem(item)
+        cursor = Detection().findByItem(item)
         jsonString = self.JSONEncoder().encode(list(cursor))
         return jsonString
 
     @autoDescribeRoute(
         Description('')
         .modelParam('itemId', model=Item, level=AccessType.WRITE)
-        .jsonParam('data', 'The geom content', requireObject=True, paramType='body')
+        .jsonParam('data', 'The detection content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def addGeomToItem(self, item, data, params):
+    def addDetectionToItem(self, item, data, params):
         data['itemId'] = item['_id']
-        return Geom().save(data)
+        return Detection().save(data)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('geomId', model=Geom)
-        .jsonParam('data', 'The geom content', requireObject=True, paramType='body')
+        .modelParam('detectionId', model=Detection, destName='detection')
+        .jsonParam('data', 'The detection content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def updateGeom(self, geom, data, params):
+    def updateDetection(self, detection, data, params):
         data.pop('_id', None)
         data.pop('itemId', None)
-        geom.update(data)
-        return Geom().save(geom)
+        detection.update(data)
+        return Detection().save(detection)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('geomId', model=Geom)
+        .modelParam('detectionId', model=Detection, destName='detection')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def deleteGeom(self, geom, params):
-        Geom().remove(geom)
+    def deleteDetection(self, detection, params):
+        Detection().remove(detection)
         return ''
 
     @autoDescribeRoute(
@@ -110,27 +110,27 @@ class GeomResource(Resource):
     @rawResponse
     def exportKPF(self, item, params):
         setResponseHeader('Content-Type', 'text/plain')
-        setResponseHeader('Content-Disposition', 'attachment; filename=geom.kpf')
+        setResponseHeader('Content-Disposition', 'attachment; filename=detection.kpf')
         return self.generateKPFContent(item)
 
     @staticmethod
     def generateKPFContent(item):
-        # The pyyaml without c yaml is not fast, so for geom, considering the
+        # The pyyaml without c yaml is not fast, so for detection, considering the
         # size, we build the yaml by hand
-        cursor = Geom().findByItem(item)
+        cursor = Detection().findByItem(item)
         output = []
-        for geom in cursor:
+        for detection in cursor:
             keyValues = []
-            for key in geom:
+            for key in detection:
                 if key == 'itemId' or key == '_id':
                     continue
                 if key == 'g0':
-                    value = str(geom['g0'][0][0]) + ' ' + str(geom['g0'][0][1]) + \
-                        ' ' + str(geom['g0'][1][0]) + ' ' + str(geom['g0'][1][1])
+                    value = str(detection['g0'][0][0]) + ' ' + str(detection['g0'][0][1]) + \
+                        ' ' + str(detection['g0'][1][0]) + ' ' + str(detection['g0'][1][1])
                 else:
-                    value = geom[key]
+                    value = detection[key]
                 keyValues.append('{0}: {1}'.format(key, value))
-            content = '- { geom: { ' + ', '.join(keyValues) + ' } }'
+            content = '- { detection: { ' + ', '.join(keyValues) + ' } }'
             output.append(content)
 
         def gen():

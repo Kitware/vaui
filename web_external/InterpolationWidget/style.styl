@@ -1,0 +1,31 @@
+.v-interpolation-widget
+  flex 1
+
+  .panel
+    display flex
+    flex-direction column
+
+  .panel-body
+    flex 1 1 0
+    display flex
+    flex-direction column
+    padding-top 10px
+
+    .detections-label
+      margin-top 10px
+
+    .detections-container
+      flex 1
+      overflow-y auto
+      overflow-x hidden
+
+      .detection
+        button
+          visibility hidden
+
+        &:hover
+          button
+            visibility visible
+
+  .bottom-row
+    text-align right

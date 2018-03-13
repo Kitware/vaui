@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_GEOM, DELETE_GEOM, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START } from '../actions/types';
+import { ANNOTATION_CLICKED, EDITING_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_SHOW, INTERPOLATE_SHOW } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -89,14 +89,17 @@ class Viewer extends PureComponent {
                             <div key='control-bar' className='control-bar'>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
                                 <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
-                                    type: CREATE_ACTIVITY_START
+                                    type: CREATE_ACTIVITY_SHOW
                                 })}>New Activity</button>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
+                                    type: INTERPOLATE_SHOW
+                                })}>Interpolate</button>
                                 {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
                                 playing={this.state.videoPlaying}
-                                geometryCotnainer={this.props.annotationGeometryContainer}
+                                detectionContainer={this.props.annotationDetectionContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
@@ -131,10 +134,10 @@ class Viewer extends PureComponent {
                                 })}
                                 annotationRightClick={(annotation) => this.props.dispatch({
                                     type: EDITING_TRACK,
-                                    payload: annotation ? annotation.geometry.id1 : null
+                                    payload: annotation ? annotation.detection.id1 : null
                                 })}
                                 rectangleDrawn={(g0) => this.props.dispatch({
-                                    type: CHANGE_GEOM,
+                                    type: CHANGE_DETECTION,
                                     payload: {
                                         frame: this.state.videoCurrentFrame,
                                         trackId: this.props.editingTrackId,
@@ -142,7 +145,7 @@ class Viewer extends PureComponent {
                                     }
                                 })}
                                 deleteAnnotation={() => this.props.dispatch({
-                                    type: DELETE_GEOM,
+                                    type: DELETE_DETECTION,
                                     payload: {
                                         frame: this.state.videoCurrentFrame,
                                         trackId: this.props.editingTrackId
@@ -232,31 +235,31 @@ class Viewer extends PureComponent {
             } else {
                 return { text: 'Loading...', classes: 'message info-message' };
             }
-        } else if (!this.props.annotationGeometryContainer) {
+        } else if (!this.props.annotationDetectionContainer) {
             return { text: 'No annotation', classes: 'message error-message' };
         }
     }
 
     getAnnotationForAFrame(frame) {
-        if (!this.props.annotationGeometryContainer ||
+        if (!this.props.annotationDetectionContainer ||
             !this.props.annotationActivityContainer ||
             !this.props.annotationTypeContainer) {
             return;
         }
         var typeContainer = this.props.annotationTypeContainer;
-        var geometryContainer = this.props.annotationGeometryContainer;
+        var detectionContainer = this.props.annotationDetectionContainer;
         var activityContainer = this.props.annotationActivityContainer;
-        var annotationGeometries = geometryContainer.getFrame(frame);
-        if (!annotationGeometries) {
+        var detections = detectionContainer.getByFrame(frame);
+        if (!detections) {
             return;
         }
-        var data = annotationGeometries.map((geometry) => {
-            var activities = activityContainer.getEnabledActivities(geometry.id1, frame);
+        var data = detections.map((detection) => {
+            var activities = activityContainer.getEnabledActivities(detection.id1, frame);
             return {
                 activities,
-                trackEnabled: geometryContainer.getEnableState(geometry.id1),
-                geometry,
-                type: typeContainer.getItem(geometry.id1)
+                trackEnabled: detectionContainer.getEnableState(detection.id1),
+                detection,
+                type: typeContainer.getItem(detection.id1)
             };
         }).filter((data) => {
             return data.activities || data.trackEnabled;
@@ -284,16 +287,16 @@ class Viewer extends PureComponent {
             },
             fillOpacity: 0.3,
             stroke(d) {
-                if (d.geometry.id1 === editingTrackId) {
+                if (d.detection.id1 === editingTrackId) {
                     return false;
                 }
                 return d.trackEnabled;
             },
             strokeColor(a, b, d) {
-                if (d.geometry.id1 === selectedTrackId) {
+                if (d.detection.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
-                var attributes = d.geometry.keyValues;
+                var attributes = d.detection.keyValues;
                 if (attributes.src === 'truth') {
                     if (attributes.eval0 === 'tp') {
                         return { r: 0, g: 1, b: 0.0 };
@@ -329,13 +332,13 @@ class Viewer extends PureComponent {
             size: 'small',
             title: 'New track id?',
             inputType: 'number',
-            value: this.props.annotationGeometryContainer.getNextTrackId(),
+            value: this.props.annotationDetectionContainer.getNextTrackId(),
             callback: (trackId) => {
                 if (!trackId) {
                     return;
                 }
                 trackId = parseInt(trackId);
-                if (!this.props.annotationGeometryContainer.validateNewTrackId(trackId)) {
+                if (!this.props.annotationDetectionContainer.validateNewTrackId(trackId)) {
                     bootbox.alert({
                         size: 'small',
                         message: 'A track with this id already exists',
@@ -388,7 +391,7 @@ const mapStateToProps = (state, ownProps) => {
         selectedItem: state.selectedItem,
         importProgress: state.importProgress,
         loadingAnnotation: state.loadingAnnotation,
-        annotationGeometryContainer: state.annotationGeometryContainer,
+        annotationDetectionContainer: state.annotationDetectionContainer,
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTypeContainer: state.annotationTypeContainer,
         selectedTrackId: state.selectedTrackId,

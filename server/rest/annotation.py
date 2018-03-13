@@ -35,10 +35,10 @@ from girder.models.folder import Folder
 from girder.models.item import Item
 from girder.models.file import File
 from girder.exceptions import RestException
-from ..models.geom import Geom
+from ..models.detection import Detection
 from ..models.activities import Activities
 from ..models.types import Types
-from .geom import GeomResource
+from .detection import DetectionResource
 from .activities import ActivitiesResource
 from .types import TypesResource
 
@@ -63,7 +63,7 @@ class AnnotationResource(Resource):
     @access.user
     def importAnnotation(self, folder, params):
         # TODO: Check if is a clip folder
-        geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
+        detectionItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
 
         setResponseHeader('Content-Length', 1000000)
 
@@ -72,7 +72,7 @@ class AnnotationResource(Resource):
             self._importTypes(typesItem)
             lastProgress = 0
             import math
-            for percentage in self._importGeom(geomItem):
+            for percentage in self._importDetection(detectionItem):
                 progress = int(math.floor(percentage * 100))
                 if lastProgress != progress:
                     yield '1' * (progress - lastProgress) * 10000
@@ -81,7 +81,7 @@ class AnnotationResource(Resource):
         return gen
 
     def _getAnnotationItems(self, folder):
-        geomItem = Item().findOne(query={
+        detectionItem = Item().findOne(query={
             'folderId': folder['_id'],
             'name': '{0}.geom.yml'.format(folder['name'])
         })
@@ -93,28 +93,28 @@ class AnnotationResource(Resource):
             'folderId': folder['_id'],
             'name': '{0}.types.yml'.format(folder['name'])
         })
-        return geomItem, activitiesItem, typesItem
+        return detectionItem, activitiesItem, typesItem
 
     @staticmethod
     def _readKPF(item):
-        geomFile = Item().childFiles(item)[0]
-        result = File().download(geomFile, headers=False)
+        detectionFile = Item().childFiles(item)[0]
+        result = File().download(detectionFile, headers=False)
         fileContent = ''.join(list(result()))
         return fileContent.splitlines()
 
-    def _importGeom(self, item):
-        print 'start import geom'
+    def _importDetection(self, item):
+        print 'start import detection'
         print datetime.datetime.utcnow()
 
-        Geom().removeWithQuery(query={'itemId': item['_id']})
+        Detection().removeWithQuery(query={'itemId': item['_id']})
         print 'removed existing records'
         print datetime.datetime.utcnow()
 
-        geomFile = Item().childFiles(item)[0]
-        result = File().download(geomFile, headers=False)
+        detectionFile = Item().childFiles(item)[0]
+        result = File().download(detectionFile, headers=False)
         fileContent = ''.join(list(result()))
 
-        print 'fileContent'
+        print 'read detection file'
         print datetime.datetime.utcnow()
         lines = fileContent.splitlines()
         lineCount = float(len(lines))
@@ -122,16 +122,16 @@ class AnnotationResource(Resource):
             obj = load(line, Loader=Loader)[0]
             if 'geom' not in obj:
                 continue
-            geom = obj['geom']
-            geom['itemId'] = item['_id']
-            values = geom['g0'].split()
-            geom['g0'] = [
+            detection = obj['geom']
+            detection['itemId'] = item['_id']
+            values = detection['g0'].split()
+            detection['g0'] = [
                 [int(values[0]), int(values[1])],
                 [int(values[2]), int(values[3])]
             ]
-            Geom().save(geom)
+            Detection().save(detection)
             yield i / lineCount
-        print 'finish _importGeom()'
+        print 'finish import Detections'
         print datetime.datetime.utcnow()
 
     def _importActivities(self, item):
@@ -164,14 +164,14 @@ class AnnotationResource(Resource):
     )
     @access.user
     def checkImportStatus(self, folder, params):
-        geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
-        if not geomItem:
-            raise RestException('missing geom annotation file', code=404)
+        detectionItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
+        if not detectionItem:
+            raise RestException('missing detection annotation file', code=404)
         if not activitiesItem:
             raise RestException('missing activities annotation file', code=404)
         if not typesItem:
             raise RestException('missing types annotation file', code=404)
-        imported = Geom().imported(geomItem) and Activities().imported(
+        imported = Detection().imported(detectionItem) and Activities().imported(
             activitiesItem) and Types().imported(typesItem)
         return imported
 
@@ -191,9 +191,9 @@ class AnnotationResource(Resource):
 
         def stream():
             zip = ziputil.ZipGenerator(folder['name'])
-            geomItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
+            detectionItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
 
-            for data in zip.addFile(GeomResource.generateKPFContent(geomItem), geomItem['name']):
+            for data in zip.addFile(DetectionResource.generateKPFContent(detectionItem), detectionItem['name']):
                 yield data
             for data in zip.addFile(TypesResource.generateKPFContent(typesItem), typesItem['name']):
                 yield data
