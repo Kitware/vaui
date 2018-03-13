@@ -65,7 +65,7 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });
-        mousetrap.bind('del', () => {
+        mousetrap.bind(['del', 'backspace', 'alt+d', 'command+d'], () => {
             if (this.props.editingTrackId !== null) {
                 this.props.deleteAnnotation();
             }
@@ -74,7 +74,7 @@ class ImageViewerWidgetWrapper extends Component {
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
-        mousetrap.unbind('del');
+        mousetrap.unbind(['del', 'backspace', 'alt+d', 'command+d']);
     }
 
     render() {

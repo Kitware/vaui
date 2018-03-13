@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { logout } from 'girder/auth';
 import events from 'girder/events';
 import { getApiRoot } from 'girder/rest';
+import bootbox from 'bootbox';
 
 import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import ClipExplorer from '../ClipExplorer';
@@ -25,7 +26,16 @@ class HeaderBar extends PureComponent {
             <div className='button-wrapper toolbutton'>
                 <button className='btn btn-primary' disabled={this.props.loadingAnnotation} onClick={(e) => this.setState({ showClipExplorer: true, modalKey: Math.random() })/* want to have new instance every time */}>Load</button>
                 <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving} onClick={(e) => this.props.dispatch(save())}>{this.props.saving ? 'Saving' : 'Save'}</button>
-                <button className='btn btn-link' disabled={!this.props.selectedFolder} onClick={(e) => { window.location = getApiRoot() + `/vaui-annotation/export/${this.props.selectedFolder._id}`; }}>Export</button>
+                <button className='btn btn-link' disabled={!this.props.selectedFolder} onClick={(e) => {
+                    var exportURL = getApiRoot() + `/vaui-annotation/export/${this.props.selectedFolder._id}`;
+                    if (this.props.pendingSave) {
+                        bootbox.confirm(`Export won't include pending changes, do you want to continue?`, (result) => {
+                            if (result) { window.location = exportURL; }
+                        });
+                    } else {
+                        window.location = exportURL;
+                    }
+                }}>Export</button>
             </div>
             <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
             <div className='v-current-user-wrapper toolbutton'>
