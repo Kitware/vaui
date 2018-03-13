@@ -276,7 +276,7 @@ class ActivityWidget extends PureComponent {
                             <div className='col-sm-4 frame-button-container'>
                                 {this.state.editing &&
                                     <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                        var start = this.props.currentFrame;
+                                        var start = this.props.wrappedCurrentFrame.value;
                                         if (start > startMax) {
                                             start = startMax;
                                         }
@@ -302,7 +302,7 @@ class ActivityWidget extends PureComponent {
                             <div className='col-sm-4 frame-button-container'>
                                 {this.state.editing &&
                                     <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                        var end = this.props.currentFrame;
+                                        var end = this.props.wrappedCurrentFrame.value;
                                         if (end > endMax) {
                                             end = endMax;
                                         }
@@ -371,7 +371,7 @@ class ActivityWidget extends PureComponent {
                                                         max={trackRange[1]}
                                                         onChange={setActivityTrackRangeStart} />}
                                                 {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                    var start = this.props.currentFrame;
+                                                    var start = this.props.wrappedCurrentFrame.value;
                                                     if (start > trackRange[1]) {
                                                         start = trackRange[1];
                                                     }
@@ -390,7 +390,7 @@ class ActivityWidget extends PureComponent {
                                                         max={trackRange[1]}
                                                         onChange={setActivityTrackRangeEnd} />}
                                                 {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                    var end = this.props.currentFrame;
+                                                    var end = this.props.wrappedCurrentFrame.value;
                                                     if (end > trackRange[1]) {
                                                         end = trackRange[1];
                                                     }
@@ -458,12 +458,15 @@ class ActivityWidget extends PureComponent {
         </div >;
     }
 }
+
+var currentFrame = { value: null };
 const mapStateToProps = (state, ownProps) => {
+    currentFrame.value = state.currentFrame;
     return {
         creatingActivity: state.creatingActivity,
         selectedActivityId: state.selectedActivityId,
         editingActivityId: state.editingActivityId,
-        currentFrame: state.currentFrame,
+        wrappedCurrentFrame: currentFrame,
         selectedTrackId: state.selectedTrackId,
         annotationDetectionContainer: state.annotationDetectionContainer,
         annotationTypeContainer: state.annotationTypeContainer,
