@@ -103,8 +103,8 @@ function app(state, action) {
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.CHANGE_ACTIVITY2:
-            var activity = action.payload;
-            var annotationActivityContainer = state.annotationActivityContainer.change2(activity.id2, activity);
+            var activity = action.payload.activity;
+            var annotationActivityContainer = state.annotationActivityContainer.change2(action.payload.id2, activity);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.DELETE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.remove(action.payload);

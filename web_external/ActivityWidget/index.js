@@ -1,6 +1,7 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'react-redux';
 import _ from 'underscore';
+import bootbox from 'bootbox';
 
 import activityTypes from '../activityTypes.json';
 import { ADD_ACTIVITY, EDIT_ACTIVITY_START, EDIT_ACTIVITY_STOP, CHANGE_ACTIVITY2, CREATE_ACTIVITY_STOP } from '../actions/types';
@@ -12,6 +13,7 @@ import './style.styl';
 class ActivityWidget extends PureComponent {
     constructor(props) {
         super(props);
+        this.id2 = null;
         this.state = this._getInitialState(props);
     }
 
@@ -35,6 +37,7 @@ class ActivityWidget extends PureComponent {
                 map.set(activity.id1, activity.timespan[0].tsr0.slice())
                 , new Map());
             var activityRange = activity.timespan[0].tsr0.slice();
+            this.id2 = activity.id2;
             return {
                 id2: activity.id2,
                 act2: activity.act2,
@@ -159,7 +162,10 @@ class ActivityWidget extends PureComponent {
             this.setState({ changed: false });
             this.props.dispatch({
                 type: CHANGE_ACTIVITY2,
-                payload: activity
+                payload: {
+                    id2: this.id2,
+                    activity
+                }
             });
             this.props.dispatch({
                 type: EDIT_ACTIVITY_STOP,
@@ -214,6 +220,26 @@ class ActivityWidget extends PureComponent {
                 <div className='panel-body'>
                     <form className='form-horizontal'>
                         <label>Activity</label>
+                        <div className='form-group form-group-xs'>
+                            {!this.props.creatingActivity &&
+                                <Fragment>
+                                    <label className='col-sm-2 control-label'>Id:</label>
+                                    <div className='col-sm-3'>
+                                        {!this.state.editing && <p className='form-control-static'>{this.state.id2}</p>}
+                                        {this.state.editing && <FrameNumberInput className='form-control' min={1} value={this.state.id2}
+                                            onChange={(id2) => {
+                                                if (!this.props.annotationActivityContainer.validateNewActivityId(id2)) {
+                                                    bootbox.alert({
+                                                        size: 'small',
+                                                        message: 'An activity with this id already exists'
+                                                    });
+                                                } else {
+                                                    this.setState({ id2, changed: true });
+                                                }
+                                            }} />}
+                                    </div>
+                                </Fragment>}
+                        </div>
                         <div className='form-group form-group-xs'>
                             <label className='col-sm-2 control-label'>Type:</label>
                             <div className='col-sm-9'>
