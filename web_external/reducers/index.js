@@ -10,13 +10,13 @@ function app(state, action) {
             selectedFolder: null,
             selectedItem: null,
             loadingAnnotation: false,
+            loadingAnnotationFailed: false,
             importProgress: null,
             annotationActivityContainer: null,
             annotationTypeContainer: null,
             annotationDetectionContainer: null,
             currentFrame: 0,
             maxFrame: null,
-            detectionItem: null,
             selectedAnnotation: null,
             selectedTrackId: null,
             editingTrackId: null,
@@ -39,11 +39,11 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, detectionItem: null, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
-            return { ...state, ...{ loadingAnnotation: false } };
+            return { ...state, ...{ loadingAnnotation: false, loadingAnnotationFailed: true } };
         case types.TOGGLE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.toggleState(action.payload.activity.id2, action.payload.enabled);
             return { ...state, ...{ annotationActivityContainer } };
@@ -54,8 +54,6 @@ function app(state, action) {
             return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, editingTrackId: null, selectedActivityId: null } };
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
-        case types.SET_DETECTION_ITEM:
-            return { ...state, ...{ detectionItem: action.payload } };
         case types.CHANGE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };

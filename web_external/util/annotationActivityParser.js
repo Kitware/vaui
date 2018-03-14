@@ -1,7 +1,7 @@
 class AnnotationActivityContainer {
-    constructor() {
+    constructor(folderId) {
         this._id2 = 0;
-        this._itemId = null;
+        this._folderId = folderId;
 
         this._activities = new Map(); // activity id -> activity
         this._enableState = new Map(); // activity id -> enabled
@@ -13,7 +13,6 @@ class AnnotationActivityContainer {
     }
 
     add(activity) {
-        this._itemId = activity.itemId;
         this._id2 = Math.max(this._id2, activity.id2);
 
         for (let actor of activity.actors) {
@@ -79,7 +78,7 @@ class AnnotationActivityContainer {
 
     new(activity) {
         activity.id2 = ++this._id2;
-        activity.itemId = this._itemId;
+        activity.folderId = this._folderId;
         this.add(activity);
         this._added.add(activity);
         return this.copy();
@@ -254,7 +253,7 @@ class AnnotationActivityContainer {
     }
 
     copy() {
-        return Object.assign(new AnnotationActivityContainer(), this);
+        return Object.assign(new AnnotationActivityContainer(this._folderId), this);
     }
 }
 
@@ -264,8 +263,8 @@ class AnnotationActivity {
     }
 }
 
-function annotationActivityParser(activities) {
-    var container = new AnnotationActivityContainer();
+function annotationActivityParser(forderId, activities) {
+    var container = new AnnotationActivityContainer(forderId);
     for (let activity of activities) {
         var annotationActivity = new AnnotationActivity(activity);
         container.add(annotationActivity);

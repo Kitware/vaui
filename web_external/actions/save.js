@@ -28,7 +28,7 @@ export default () => {
             ...annotationDetectionContainer.getAdded().map(([flattenDetection, detection]) => {
                 return restRequest({
                     method: 'POST',
-                    url: `/detection/${flattenDetection.itemId}`,
+                    url: `/detection/${flattenDetection.folderId}`,
                     contentType: 'application/json',
                     data: JSON.stringify(flattenDetection)
                 }).then((savedDetection) => {
@@ -54,7 +54,7 @@ export default () => {
             ...annotationTypeContainer.getAdded().map((type) => {
                 return restRequest({
                     method: 'POST',
-                    url: `/types/${type.itemId}`,
+                    url: `/types/${type.folderId}`,
                     contentType: 'application/json',
                     data: JSON.stringify(type)
                 }).then((savedType) => {
@@ -80,7 +80,7 @@ export default () => {
             ...annotationActivityContainer.getAdded().map((activity) => {
                 return restRequest({
                     method: 'POST',
-                    url: `/activities/${activity.itemId}`,
+                    url: `/activities/${activity.folderId}`,
                     contentType: 'application/json',
                     data: JSON.stringify(activity)
                 }).then((savedActivity) => {

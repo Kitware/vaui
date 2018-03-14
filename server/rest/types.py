@@ -22,7 +22,7 @@ from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
-from girder.models.item import Item
+from girder.models.folder import Folder
 from girder.plugins.vaui.models.types import Types
 
 
@@ -32,33 +32,33 @@ class TypesResource(Resource):
         super(TypesResource, self).__init__()
 
         self.resourceName = 'types'
-        self.route('GET', (':itemId',), self.getTypesOfItem)
-        self.route('POST', (':itemId',), self.addTypesToItem)
+        self.route('GET', (':folderId',), self.getTypesOfFolder)
+        self.route('POST', (':folderId',), self.addTypesToFolder)
         self.route('PUT', (':typesId',), self.updateTypes)
         self.route('DELETE', (':typesId',), self.deleteTypes)
-        self.route('GET', ('export', ':itemId',), self.export)
+        self.route('GET', ('export', ':folderId',), self.export)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def getTypesOfItem(self, item, params):
-        cursor = Types().findByItem(item)
+    def getTypesOfFolder(self, folder, params):
+        cursor = Types().findByFolder(folder)
         return list(cursor)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.WRITE)
+        .modelParam('folderId', model=Folder, level=AccessType.WRITE)
         .jsonParam('data', 'The types content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def addTypesToItem(self, item, data, params):
-        data['itemId'] = item['_id']
+    def addTypesToFolder(self, folder, data, params):
+        data['folderId'] = folder['_id']
         return Types().save(data)
 
     @autoDescribeRoute(
@@ -71,7 +71,7 @@ class TypesResource(Resource):
     @access.user
     def updateTypes(self, types, data, params):
         data.pop('_id', None)
-        data.pop('itemId', None)
+        data.pop('folderId', None)
         types.update(data)
         return Types().save(types)
 
@@ -88,25 +88,25 @@ class TypesResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
     @access.cookie
     @rawResponse
-    def export(self, item, params):
+    def export(self, folder, params):
         setResponseHeader('Content-Type', 'text/plain')
         setResponseHeader('Content-Disposition', 'attachment; filename=types.kpf')
-        return self.generateKPFContent(item)
+        return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(item):
-        cursor = Types().findByItem(item)
+    def generateKPFContent(folder):
+        cursor = Types().findByFolder(folder)
         output = []
         for types in cursor:
             del types['_id']
-            del types['itemId']
+            del types['folderId']
             types = yaml.safe_dump(types, default_flow_style=True,
                                    width=1000).rstrip()
             output.append('- {{ types: {0} }}'.format(types))

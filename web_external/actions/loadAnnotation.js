@@ -3,8 +3,8 @@ import { restRequest } from 'girder/rest';
 import { getCurrentToken } from 'girder/auth';
 
 import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, SET_DETECTION_ITEM } from '../actions/types';
-import annotationDetectionParser from '../util/annotationDetectionParser';
-import annotationActivityParser from '../util/annotationActivityParser';
+import annotationDetectionParser, { AnnotationDetectionContainer } from '../util/annotationDetectionParser';
+import annotationActivityParser, { AnnotationActivityContainer } from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 
 export default (item, reImport) => {
@@ -15,7 +15,9 @@ export default (item, reImport) => {
         return restRequest({
             url: `/vaui-annotation/status/${item.folderId}`
         }).then((result) => {
-            if (!result || reImport) {
+            var existKPF = Object.values(result.kpf).reduce((exist, value) => exist & value, true);
+            var records = !!Object.values(result.records).reduce((total, value) => total + value, 0);
+            if (existKPF && (!records || reImport)) {
                 return new Promise((resolve, reject) => {
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', `/api/v1/vaui-annotation/import/${item.folderId}`, true);
@@ -42,35 +44,21 @@ export default (item, reImport) => {
             });
         }).then((folder) => {
             return Promise.all([
-                loadAnnotation(item.folderId, folder.name, 'activities')
-                    .then((activities) => {
-                        var annotationActivityContainer = annotationActivityParser(activities);
-                        return annotationActivityContainer;
-                    })
-                    .catch(() => { }),
-                loadAnnotation(item.folderId, folder.name, 'types')
-                    .then((types) => {
-                        return annotationTypeParser(types);
-                    })
-                    .catch(() => {
-                        return new AnnotationTypeContainer();
-                    }),
                 restRequest({
-                    url: '/item',
-                    data: {
-                        folderId: item.folderId,
-                        name: `${folder.name}.geom.yml`
-                    }
-                }).then((items) => {
-                    dispatch({
-                        type: SET_DETECTION_ITEM,
-                        payload: items[0]
-                    });
-                    return restRequest({
-                        url: `/detection/${items[0]._id}`
-                    });
+                    url: `/activities/${item.folderId}`
+                }).then((activities) => {
+                    var annotationActivityContainer = annotationActivityParser(item.folderId, activities);
+                    return annotationActivityContainer;
+                }),
+                restRequest({
+                    url: `/types/${item.folderId}`
+                }).then((types) => {
+                    return annotationTypeParser(item.folderId, types);
+                }),
+                restRequest({
+                    url: `/detection/${item.folderId}`
                 }).then((detections) => {
-                    return annotationDetectionParser(detections);
+                    return annotationDetectionParser(item.folderId, detections);
                 })
             ]).then(([annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer]) => {
                 dispatch({
@@ -84,18 +72,4 @@ export default (item, reImport) => {
             });
         });
     };
-};
-
-const loadAnnotation = (folderId, folderName, type) => {
-    return restRequest({
-        url: '/item',
-        data: {
-            folderId,
-            name: `${folderName}.${type}.yml`
-        }
-    }).then((items) => {
-        return restRequest({
-            url: `/${type}/${items[0]._id}`
-        });
-    });
 };

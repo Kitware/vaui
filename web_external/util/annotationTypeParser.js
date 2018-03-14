@@ -1,6 +1,6 @@
 class AnnotationTypeContainer {
-    constructor() {
-        this._itemId = null;
+    constructor(folderId) {
+        this._folderId = folderId;
         this._mapper = new Map();
 
         this._added = new Set();
@@ -9,7 +9,6 @@ class AnnotationTypeContainer {
     }
 
     add(types) {
-        this._itemId = types.itemId;
         this._mapper.set(types.id1, types);
     }
 
@@ -77,7 +76,7 @@ class AnnotationTypeContainer {
         var type = new AnnotationType({
             id1: trackId,
             cset3,
-            itemId: this._itemId
+            folderId: this._folderId
         });
         this._added.add(type);
         this._mapper.set(trackId, type);
@@ -104,21 +103,21 @@ class AnnotationTypeContainer {
     }
 
     copy() {
-        return Object.assign(new this.constructor(), this);
+        return Object.assign(new this.constructor(this._folderId), this);
     }
 }
 
 class AnnotationType {
     constructor(types) {
         this._id = types._id;
-        this.itemId = types.itemId;
+        this.folderId = types.folderId;
         this.id1 = types.id1;
         this.cset3 = types.cset3;
     }
 }
 
-function annotationTypeParser(typesList) {
-    var container = new AnnotationTypeContainer();
+function annotationTypeParser(folderId, typesList) {
+    var container = new AnnotationTypeContainer(folderId);
     for (let types of typesList) {
         var annotationType = new AnnotationType(types);
         container.add(annotationType);
