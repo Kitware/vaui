@@ -248,9 +248,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 });
 
                 this._triggerAnnotationLeftClickEvent = (annotation) => {
-                    if (annotation) {
-                        this._annotationLeftClick = annotation;
-                    }
+                    this._annotationLeftClick = annotation ? annotation : null;
                     clearTimeout(this._annotationEventHandle);
                     this._annotationEventHandle = setTimeout(() => {
                         this.trigger('annotationLeftClick', this._annotationLeftClick);

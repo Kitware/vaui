@@ -428,7 +428,7 @@ class ActivityWidget extends PureComponent {
                                         <button type='button' className='btn btn-default btn-sm' onClick={(e) => {
                                             this.props.dispatch({
                                                 type: EDIT_ACTIVITY_START,
-                                                payload: this.state.id2
+                                                payload: this.props.selectedActivityId
                                             });
                                         }}><span className='glyphicon glyphicon-wrench'></span></button>}
                                     {this.state.editing &&
@@ -440,8 +440,7 @@ class ActivityWidget extends PureComponent {
                                                     })
                                                 } else {
                                                     this.props.dispatch({
-                                                        type: EDIT_ACTIVITY_STOP,
-                                                        payload: this.state.id2
+                                                        type: EDIT_ACTIVITY_STOP
                                                     });
                                                 }
                                             }}><span className='glyphicon glyphicon-remove text-danger'></span></button>

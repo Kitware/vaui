@@ -20,7 +20,7 @@ class InterpolationWidget extends PureComponent {
         if (nextProps.selectedTrackId && nextProps.selectedTrackId !== this.props.selectedTrackId) {
             this.setState({ trackId: nextProps.selectedTrackId, detections: [] });
         }
-        if (nextProps.selectedAnnotation !== this.props.selectedAnnotation) {
+        if (nextProps.selectedAnnotation && nextProps.selectedAnnotation !== this.props.selectedAnnotation) {
             if (nextProps.selectedAnnotation.detection.id1 === this.state.trackId) {
                 if (!this.state.detections.find((detection) => detection.id0 === nextProps.selectedAnnotation.detection.id0)) {
                     var detections = _.sortBy([...this.state.detections, nextProps.selectedAnnotation.detection], (detection) => detection.ts0);
@@ -85,7 +85,7 @@ class InterpolationWidget extends PureComponent {
                                 <div className='btn-group btn-group-sm' role='group'>
                                     <button type='button' className='btn btn-default' title='Run' disabled={!canExecute} onClick={(e) => {
                                         var trackId = this.state.trackId;
-                                        var detections = this.state.detections.length > 1 ? this.state.detections : _.sortBy(this.props.annotationDetectionContainer.getByTrackId(trackId),(detection)=>detection.ts0);
+                                        var detections = this.state.detections.length > 1 ? this.state.detections : _.sortBy(this.props.annotationDetectionContainer.getByTrackId(trackId), (detection) => detection.ts0);
                                         this.props.dispatch(interpolate(trackId, detections));
                                     }}><span className='glyphicon glyphicon-cog text-success'></span></button>
                                     <button type='button' className='btn btn-default' onClick={(e) => this.props.dispatch({

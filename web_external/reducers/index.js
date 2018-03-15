@@ -51,7 +51,7 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationDetectionContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, editingTrackId: null, selectedActivityId: null } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null } };
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
@@ -66,11 +66,11 @@ function app(state, action) {
             return { ...state, ...action.payload, pendingSave: false, saving: false };
         case types.FOCUS_TRACK:
             var range = state.annotationDetectionContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload } };
         case types.GOTO_TRACK_START:
         case types.GOTO_TRACK_END:
             var range = state.annotationDetectionContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload } };
         case types.NEW_TRACK:
             var annotationDetectionContainer = state.annotationDetectionContainer.newTrack(action.payload.trackId);
             var annotationTypeContainer = state.annotationTypeContainer.newType(action.payload.trackId, action.payload.cset3);
@@ -86,7 +86,8 @@ function app(state, action) {
             var annotationActivityContainer = state.annotationActivityContainer.removeTrack(action.payload);
             return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null } };
         case types.SELECT_TRACK:
-            return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            console.log("SELECT_TRACK", action.payload);
+            return { ...state, ...{ selectedTrackId: action.payload } };
         case types.GOTO_ACTIVITY_START:
         case types.GOTO_ACTIVITY_END:
             var range = state.annotationActivityContainer.getActivityFrameRange(action.payload);
@@ -96,7 +97,7 @@ function app(state, action) {
         case types.EDIT_ACTIVITY_START:
             return { ...state, ...{ editingActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
         case types.EDIT_ACTIVITY_STOP:
-            return { ...state, ...{ editingActivityId: null, selectedActivityId: action.payload } };
+            return { ...state, ...{ editingActivityId: null, selectedActivityId: state.editingActivityId } };
         case types.CHANGE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
