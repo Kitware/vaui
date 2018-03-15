@@ -84,7 +84,7 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.removeTrack(action.payload);
             var annotationTypeContainer = state.annotationTypeContainer.remove(action.payload);
             var annotationActivityContainer = state.annotationActivityContainer.removeTrack(action.payload);
-            return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null } };
         case types.SELECT_TRACK:
             console.log("SELECT_TRACK", action.payload);
             return { ...state, ...{ selectedTrackId: action.payload } };
