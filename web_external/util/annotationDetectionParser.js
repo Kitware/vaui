@@ -31,8 +31,8 @@ class AnnotationDetectionTrack {
 }
 
 class AnnotationDetectionContainer {
-    constructor() {
-        this._itemId = null;
+    constructor(folderId) {
+        this._folderId = folderId;
         this._id0 = 0;
 
         this._trackMap = new Map(); // track id -> AnnotationDetectionTrack
@@ -44,7 +44,6 @@ class AnnotationDetectionContainer {
     }
 
     add(detection) {
-        this._itemId = detection.itemId;
         this._id0 = Math.max(this._id0, detection.id0);
 
         // Create frame if needed
@@ -86,7 +85,11 @@ class AnnotationDetectionContainer {
     }
 
     getNextTrackId() {
-        return Math.max(...this._trackMap.keys()) + 1;
+        if (this._trackMap.size) {
+            return Math.max(...this._trackMap.keys()) + 1;
+        } else {
+            return 0;
+        }
     }
 
     validateNewTrackId(trackId) {
@@ -135,7 +138,8 @@ class AnnotationDetectionContainer {
     }
 
     getByFrame(frame) {
-        return Array.from(this._frameMap.get(frame).values());
+        var trackDetectionMap = this._frameMap.get(frame);
+        return trackDetectionMap ? Array.from(trackDetectionMap.values()) : null;
     }
 
     getByTrackId(trackId) {
@@ -191,7 +195,7 @@ class AnnotationDetectionContainer {
                     id1: trackId,
                     ts0: frame,
                     g0,
-                    itemId: this._itemId,
+                    folderId: this._folderId,
                     src: 'truth'
                 },
                 ...attributes
@@ -263,7 +267,7 @@ class AnnotationDetectionContainer {
     }
 
     copy() {
-        return Object.assign(new this.constructor(), this);
+        return Object.assign(new this.constructor(this._folderId), this);
     }
 }
 
@@ -283,7 +287,7 @@ class AnnotationDetection {
     set(key, value) {
         switch (key) {
             case '_id':
-            case 'itemId':
+            case 'folderId':
             case 'g0':
             case 'id0':
             case 'id1':
@@ -299,8 +303,8 @@ class AnnotationDetection {
     }
 }
 
-function annotationDetectionParser(detections) {
-    var annotationDetectionContainer = new AnnotationDetectionContainer();
+function annotationDetectionParser(folderId, detections) {
+    var annotationDetectionContainer = new AnnotationDetectionContainer(folderId);
     for (let detection of detections) {
         var annotationDetection = new AnnotationDetection(detection);
         annotationDetectionContainer.add(annotationDetection);

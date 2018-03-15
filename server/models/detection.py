@@ -5,4 +5,4 @@ class Detection(Base):
 
     def initialize(self):
         self.name = 'geom'
-        self.ensureIndex('itemId')
+        self.ensureIndex('folderId')

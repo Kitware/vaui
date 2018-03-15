@@ -23,7 +23,7 @@ from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
-from girder.models.item import Item
+from girder.models.folder import Folder
 from girder.plugins.vaui.models.detection import Detection
 
 
@@ -33,11 +33,11 @@ class DetectionResource(Resource):
         super(DetectionResource, self).__init__()
 
         self.resourceName = 'detection'
-        self.route('GET', (':itemId',), self.getDetectionsOfItem)
-        self.route('POST', (':itemId',), self.addDetectionToItem)
+        self.route('GET', (':folderId',), self.getDetectionsOfFolder)
+        self.route('POST', (':folderId',), self.addDetectionToFolder)
         self.route('PUT', (':detectionId',), self.updateDetection)
         self.route('DELETE', (':detectionId',), self.deleteDetection)
-        self.route('GET', ('export', ':itemId',), self.exportKPF)
+        self.route('GET', ('export', ':folderId',), self.exportKPF)
 
     # The girder default serialization takes twice the time
     # as this custom serializer. Since detection could be relatively big,
@@ -50,28 +50,28 @@ class DetectionResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
     @rawResponse
-    def getDetectionsOfItem(self, item, params):
+    def getDetectionsOfFolder(self, folder, params):
         setResponseHeader('Content-Type', 'application/json')
-        cursor = Detection().findByItem(item)
+        cursor = Detection().findByFolder(folder)
         jsonString = self.JSONEncoder().encode(list(cursor))
         return jsonString
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.WRITE)
+        .modelParam('folderId', model=Folder, level=AccessType.WRITE)
         .jsonParam('data', 'The detection content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def addDetectionToItem(self, item, data, params):
-        data['itemId'] = item['_id']
+    def addDetectionToFolder(self, folder, data, params):
+        data['folderId'] = folder['_id']
         return Detection().save(data)
 
     @autoDescribeRoute(
@@ -84,7 +84,7 @@ class DetectionResource(Resource):
     @access.user
     def updateDetection(self, detection, data, params):
         data.pop('_id', None)
-        data.pop('itemId', None)
+        data.pop('folderId', None)
         detection.update(data)
         return Detection().save(detection)
 
@@ -101,28 +101,28 @@ class DetectionResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
     @access.cookie
     @rawResponse
-    def exportKPF(self, item, params):
+    def exportKPF(self, folder, params):
         setResponseHeader('Content-Type', 'text/plain')
         setResponseHeader('Content-Disposition', 'attachment; filename=detection.kpf')
-        return self.generateKPFContent(item)
+        return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(item):
+    def generateKPFContent(folder):
         # The pyyaml without c yaml is not fast, so for detection, considering the
         # size, we build the yaml by hand
-        cursor = Detection().findByItem(item)
+        cursor = Detection().findByFolder(folder)
         output = []
         for detection in cursor:
             keyValues = []
             for key in detection:
-                if key == 'itemId' or key == '_id':
+                if key == 'folderId' or key == '_id':
                     continue
                 if key == 'g0':
                     value = str(detection['g0'][0][0]) + ' ' + str(detection['g0'][0][1]) + \

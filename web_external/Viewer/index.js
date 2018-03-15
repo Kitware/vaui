@@ -235,7 +235,10 @@ class Viewer extends PureComponent {
             } else {
                 return { text: 'Loading...', classes: 'message info-message' };
             }
-        } else if (!this.props.annotationDetectionContainer) {
+        } else if (this.props.loadingAnnotationFailed) {
+            return { text: 'Failed to load annotations', classes: 'message error-message' };
+        }
+        else if (!this.props.annotationDetectionContainer.length) {
             return { text: 'No annotation', classes: 'message error-message' };
         }
     }
@@ -350,7 +353,6 @@ class Viewer extends PureComponent {
                     type: NEW_TRACK,
                     payload: {
                         trackId,
-                        itemId: this.props.selectedItem._id,
                         cset3: {}
                     }
                 });
@@ -391,6 +393,7 @@ const mapStateToProps = (state, ownProps) => {
         selectedItem: state.selectedItem,
         importProgress: state.importProgress,
         loadingAnnotation: state.loadingAnnotation,
+        loadingAnnotationFailed: state.loadingAnnotationFailed,
         annotationDetectionContainer: state.annotationDetectionContainer,
         annotationActivityContainer: state.annotationActivityContainer,
         annotationTypeContainer: state.annotationTypeContainer,

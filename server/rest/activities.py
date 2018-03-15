@@ -22,7 +22,7 @@ from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
-from girder.models.item import Item
+from girder.models.folder import Folder
 from ..models.activities import Activities
 
 
@@ -32,33 +32,33 @@ class ActivitiesResource(Resource):
         super(ActivitiesResource, self).__init__()
 
         self.resourceName = 'activities'
-        self.route('GET', (':itemId',), self.getActivitiesOfItem)
-        self.route('POST', (':itemId',), self.addActivitiesToItem)
+        self.route('GET', (':folderId',), self.getActivitiesOfFolder)
+        self.route('POST', (':folderId',), self.addActivitiesToFolder)
         self.route('PUT', (':activityId',), self.updateActivity)
         self.route('DELETE', (':activityId',), self.deleteActivity)
-        self.route('GET', ('export', ':itemId',), self.exportKPF)
+        self.route('GET', ('export', ':folderId',), self.exportKPF)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def getActivitiesOfItem(self, item, params):
-        cursor = Activities().findByItem(item)
+    def getActivitiesOfFolder(self, folder, params):
+        cursor = Activities().findByFolder(folder)
         return list(cursor)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.WRITE)
+        .modelParam('folderId', model=Folder, level=AccessType.WRITE)
         .jsonParam('data', 'The activity content', requireObject=True, paramType='body')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def addActivitiesToItem(self, item, data, params):
-        data['itemId'] = item['_id']
+    def addActivitiesToFolder(self, folder, data, params):
+        data['folderId'] = folder['_id']
         return Activities().save(data)
 
     @autoDescribeRoute(
@@ -71,7 +71,7 @@ class ActivitiesResource(Resource):
     @access.user
     def updateActivity(self, activities, data, params):
         data.pop('_id', None)
-        data.pop('itemId', None)
+        data.pop('folderId', None)
         activities.update(data)
         return Activities().save(activities)
 
@@ -88,25 +88,25 @@ class ActivitiesResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('itemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ)
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
     @access.cookie
     @rawResponse
-    def exportKPF(self, item, params):
+    def exportKPF(self, folder, params):
         setResponseHeader('Content-Type', 'text/plain')
         setResponseHeader('Content-Disposition', 'attachment; filename=activities.kpf')
-        return self.generateKPFContent(item)
+        return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(item):
-        cursor = Activities().findByItem(item)
+    def generateKPFContent(folder):
+        cursor = Activities().findByFolder(folder)
         output = []
         for activity in cursor:
             del activity['_id']
-            del activity['itemId']
+            del activity['folderId']
             activity = yaml.safe_dump(activity, default_flow_style=True,
                                       width=1000).rstrip()
             output.append('- {{ act: {0} }}'.format(activity))

@@ -68,11 +68,11 @@ class AnnotationResource(Resource):
         setResponseHeader('Content-Length', 1000000)
 
         def gen():
-            self._importActivities(activitiesItem)
-            self._importTypes(typesItem)
+            self._importActivities(folder['_id'], activitiesItem)
+            self._importTypes(folder['_id'], typesItem)
             lastProgress = 0
             import math
-            for percentage in self._importDetection(detectionItem):
+            for percentage in self._importDetection(folder['_id'], detectionItem):
                 progress = int(math.floor(percentage * 100))
                 if lastProgress != progress:
                     yield '1' * (progress - lastProgress) * 10000
@@ -102,11 +102,10 @@ class AnnotationResource(Resource):
         fileContent = ''.join(list(result()))
         return fileContent.splitlines()
 
-    def _importDetection(self, item):
+    def _importDetection(self, folderId, item):
         print 'start import detection'
         print datetime.datetime.utcnow()
-
-        Detection().removeWithQuery(query={'itemId': item['_id']})
+        Detection().removeWithQuery(query={'folderId': folderId})
         print 'removed existing records'
         print datetime.datetime.utcnow()
 
@@ -123,7 +122,7 @@ class AnnotationResource(Resource):
             if 'geom' not in obj:
                 continue
             detection = obj['geom']
-            detection['itemId'] = item['_id']
+            detection['folderId'] = folderId
             values = detection['g0'].split()
             detection['g0'] = [
                 [int(values[0]), int(values[1])],
@@ -134,26 +133,26 @@ class AnnotationResource(Resource):
         print 'finish import Detections'
         print datetime.datetime.utcnow()
 
-    def _importActivities(self, item):
-        Activities().removeWithQuery(query={'itemId': item['_id']})
+    def _importActivities(self, folderId, item):
+        Activities().removeWithQuery(query={'folderId': folderId})
 
         for line in AnnotationResource._readKPF(item):
             obj = load(line, Loader=Loader)[0]
             if 'act' not in obj:
                 continue
             activity = obj['act']
-            activity['itemId'] = item['_id']
+            activity['folderId'] = folderId
             Activities().save(activity)
 
-    def _importTypes(self, item):
-        Types().removeWithQuery(query={'itemId': item['_id']})
+    def _importTypes(self, folderId, item):
+        Types().removeWithQuery(query={'folderId': folderId})
 
         for line in AnnotationResource._readKPF(item):
             obj = load(line, Loader=Loader)[0]
             if 'types' not in obj:
                 continue
             types = obj['types']
-            types['itemId'] = item['_id']
+            types['folderId'] = folderId
             Types().save(types)
 
     @autoDescribeRoute(
@@ -165,15 +164,18 @@ class AnnotationResource(Resource):
     @access.user
     def checkImportStatus(self, folder, params):
         detectionItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
-        if not detectionItem:
-            raise RestException('missing detection annotation file', code=404)
-        if not activitiesItem:
-            raise RestException('missing activities annotation file', code=404)
-        if not typesItem:
-            raise RestException('missing types annotation file', code=404)
-        imported = Detection().imported(detectionItem) and Activities().imported(
-            activitiesItem) and Types().imported(typesItem)
-        return imported
+        return {
+            'kpf': {
+                'detection': detectionItem is not None,
+                'activities': activitiesItem is not None,
+                'types': typesItem is not None
+            },
+            'records': {
+                'detection': Detection().recordCount(folder),
+                'activities': Activities().recordCount(folder),
+                'types': Types().recordCount(folder)
+            }
+        }
 
     @autoDescribeRoute(
         Description('')
@@ -191,13 +193,12 @@ class AnnotationResource(Resource):
 
         def stream():
             zip = ziputil.ZipGenerator(folder['name'])
-            detectionItem, activitiesItem, typesItem = self._getAnnotationItems(folder)
 
-            for data in zip.addFile(DetectionResource.generateKPFContent(detectionItem), detectionItem['name']):
+            for data in zip.addFile(DetectionResource.generateKPFContent(folder), folder['name'] + '.geom.kpf'):
                 yield data
-            for data in zip.addFile(TypesResource.generateKPFContent(typesItem), typesItem['name']):
+            for data in zip.addFile(TypesResource.generateKPFContent(folder), folder['name'] + '.types.kpf'):
                 yield data
-            for data in zip.addFile(ActivitiesResource.generateKPFContent(activitiesItem), activitiesItem['name']):
+            for data in zip.addFile(ActivitiesResource.generateKPFContent(folder), folder['name'] + '.activities.kpf'):
                 yield data
             yield zip.footer()
         return stream

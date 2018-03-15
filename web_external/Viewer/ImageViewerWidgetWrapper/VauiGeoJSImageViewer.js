@@ -193,8 +193,9 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                     if (this.lastFeatureFrame) {
                         this.featureLayer.deleteFeature(this.lastFeatureFrame);
                     }
+                    this.annotationLayer.removeAllAnnotations(true);
+                    this.annotationLayer.mode(null);
                     var result = this.getAnnotation(frame);
-                    // Only needed if the frames of image and annotation has difference
                     if (!result) {
                         return;
                     }
@@ -221,8 +222,6 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         }
                     });
                     this.lastFeatureFrame = feature;
-                    this.annotationLayer.removeAllAnnotations(true);
-                    this.annotationLayer.mode(null);
                     var record = data.find((record) => { return record.detection.id1 === editingTrackId });
                     if (record) {
                         var g0 = record.detection.g0;
