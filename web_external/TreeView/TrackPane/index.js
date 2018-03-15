@@ -41,6 +41,10 @@ class TrackPane extends BasePane {
         var sortedTrackIds = _.sortBy(detectionContainer.getAllItems());
 
         return <div className={['v-track-pane', this.props.className].join(' ')}>
+            <div className='btn-group selection-buttons' role='group'>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.checkAll(); }}>Show all</button>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.uncheckAll(); }}>Hide all</button>
+            </div>
             <ul>
                 {sortedTrackIds.map((trackId) => {
                     var type = typeContainer.getItem(trackId);
@@ -76,10 +80,6 @@ class TrackPane extends BasePane {
                     </li>;
                 })}
             </ul>
-            <div className='btn-group selection-buttons' role='group'>
-                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.checkAll(); }}>Show all</button>
-                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.uncheckAll(); }}>Hide all</button>
-            </div>
             <ContextMenu id='track-menu'>
                 <MenuItem onClick={(e) => this.props.dispatch({
                     type: FOCUS_TRACK,

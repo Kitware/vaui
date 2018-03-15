@@ -39,7 +39,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
@@ -91,11 +91,11 @@ function app(state, action) {
         case types.GOTO_ACTIVITY_START:
         case types.GOTO_ACTIVITY_END:
             var range = state.annotationActivityContainer.getActivityFrameRange(action.payload);
-            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload } };
         case types.SELECT_ACTIVITY:
-            return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ selectedActivityId: action.payload } };
         case types.EDIT_ACTIVITY_START:
-            return { ...state, ...{ editingActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ editingActivityId: action.payload } };
         case types.EDIT_ACTIVITY_STOP:
             return { ...state, ...{ editingActivityId: null, selectedActivityId: state.editingActivityId } };
         case types.CHANGE_ACTIVITY:

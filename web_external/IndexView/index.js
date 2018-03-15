@@ -4,8 +4,8 @@ import { connect } from 'react-redux';
 import TreeView from '../TreeView';
 import Viewer from '../Viewer';
 import InfoView from '../InfoView';
+import TrackWidget from '../TrackWidget';
 import ActivityWidget from '../ActivityWidget';
-import ObjectInfo from '../ObjectInfo';
 import InterpolationWidget from '../InterpolationWidget';
 
 import './style.styl';
@@ -17,13 +17,12 @@ class IndexView extends PureComponent {
                 <div className='treeview-container'>
                     <TreeView />
                 </div>
-                <div className='objectinfo-container'>
-                    <ObjectInfo />
-                </div>
             </div>
             <Viewer className='main' />
             <div className='right-sidebar'>
-                {(this.props.creatingActivity || this.props.editingActivityId || this.props.selectedActivityId) &&
+                {this.props.treePanel === 'track' && this.props.selectedTrackId !== null &&
+                    <TrackWidget />}
+                {this.props.treePanel === 'activity' && (this.props.creatingActivity || this.props.editingActivityId || this.props.selectedActivityId) &&
                     <ActivityWidget />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
@@ -35,8 +34,10 @@ class IndexView extends PureComponent {
 
 const mapStateToProps = (state, ownProps) => {
     return {
+        treePanel: state.treePanel,
         creatingActivity: state.creatingActivity,
         editingActivityId: state.editingActivityId,
+        selectedTrackId: state.selectedTrackId,
         selectedActivityId: state.selectedActivityId,
         interpolationWidget: state.interpolationWidget
     };

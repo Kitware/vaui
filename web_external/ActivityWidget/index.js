@@ -214,7 +214,7 @@ class ActivityWidget extends PureComponent {
                 this._updateActivityTrackFrameRangeMap(false);
             });
         };
-        return <div className={['v-activity-creator', this.props.className].join(' ')}>
+        return <div className={['v-activity-widget', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-heading'>{!this.state.editing ? 'Activity' : (this.props.creatingActivity ? 'Create Activity' : 'Edit Activity')}</div>
                 <div className='panel-body'>
