@@ -4,7 +4,8 @@ import _ from 'underscore';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu';
 
 import BasePane from '../BasePane';
-import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK, EDIT_TRACK, DELETE_TRACK } from '../../actions/types';
+import { TOGGLE_TRACK, FOCUS_TRACK, GOTO_TRACK_START, GOTO_TRACK_END, SELECT_TRACK, EDIT_TRACK } from '../../actions/types';
+import deleteTrack from '../../actions/deleteTrack';
 
 import './style.styl';
 
@@ -41,6 +42,10 @@ class TrackPane extends BasePane {
         var sortedTrackIds = _.sortBy(detectionContainer.getAllItems());
 
         return <div className={['v-track-pane', this.props.className].join(' ')}>
+            <div className='btn-group selection-buttons' role='group'>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.checkAll(); }}>Show all</button>
+                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.uncheckAll(); }}>Hide all</button>
+            </div>
             <ul>
                 {sortedTrackIds.map((trackId) => {
                     var type = typeContainer.getItem(trackId);
@@ -76,10 +81,6 @@ class TrackPane extends BasePane {
                     </li>;
                 })}
             </ul>
-            <div className='btn-group selection-buttons' role='group'>
-                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.checkAll(); }}>Show all</button>
-                <button type='button' className='btn btn-default btn-xs' onClick={(e) => { this.uncheckAll(); }}>Hide all</button>
-            </div>
             <ContextMenu id='track-menu'>
                 <MenuItem onClick={(e) => this.props.dispatch({
                     type: FOCUS_TRACK,
@@ -107,10 +108,7 @@ class TrackPane extends BasePane {
                 })}>
                     Edit
                 </MenuItem>
-                <MenuItem onClick={(e) => this.props.dispatch({
-                    type: DELETE_TRACK,
-                    payload: this.state.interactTrackId
-                })}>
+                <MenuItem onClick={(e) => this.props.dispatch(deleteTrack(this.state.interactTrackId))}>
                     Delete
                 </MenuItem>
             </ContextMenu>

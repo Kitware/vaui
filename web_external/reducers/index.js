@@ -39,7 +39,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
@@ -51,7 +51,7 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationDetectionContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, editingTrackId: null, selectedActivityId: null } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null } };
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
@@ -66,11 +66,11 @@ function app(state, action) {
             return { ...state, ...action.payload, pendingSave: false, saving: false };
         case types.FOCUS_TRACK:
             var range = state.annotationDetectionContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrameRange: [range[0], range[1]], selectedTrackId: action.payload } };
         case types.GOTO_TRACK_START:
         case types.GOTO_TRACK_END:
             var range = state.annotationDetectionContainer.getTrackFrameRange(action.payload);
-            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_TRACK_START ? range[0] : range[1] }, selectedTrackId: action.payload } };
         case types.NEW_TRACK:
             var annotationDetectionContainer = state.annotationDetectionContainer.newTrack(action.payload.trackId);
             var annotationTypeContainer = state.annotationTypeContainer.newType(action.payload.trackId, action.payload.cset3);
@@ -84,19 +84,20 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.removeTrack(action.payload);
             var annotationTypeContainer = state.annotationTypeContainer.remove(action.payload);
             var annotationActivityContainer = state.annotationActivityContainer.removeTrack(action.payload);
-            return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null } };
         case types.SELECT_TRACK:
-            return { ...state, ...{ selectedTrackId: action.payload, selectedActivityId: null, editingTrackId: null } };
+            console.log("SELECT_TRACK", action.payload);
+            return { ...state, ...{ selectedTrackId: action.payload } };
         case types.GOTO_ACTIVITY_START:
         case types.GOTO_ACTIVITY_END:
             var range = state.annotationActivityContainer.getActivityFrameRange(action.payload);
-            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ requestFrame: { frame: action.type === types.GOTO_ACTIVITY_START ? range[0] : range[1] }, selectedActivityId: action.payload } };
         case types.SELECT_ACTIVITY:
-            return { ...state, ...{ selectedActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ selectedActivityId: action.payload } };
         case types.EDIT_ACTIVITY_START:
-            return { ...state, ...{ editingActivityId: action.payload, selectedTrackId: null, editingTrackId: null } };
+            return { ...state, ...{ editingActivityId: action.payload } };
         case types.EDIT_ACTIVITY_STOP:
-            return { ...state, ...{ editingActivityId: null, selectedActivityId: action.payload } };
+            return { ...state, ...{ editingActivityId: null, selectedActivityId: state.editingActivityId } };
         case types.CHANGE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true } };

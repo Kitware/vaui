@@ -193,35 +193,16 @@ class AnnotationActivityContainer {
     }
 
     removeTrack(trackId) {
-        let map = this._trackActivityMap.get(trackId);
-        if (map) {
-            let activitiesToDelete = new Set();
-
-            // Remove track from all activities that use it
-            for (let activity of map) {
-                let actors = activity.actors.filter((actor) => {
-                    return actor.id1 !== trackId;
-                });
-                activity.actors = actors;
-
-                // Update modification records
-                if (!this._added.has(activity)) {
-                    this._edited.add(activity);
-                }
-
-                // Queue newly-emptied activities for deletion
-                if (actors.length === 0) {
-                    activitiesToDelete.add(activity.id2);
-                }
-            }
-
-            // Purge newly-emptied activities
-            for (let activityId of activitiesToDelete) {
-                this.remove(activityId);
-            }
-        }
-
+        let activities = this.getActivitiesContainingTrack(trackId);
+        activities.forEach((activity) => {
+            this.remove(activity.id2);
+        });
         return this.copy();
+    }
+
+    getActivitiesContainingTrack(trackId) {
+        var activitiesSet = this._trackActivityMap.get(trackId);
+        return activitiesSet ? Array.from(activitiesSet) : [];
     }
 
     getActivityFrameRange(activityId) {

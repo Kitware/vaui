@@ -214,7 +214,7 @@ class ActivityWidget extends PureComponent {
                 this._updateActivityTrackFrameRangeMap(false);
             });
         };
-        return <div className={['v-activity-creator', this.props.className].join(' ')}>
+        return <div className={['v-activity-widget', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-heading'>{!this.state.editing ? 'Activity' : (this.props.creatingActivity ? 'Create Activity' : 'Edit Activity')}</div>
                 <div className='panel-body'>
@@ -428,7 +428,7 @@ class ActivityWidget extends PureComponent {
                                         <button type='button' className='btn btn-default btn-sm' onClick={(e) => {
                                             this.props.dispatch({
                                                 type: EDIT_ACTIVITY_START,
-                                                payload: this.state.id2
+                                                payload: this.props.selectedActivityId
                                             });
                                         }}><span className='glyphicon glyphicon-wrench'></span></button>}
                                     {this.state.editing &&
@@ -440,8 +440,7 @@ class ActivityWidget extends PureComponent {
                                                     })
                                                 } else {
                                                     this.props.dispatch({
-                                                        type: EDIT_ACTIVITY_STOP,
-                                                        payload: this.state.id2
+                                                        type: EDIT_ACTIVITY_STOP
                                                     });
                                                 }
                                             }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
