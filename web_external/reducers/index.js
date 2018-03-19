@@ -39,7 +39,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
@@ -86,7 +86,6 @@ function app(state, action) {
             var annotationActivityContainer = state.annotationActivityContainer.removeTrack(action.payload);
             return { ...state, ...{ annotationDetectionContainer, annotationTypeContainer, pendingSave: true, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null } };
         case types.SELECT_TRACK:
-            console.log("SELECT_TRACK", action.payload);
             return { ...state, ...{ selectedTrackId: action.payload } };
         case types.GOTO_ACTIVITY_START:
         case types.GOTO_ACTIVITY_END:

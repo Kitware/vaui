@@ -18,7 +18,15 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         var interactorOpts = map.interactor().options();
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
-        interactorOpts.actions.splice(3, 2);
+        console.log(interactorOpts.actions);
+        // interactorOpts.actions.splice(2, 8);
+        interactorOpts.actions = [
+            interactorOpts.actions[0],
+            interactorOpts.actions[2],
+            interactorOpts.actions[6],
+            interactorOpts.actions[7],
+            interactorOpts.actions[8]
+        ];
         map.interactor().options(interactorOpts);
         var ids = null;
         var siblings = new ItemCollection();
@@ -121,7 +129,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             frame = newFrame;
                             updateFrame(frame)
                                 .then(() => {
-                                    if (this.pendingFrame) {
+                                    if (this.pendingFrame !== null) {
                                         this.setFrame(this.pendingFrame);
                                         this.pendingFrame = null;
                                     } else {
@@ -160,12 +168,14 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             });
                         } else if (this.editMode === 'draw') {
                             layer.mode('rectangle');
+                            layer.annotations().slice(-1)[0].mouseClick = function () { };
                             layer.geoOn(geo.event.annotation.state, (e) => {
                                 annotationChanged(e.annotation);
                             });
                             layer.geoOn(geo.event.annotation.mode, (e) => {
                                 if (e.mode === null && e.oldMode === 'rectangle') {
                                     layer.mode('rectangle');
+                                    layer.annotations().slice(-1)[0].mouseClick = function () { };
                                 }
                             });
                         }

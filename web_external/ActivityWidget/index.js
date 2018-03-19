@@ -262,8 +262,8 @@ class ActivityWidget extends PureComponent {
                             </div>
                         </div>
                         <div className='form-group form-group-xs'>
-                            <label className='col-sm-2 control-label'>Start:</label>
-                            <div className='col-sm-5'>
+                            <label className='col-xs-2 control-label'>Start:</label>
+                            <div className='col-xs-4'>
                                 {!this.state.editing &&
                                     < p className='form-control-static'>{this.state.start}</p>}
                                 {this.state.editing &&
@@ -273,7 +273,7 @@ class ActivityWidget extends PureComponent {
                                         max={startMax}
                                         onChange={setActivityRangeStart} />}
                             </div>
-                            <div className='col-sm-4 frame-button-container'>
+                            <div className='col-xs-4 col-xs-offset-1 frame-button-container'>
                                 {this.state.editing &&
                                     <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
                                         var start = this.props.wrappedCurrentFrame.value;
@@ -288,8 +288,8 @@ class ActivityWidget extends PureComponent {
                             </div>
                         </div>
                         <div className='form-group form-group-xs'>
-                            <label className='col-sm-2 control-label'>End:</label>
-                            <div className='col-sm-5'>
+                            <label className='col-xs-2 control-label'>End:</label>
+                            <div className='col-xs-4'>
                                 {!this.state.editing &&
                                     < p className='form-control-static'>{this.state.end}</p>}
                                 {this.state.editing &&
@@ -299,7 +299,7 @@ class ActivityWidget extends PureComponent {
                                         max={endMax}
                                         onChange={setActivityRangeEnd} />}
                             </div>
-                            <div className='col-sm-4 frame-button-container'>
+                            <div className='col-xs-4 col-xs-offset-1 frame-button-container'>
                                 {this.state.editing &&
                                     <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
                                         var end = this.props.wrappedCurrentFrame.value;
@@ -364,41 +364,43 @@ class ActivityWidget extends PureComponent {
                                             </div>
                                             <div className='col-xs-3 range'>
                                                 {!this.state.editing && <p className='form-control-static'>{activityTrackRange[0]}</p>}
-                                                {this.state.editing &&
+                                                {this.state.editing && <div>
                                                     <FrameNumberInput className='form-control'
                                                         value={activityTrackRange[0]}
                                                         min={trackRange[0]}
                                                         max={trackRange[1]}
-                                                        onChange={setActivityTrackRangeStart} />}
-                                                {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                    var start = this.props.wrappedCurrentFrame.value;
-                                                    if (start > trackRange[1]) {
-                                                        start = trackRange[1];
-                                                    }
-                                                    if (start < trackRange[0]) {
-                                                        start = trackRange[0];
-                                                    }
-                                                    setActivityTrackRangeStart(start);
-                                                }}>Start here</button>}
+                                                        onChange={setActivityTrackRangeStart} />
+                                                    <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
+                                                        var start = this.props.wrappedCurrentFrame.value;
+                                                        if (start > trackRange[1]) {
+                                                            start = trackRange[1];
+                                                        }
+                                                        if (start < trackRange[0]) {
+                                                            start = trackRange[0];
+                                                        }
+                                                        setActivityTrackRangeStart(start);
+                                                    }}>Start here</button>
+                                                </div>}
                                             </div>
                                             <div className='col-xs-3 range'>
                                                 {!this.state.editing && <p className='form-control-static'>{activityTrackRange[1]}</p>}
-                                                {this.state.editing &&
+                                                {this.state.editing && <div>
                                                     <FrameNumberInput className='form-control'
                                                         value={activityTrackRange[1]}
                                                         min={trackRange[0]}
                                                         max={trackRange[1]}
-                                                        onChange={setActivityTrackRangeEnd} />}
-                                                {this.state.editing && <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
-                                                    var end = this.props.wrappedCurrentFrame.value;
-                                                    if (end > trackRange[1]) {
-                                                        end = trackRange[1];
-                                                    }
-                                                    if (end < trackRange[0]) {
-                                                        end = trackRange[0];
-                                                    }
-                                                    setActivityTrackRangeEnd(end);
-                                                }}>End here</button>}
+                                                        onChange={setActivityTrackRangeEnd} />
+                                                    <button type='button' className='btn btn-default btn-xs' title='Set to current frame number' onClick={(e) => {
+                                                        var end = this.props.wrappedCurrentFrame.value;
+                                                        if (end > trackRange[1]) {
+                                                            end = trackRange[1];
+                                                        }
+                                                        if (end < trackRange[0]) {
+                                                            end = trackRange[0];
+                                                        }
+                                                        setActivityTrackRangeEnd(end);
+                                                    }}>End here</button>
+                                                </div>}
                                             </div>
                                             <div className='col-xs-1 no-padding'>
                                                 {this.state.editing &&
