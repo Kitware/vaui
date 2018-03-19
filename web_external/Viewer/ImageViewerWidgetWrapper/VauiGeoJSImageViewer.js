@@ -146,6 +146,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 var annotationChanged = (annotation) => {
                     var coordinates = annotation.coordinates();
                     var g0 = [[Math.round(coordinates[0]['x']), Math.round(coordinates[0]['y'])], [Math.round(coordinates[2]['x']), Math.round(coordinates[2]['y'])]];
+                    this.annotationLayer.removeAllAnnotations(true);
                     this.trigger('rectangleDrawn', g0);
                 };
 
@@ -275,6 +276,17 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
 
                 this._redrawAnnotation = () => {
                     this._drawAnnotation(frame);
+                };
+
+                this.zoomTo = (g0) => {
+                    var { center, zoom } = this.viewer.zoomAndCenterFromBounds({
+                        left: g0[0][0],
+                        right: g0[1][0],
+                        top: g0[1][1],
+                        bottom: g0[0][1]
+                    });
+                    this.viewer.zoom(zoom);
+                    this.viewer.center(center);
                 };
 
                 updateFrame(frame);

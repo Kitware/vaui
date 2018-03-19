@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, INTERPOLATE_SHOW } from '../actions/types';
+import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, CREATE_ACTIVITY_STOP, INTERPOLATE_SHOW, INTERPOLATE_HIDE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -22,7 +22,9 @@ class Viewer extends PureComponent {
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
             ready: false,
-            editMode: 'draw'
+            editMode: 'draw',
+            drawingToZoom: false,
+            zoomRegion: null
         };
         this.draggingSlider = false;
     }
@@ -61,14 +63,18 @@ class Viewer extends PureComponent {
     }
 
     componentDidMount() {
-        mousetrap.bind('shift+t', () => this.newTrack());
+        mousetrap.bind('t', () => this.newTrack());
         mousetrap.bind('left', () => this._previousFrame());
         mousetrap.bind('right', () => this._nextFrame());
+        mousetrap.bind('shift', () => this.setState({ drawingToZoom: true }), 'keydown');
+        mousetrap.bind('shift', () => this.setState({ drawingToZoom: false }), 'keyup');
     }
     componentWillUnmount() {
-        mousetrap.unbind('shift+t');
+        mousetrap.unbind('t');
         mousetrap.unbind('left');
         mousetrap.unbind('right');
+        mousetrap.unbind('shift', 'keydown');
+        mousetrap.unbind('shift', 'keyup');
     }
     requestToFrame(frame) {
         // This works now but can be improved, the player and this controller still has some data racing issue
@@ -87,13 +93,32 @@ class Viewer extends PureComponent {
                     {this.props.selectedItem &&
                         [
                             <div key='control-bar' className='control-bar'>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()}>New Track</button>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
-                                    type: CREATE_ACTIVITY_START
-                                })}>New Activity</button>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.props.dispatch({
-                                    type: INTERPOLATE_SHOW
-                                })}>Interpolate</button>
+                                <button className={'btn btn-deault btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                    this.setState({ drawingToZoom: !this.state.drawingToZoom });
+                                }} title='shortcut: Shift'><span className='glyphicon glyphicon-zoom-in'></span></button>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='shortcut: T'>New Track</button>
+                                <button className={'btn btn-deault btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                    if (!this.props.creatingActivity) {
+                                        this.props.dispatch({
+                                            type: CREATE_ACTIVITY_START
+                                        });
+                                    } else {
+                                        this.props.dispatch({
+                                            type: CREATE_ACTIVITY_STOP
+                                        });
+                                    }
+                                }}>New Activity</button>
+                                <button className={'btn btn-deault btn-xs' + (this.props.interpolationWidget ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                    if (!this.props.interpolationWidget) {
+                                        this.props.dispatch({
+                                            type: INTERPOLATE_SHOW
+                                        });
+                                    } else {
+                                        this.props.dispatch({
+                                            type: INTERPOLATE_HIDE
+                                        });
+                                    }
+                                }}>Interpolate</button>
                                 {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
@@ -107,6 +132,7 @@ class Viewer extends PureComponent {
                                 selectedTrackId={this.props.selectedTrackId}
                                 selectedActivityId={this.props.selectedActivityId}
                                 editMode={this.state.editMode}
+                                drawingToZoom={this.state.drawingToZoom} zoomRegion={this.state.zoomRegion}
                                 onPause={() => {
                                     if (!this.draggingSlider) {
                                         this.setState({
@@ -132,18 +158,30 @@ class Viewer extends PureComponent {
                                     type: ANNOTATION_CLICKED,
                                     payload: annotation
                                 })}
-                                annotationRightClick={(annotation) => this.props.dispatch({
-                                    type: EDIT_TRACK,
-                                    payload: annotation ? annotation.detection.id1 : null
-                                })}
-                                rectangleDrawn={(g0) => this.props.dispatch({
-                                    type: CHANGE_DETECTION,
-                                    payload: {
-                                        frame: this.state.videoCurrentFrame,
-                                        trackId: this.props.editingTrackId,
-                                        g0
+                                annotationRightClick={(annotation) => {
+                                    this.setState({ drawingToZoom: false });
+                                    this.props.dispatch({
+                                        type: EDIT_TRACK,
+                                        payload: annotation ? annotation.detection.id1 : null
+                                    });
+                                }}
+                                rectangleDrawn={(g0) => {
+                                    if (!this.drawingToZoom && this.props.editingTrackId !== null) {
+                                        this.props.dispatch({
+                                            type: CHANGE_DETECTION,
+                                            payload: {
+                                                frame: this.state.videoCurrentFrame,
+                                                trackId: this.props.editingTrackId,
+                                                g0
+                                            }
+                                        });
+                                    } else if (this.state.drawingToZoom) {
+                                        this.setState({
+                                            drawingToZoom: false,
+                                            zoomRegion: g0
+                                        });
                                     }
-                                })}
+                                }}
                                 deleteAnnotation={() => this.props.dispatch({
                                     type: DELETE_DETECTION,
                                     payload: {
@@ -401,7 +439,9 @@ const mapStateToProps = (state, ownProps) => {
         selectedActivityId: state.selectedActivityId,
         editingTrackId: state.editingTrackId,
         requestFrameRange: state.requestFrameRange,
-        requestFrame: state.requestFrame
+        requestFrame: state.requestFrame,
+        creatingActivity: state.creatingActivity,
+        interpolationWidget: state.interpolationWidget
     };
 };
 
