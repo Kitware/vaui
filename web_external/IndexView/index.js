@@ -20,9 +20,14 @@ class IndexView extends PureComponent {
             </div>
             <Viewer className='main' />
             <div className='right-sidebar'>
-                {this.props.treePanel === 'track' && this.props.selectedTrackId !== null && !this.props.creatingActivity && this.props.editingActivityId === null &&
+                {this.props.treePanel === 'track' &&
+                    this.props.selectedTrackId !== null &&
+                    !this.props.creatingActivity &&
+                    !this.props.interpolationWidget &&
+                    this.props.editingActivityId === null &&
                     <TrackWidget />}
                 {(this.props.creatingActivity || this.props.editingActivityId !== null || (this.props.treePanel === 'activity' && this.props.selectedActivityId !== null)) &&
+                    !this.props.interpolationWidget &&
                     <ActivityWidget />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}

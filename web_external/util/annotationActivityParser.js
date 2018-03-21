@@ -1,3 +1,5 @@
+import _ from 'underscore';
+
 class AnnotationActivityContainer {
     constructor(folderId) {
         this._id2 = 0;
@@ -32,7 +34,7 @@ class AnnotationActivityContainer {
             return;
         }
 
-        let activitiesInRange = new Set();
+        let activitiesInRange = [];
         for (let activity of this._trackActivityMap.get(id1)) {
             // Ignore activities that are not enabled
             if (!this._enableState.get(activity.id2)) {
@@ -47,16 +49,16 @@ class AnnotationActivityContainer {
                 let frameRange = actor.timespan[0].tsr0;
                 if (frameRange[0] <= frame && frameRange[1] >= frame) {
                     // Actor's range includes requested frame; add match
-                    activitiesInRange.add(activity);
+                    activitiesInRange.push(activity);
                 }
             }
         }
 
         // Return matching activities, if any
-        if (activitiesInRange.size === 0) {
+        if (activitiesInRange.length === 0) {
             return;
         }
-        return [...activitiesInRange];
+        return activitiesInRange;
     }
 
     getItem(id2) {
@@ -84,32 +86,28 @@ class AnnotationActivityContainer {
         return this.copy();
     }
 
-    // TODO: Deprecate
-    change(activityId, newActivityAct2, newTimespan) {
-        var activityToChange = this.getItem(activityId);
-        if (activityToChange) {
-            activityToChange.act2 = newActivityAct2;
-            var oldTimespan = activityToChange.timespan[0].tsr0;
-            activityToChange.timespan[0].tsr0 = newTimespan;
-            // Adjust timespan of Tracks of the activity accordingly
-            for (let actor of activityToChange.actors) {
-                var tsr0 = actor.timespan[0].tsr0;
-                if (tsr0[0] === oldTimespan[0] || tsr0[0] <= newTimespan[0]) {
-                    tsr0[0] = newTimespan[0];
-                }
-                if (tsr0[1] === oldTimespan[1] || tsr0[1] >= newTimespan[1]) {
-                    tsr0[1] = newTimespan[1];
-                }
-            }
-            if (!this._added.has(activityToChange)) {
-                this._edited.add(activityToChange);
-            }
-        }
-        return this.copy();
-    }
-
-    change2(id2, activity) {
+    change(id2, activity) {
         var activityToChange = this.getItem(id2);
+        // update for removed and added tracks
+        var existingTrackIds = activityToChange.actors.map((actor) => actor.id1);
+        var addTrackIds = activity.actors.map((actor) => actor.id1);
+        var removedTracksId = _(existingTrackIds).difference(addTrackIds);
+        removedTracksId.forEach((trackId) => {
+            var activitySet = this._trackActivityMap.get(trackId);
+            if (activitySet.size === 1) {
+                this._trackActivityMap.delete(trackId);
+            } else {
+                activitySet.delete(activityToChange);
+            }
+        });
+        var addTracksId = _(addTrackIds).difference(existingTrackIds);
+        addTracksId.forEach((trackId) => {
+            if (!this._trackActivityMap.has(trackId)) {
+                this._trackActivityMap.set(trackId, new Set());
+            }
+            this._trackActivityMap.get(trackId).add(activityToChange);
+        });
+
         Object.assign(activityToChange, activity);
         if (!this._added.has(activityToChange)) {
             this._edited.add(activityToChange);
@@ -140,24 +138,6 @@ class AnnotationActivityContainer {
             }
             // Transfer records in track-to-activities map
             this._trackActivityMap.set(newTrackId, activities);
-        }
-        return this.copy();
-    }
-
-    changeTrackActivity(activityId, trackId, newTimespan) {
-        var activity = this.getItem(activityId);
-        var trackActivity = activity.actors.find((trackActivity) => trackActivity.id1 === trackId);
-        trackActivity.timespan[0].tsr0 = newTimespan;
-        // Adjust timespan of Activity accordingly
-        var tsr0 = activity.timespan[0].tsr0;
-        if (tsr0[0] >= newTimespan[0]) {
-            tsr0[0] = newTimespan[0];
-        }
-        if (tsr0[1] <= newTimespan[1]) {
-            tsr0[1] = newTimespan[1];
-        }
-        if (!this._added.has(activity)) {
-            this._edited.add(activity);
         }
         return this.copy();
     }

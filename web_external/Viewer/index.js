@@ -95,8 +95,8 @@ class Viewer extends PureComponent {
                             <div key='control-bar' className='control-bar'>
                                 <button className={'btn btn-deault btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     this.setState({ drawingToZoom: !this.state.drawingToZoom });
-                                }} title='shortcut: Shift'><span className='glyphicon glyphicon-zoom-in'></span></button>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='shortcut: T'>New Track</button>
+                                }} title='Zoom to region (Shift)'><span className='glyphicon glyphicon-zoom-in'></span></button>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='Create new Track (T)'>New Track</button>
                                 <button className={'btn btn-deault btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     if (!this.props.creatingActivity) {
                                         this.props.dispatch({

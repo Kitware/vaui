@@ -96,13 +96,10 @@ function app(state, action) {
         case types.EDIT_ACTIVITY_START:
             return { ...state, ...{ editingActivityId: action.payload } };
         case types.EDIT_ACTIVITY_STOP:
-            return { ...state, ...{ editingActivityId: null, selectedActivityId: state.editingActivityId } };
-        case types.CHANGE_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+            return { ...state, ...{ editingActivityId: null, selectedActivityId: action.payload } };
         case types.CHANGE_ACTIVITY2:
             var activity = action.payload.activity;
-            var annotationActivityContainer = state.annotationActivityContainer.change2(action.payload.id2, activity);
+            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.id2, activity);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.DELETE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.remove(action.payload);
@@ -111,9 +108,6 @@ function app(state, action) {
             var activity = action.payload;
             var annotationActivityContainer = state.annotationActivityContainer.new(activity);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
-        case types.CHANGE_TRACK_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.SELECT_TRACK_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
         case types.CURRENT_FRAME_CHANGE:
@@ -121,7 +115,7 @@ function app(state, action) {
         case types.MAX_FRAME_CHANGE:
             return { ...state, ...{ maxFrame: action.payload } };
         case types.CREATE_ACTIVITY_START:
-            return { ...state, ...{ creatingActivity: true } };
+            return { ...state, ...{ creatingActivity: true, interpolationWidget: false } };
         case types.CREATE_ACTIVITY_STOP:
             return { ...state, ...{ creatingActivity: false } };
         case types.IMPORT_PROGRESS_CHANGE:

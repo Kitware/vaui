@@ -36,7 +36,7 @@ class AppContainer extends PureComponent {
     render() {
         return [
             <HeaderBar className='v-header' key='header-bar' />,
-            <IndexView key='index-view' />
+            <IndexView key={this.props.selectedFolder ? this.props.selectedFolder._id : ''} />
         ];
     }
 }
@@ -44,7 +44,8 @@ class AppContainer extends PureComponent {
 const mapStateToProps = (state, ownProps) => {
     return {
         saving: state.saving,
-        loadingAnnotation: state.loadingAnnotation
+        loadingAnnotation: state.loadingAnnotation,
+        selectedFolder: state.selectedFolder
     };
 };
 

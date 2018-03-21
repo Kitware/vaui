@@ -147,9 +147,13 @@ class AnnotationDetectionContainer {
         var frameRange = track.frameRange;
         var trackDetections = [];
         for (let i = frameRange[0]; i < frameRange[1] + 1; i++) {
-            var detection = this._frameMap.get(i).get(trackId);
+            var map = this._frameMap.get(i);
+            if (!map) {
+                continue;
+            }
+            var detection = map.get(trackId);
             if (detection) {
-                trackDetections = [...trackDetections, detection];
+                trackDetections.push(detection);
             }
         }
         return trackDetections;

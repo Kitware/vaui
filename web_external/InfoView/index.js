@@ -34,7 +34,6 @@ class InfoView extends PureComponent {
                             </li>
                         }
                     </ul>
-                    <div className='clear-message'>(Click an annotation to view details. Click on an empty space to clear.)</div>
                 </div>
             </div>
         </div>;
