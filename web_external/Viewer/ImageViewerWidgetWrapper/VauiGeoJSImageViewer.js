@@ -18,7 +18,15 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         var interactorOpts = map.interactor().options();
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
-        interactorOpts.actions.splice(3, 2);
+        console.log(interactorOpts.actions);
+        // interactorOpts.actions.splice(2, 8);
+        interactorOpts.actions = [
+            interactorOpts.actions[0],
+            interactorOpts.actions[2],
+            interactorOpts.actions[6],
+            interactorOpts.actions[7],
+            interactorOpts.actions[8]
+        ];
         map.interactor().options(interactorOpts);
         var ids = null;
         var siblings = new ItemCollection();
@@ -121,7 +129,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             frame = newFrame;
                             updateFrame(frame)
                                 .then(() => {
-                                    if (this.pendingFrame) {
+                                    if (this.pendingFrame !== null) {
                                         this.setFrame(this.pendingFrame);
                                         this.pendingFrame = null;
                                     } else {
@@ -138,6 +146,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 var annotationChanged = (annotation) => {
                     var coordinates = annotation.coordinates();
                     var g0 = [[Math.round(coordinates[0]['x']), Math.round(coordinates[0]['y'])], [Math.round(coordinates[2]['x']), Math.round(coordinates[2]['y'])]];
+                    this.annotationLayer.removeAllAnnotations(true);
                     this.trigger('rectangleDrawn', g0);
                 };
 
@@ -160,12 +169,14 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                             });
                         } else if (this.editMode === 'draw') {
                             layer.mode('rectangle');
+                            layer.annotations().slice(-1)[0].mouseClick = function () { };
                             layer.geoOn(geo.event.annotation.state, (e) => {
                                 annotationChanged(e.annotation);
                             });
                             layer.geoOn(geo.event.annotation.mode, (e) => {
                                 if (e.mode === null && e.oldMode === 'rectangle') {
                                     layer.mode('rectangle');
+                                    layer.annotations().slice(-1)[0].mouseClick = function () { };
                                 }
                             });
                         }
@@ -265,6 +276,17 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
 
                 this._redrawAnnotation = () => {
                     this._drawAnnotation(frame);
+                };
+
+                this.zoomTo = (g0) => {
+                    var { center, zoom } = this.viewer.zoomAndCenterFromBounds({
+                        left: g0[0][0],
+                        right: g0[1][0],
+                        top: g0[1][1],
+                        bottom: g0[0][1]
+                    });
+                    this.viewer.zoom(zoom);
+                    this.viewer.center(center);
                 };
 
                 updateFrame(frame);

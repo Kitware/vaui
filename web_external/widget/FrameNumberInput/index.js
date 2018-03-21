@@ -15,7 +15,7 @@ class FrameNumberInput extends PureComponent {
     }
 
     render() {
-        return <input className={this.props.className} type='number' value={this.state.value === null ? this.props.value : this.state.value}
+        return <input className={this.props.className} type='number' value={this.state.value}
             onChange={(e) => {
                 var value = parseInt(e.target.value);
                 if (isNaN(value)) {
@@ -30,7 +30,7 @@ class FrameNumberInput extends PureComponent {
                     this.setState({ value: this.props.value });
                 } else {
                     this.props.onChange(this.state.value);
-                    this.setState({ value: null });
+                    this.setState({ value: this.props.value });
                 }
             }} />
     }

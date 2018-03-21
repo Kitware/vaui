@@ -36,6 +36,15 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.editingTrackId !== nextProps.editingTrackId) {
             this.geojsViewer.edit(nextProps.editingTrackId !== null);
         }
+        if (this.props.drawingToZoom !== nextProps.drawingToZoom) {
+            if (this.props.drawingToZoom) {
+                this.geojsViewer.setEditMode('draw');
+            }
+            this.geojsViewer.edit(nextProps.drawingToZoom);
+        }
+        if (this.props.zoomRegion !== nextProps.zoomRegion) {
+            this.geojsViewer.zoomTo(nextProps.zoomRegion);
+        }
     }
 
     componentDidMount() {
@@ -65,7 +74,7 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });
-        mousetrap.bind(['del', 'backspace', 'alt+d', 'command+d'], () => {
+        mousetrap.bind(['del', 'backspace', 'd'], () => {
             if (this.props.editingTrackId !== null) {
                 this.props.deleteAnnotation();
             }
@@ -74,7 +83,7 @@ class ImageViewerWidgetWrapper extends Component {
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
-        mousetrap.unbind(['del', 'backspace', 'alt+d', 'command+d']);
+        mousetrap.unbind(['del', 'backspace', 'd']);
     }
 
     render() {
