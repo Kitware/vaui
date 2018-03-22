@@ -337,17 +337,16 @@ class Viewer extends PureComponent {
                 if (d.detection.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
-                var attributes = d.detection.keyValues;
-                if (attributes.src === 'truth') {
-                    if (attributes.eval0 === 'tp') {
+                if (d.detection.src === 'truth') {
+                    if (d.detection.eval0 === 'tp') {
                         return { r: 0, g: 1, b: 0.0 };
-                    } else if (attributes.eval0 === 'fn') {
+                    } else if (d.detection.eval0 === 'fn') {
                         return { r: 1, g: 1, b: 0.0 };
                     }
-                } else if (attributes.src === 'computed') {
-                    if (attributes.eval0 === 'tp') {
+                } else if (d.detection.src === 'computed') {
+                    if (d.detection.eval0 === 'tp') {
                         return { r: 0, g: 0, b: 1 };
-                    } else if (attributes.eval0 === 'fp') {
+                    } else if (d.detection.eval0 === 'fp') {
                         return { r: 1, g: 0, b: 0.0 };
                     }
                 }

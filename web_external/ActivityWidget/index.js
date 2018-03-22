@@ -243,7 +243,6 @@ class ActivityWidget extends PureComponent {
                                 {!this.state.editing && <p className='form-control-static'>{type}</p>}
                                 {this.state.editing && <select className='form-control'
                                     value={type}
-                                    disabled={!this.state.editing}
                                     onChange={(e) => {
                                         this.setState({
                                             act2: e.target.value ? { [e.target.value]: 1.0 } : null,

@@ -6,6 +6,7 @@ import Viewer from '../Viewer';
 import InfoView from '../InfoView';
 import TrackWidget from '../TrackWidget';
 import ActivityWidget from '../ActivityWidget';
+import DetectionWidget from '../DetectionWidget';
 import InterpolationWidget from '../InterpolationWidget';
 
 import './style.styl';
@@ -31,6 +32,9 @@ class IndexView extends PureComponent {
                     <ActivityWidget />}
                 {this.props.interpolationWidget &&
                     <InterpolationWidget />}
+                {this.props.selectedDetectionId !== null &&
+                    <DetectionWidget />
+                }
                 <InfoView />
             </div>
         </div>;
@@ -44,6 +48,7 @@ const mapStateToProps = (state, ownProps) => {
         editingActivityId: state.editingActivityId,
         selectedTrackId: state.selectedTrackId,
         selectedActivityId: state.selectedActivityId,
+        selectedDetectionId: state.selectedDetectionId,
         interpolationWidget: state.interpolationWidget
     };
 };

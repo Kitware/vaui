@@ -18,6 +18,7 @@ function app(state, action) {
             currentFrame: 0,
             maxFrame: null,
             selectedAnnotation: null,
+            selectedDetectionId: null,
             selectedTrackId: null,
             editingTrackId: null,
             selectedActivityId: null,
@@ -39,7 +40,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
@@ -51,11 +52,14 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationDetectionContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, selectedDetectionId: action.payload ? action.payload.detection.id0 : null } };
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
+            return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
+        case types.CHANGE_DETECTION_ATTRIBUTES:
+            var annotationDetectionContainer = state.annotationDetectionContainer.changeAttributes(action.payload.id0, action.payload.attributes);
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         case types.DELETE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.remove(action.payload.frame, action.payload.trackId);

@@ -71,6 +71,16 @@ class AnnotationDetectionContainer {
         return Array.from(this._trackMap.keys());
     }
 
+    getDetection(id0) {
+        for (let map of this._frameMap.values()) {
+            for (let detection of map.values()) {
+                if (id0 === detection.id0) {
+                    return detection;
+                }
+            }
+        }
+    }
+
     getEnableState(id1) {
         return this._trackMap.get(id1).enableState;
     }
@@ -213,6 +223,16 @@ class AnnotationDetectionContainer {
         return this.copy();
     }
 
+    changeAttributes(id0, attributes) {
+        var detection = this.getDetection(id0);
+        detection.occlusion = attributes.occlusion;
+        detection.src = attributes.src;
+        if (!this._added.has(detection.id0)) {
+            this._edited.set(detection.id0, detection);
+        }
+        return this.copy();
+    }
+
     _remove(trackIdToDetectionMap, trackId, detectionId) {
         // Update modification records; if state was added, just discard the
         // record; otherwise, add to removal records and ensure the state is
@@ -245,22 +265,16 @@ class AnnotationDetectionContainer {
         return this.copy();
     }
 
-    _flattenDetection(detection) {
-        let newDetection = Object.assign({}, detection, detection.keyValues);
-        delete newDetection.keyValues;
-        return [newDetection, detection];
-    }
-
     getAdded() {
-        return [...this._added.values()].map(this._flattenDetection);
+        return [...this._added.values()];
     }
 
     getEdited() {
-        return [...this._edited.values()].map(this._flattenDetection);
+        return [...this._edited.values()];
     }
 
     getRemoved() {
-        return [...this._removed.values()].map(this._flattenDetection);
+        return [...this._removed.values()];
     }
 
     reset() {
@@ -283,27 +297,7 @@ class AnnotationDetection {
         this.ts1 = 0;
         this.g0 = null;
         this.src = 'truth';
-        this.keyValues = {};
-        for (let key in detection) {
-            this.set(key, detection[key]);
-        }
-    }
-    set(key, value) {
-        switch (key) {
-            case '_id':
-            case 'folderId':
-            case 'g0':
-            case 'id0':
-            case 'id1':
-            case 'ts0':
-            case 'ts1':
-            case 'src':
-                this[key] = value;
-                break;
-            default:
-                this.keyValues[key] = value;
-                break;
-        }
+        Object.assign(this, detection);
     }
 }
 

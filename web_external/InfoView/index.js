@@ -19,9 +19,8 @@ class InfoView extends PureComponent {
                                 }
                                 <div title='id0'>Detection id: {annotation.detection.id0}</div>
                                 <div>Frame id: {annotation.detection.ts0}</div>
-                                {Object.entries(annotation.detection.keyValues).map(([key, value], index) => {
-                                    return <div key={index}>{key}: {value}</div>;
-                                })}
+                                <div>Source: {annotation.detection.src}</div>
+                                <div>Occlusion: {annotation.detection.occlusion}</div>
                                 {annotation.activities && annotation.activities.length !== 0 &&
                                     <ul className='activity'>
                                         {annotation.activities.map((activity) => {
