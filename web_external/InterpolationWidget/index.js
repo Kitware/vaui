@@ -12,7 +12,9 @@ class InterpolationWidget extends PureComponent {
         super(props);
         this.state = {
             trackId: null,
-            detections: []
+            detections: [],
+            sourceType: 'truth',
+            processingState: null
         }
     }
 
@@ -56,24 +58,37 @@ class InterpolationWidget extends PureComponent {
                         <label className='detections-label'>Detections</label>
                         {this.state.detections.length <= 1 &&
                             <div className='row'>
-                                <div className='col-sm-11 col-sm-offset-1'>(All Detections of this Track will be used)</div>
+                                <div className='col-sm-6 col-sm-offset-1 no-padding'>All detections of source</div>
+                                <div className='col-sm-3 no-padding'>
+                                    <div className='form-group-xs'>
+                                        <select className='form-control'
+                                            value={this.state.sourceType}
+                                            onChange={(e) => {
+                                                this.setState({
+                                                    sourceType: e.target.value
+                                                });
+                                            }} >
+                                            <option value='truth'>truth</option>
+                                            <option value=''>any</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>}
                         {this.state.detections.length > 1 &&
                             [<div key='1' className='row detections font-sm bold'>
-                                <div className='col-sm-1'></div>
-                                <div className='col-sm-5'>Frame</div>
-                                <div className='col-sm-5'>ID</div>
+                                <div className='col-sm-2 col-sm-offset-1 no-padding-right'>Frame</div>
+                                <div className='col-sm-3'>ID</div>
                             </div>,
                             <div key='2' className='detections-container'>
                                 {this.state.detections.map((detection) => {
                                     return <div key={detection.id0} className='row detection'>
-                                        <div className='col-sm-1'>
+                                        <div className='col-sm-2 col-sm-offset-1 no-padding-right'>{detection.ts0}</div>
+                                        <div className='col-sm-3 no-padding-right'>{detection.id0}</div>
+                                        <div className='col-sm-1 no-padding'>
                                             <button type='button' className='btn btn-link btn-xs' onClick={(e) => {
                                                 this.setState({ detections: remove(this.state.detections, detection) });
                                             }}><span className='glyphicon glyphicon-remove text-danger'></span></button>
                                         </div>
-                                        <div className='col-sm-5'>{detection.ts0}</div>
-                                        <div className='col-sm-5'>{detection.id0}</div>
                                     </div>
                                 })}
                             </div>]
@@ -81,13 +96,37 @@ class InterpolationWidget extends PureComponent {
                     </div>}
                     <div className='bottom-row'>
                         <div className='row'>
-                            <div className='col-xs-12'>
+                            <div className='col-xs-11'>
                                 <div className='btn-group btn-group-sm' role='group'>
-                                    <button type='button' className='btn btn-default' title='Run' disabled={!canExecute} onClick={(e) => {
+                                    <button type='button' className='btn btn-default' title='Run' disabled={!canExecute || this.state.processingState} onClick={(e) => {
                                         var trackId = this.state.trackId;
-                                        var detections = this.state.detections.length > 1 ? this.state.detections : _.sortBy(this.props.annotationDetectionContainer.getByTrackId(trackId), (detection) => detection.ts0);
-                                        this.props.dispatch(interpolate(trackId, detections));
-                                    }}><span className='glyphicon glyphicon-cog text-success'></span></button>
+                                        var detections = [];
+                                        if (this.state.detections.length > 1) {
+                                            detections = this.state.detections;
+                                        } else {
+                                            (this.props.annotationDetectionContainer.getByTrackId(trackId), (detection) => detection.ts0);
+                                            detections = this.props.annotationDetectionContainer.getByTrackId(trackId);
+                                            if (this.state.sourceType) {
+                                                detections = detections.filter((detection) => detection.src === this.state.sourceType);
+                                            }
+                                            detections = _.sortBy(detections, (detection) => detection.ts0);
+                                        }
+                                        this.setState({ processingState: 'processing' });
+                                        this.props.dispatch(interpolate(trackId, detections)).then(() => {
+                                            this.setState({ processingState: 'finished' });
+                                            setTimeout(() => {
+                                                this.setState({ processingState: null });
+                                            }, 2000);
+                                        });
+                                    }}>{(() => {
+                                        if (!this.state.processingState) {
+                                            return <span className='glyphicon glyphicon-cog text-success'></span>;
+                                        } else if (this.state.processingState === 'processing') {
+                                            return 'processing';
+                                        } else if (this.state.processingState === 'finished') {
+                                            return <span className='text-success'>Finished!</span>;
+                                        }
+                                    })()}</button>
                                     <button type='button' className='btn btn-default' onClick={(e) => this.props.dispatch({
                                         type: INTERPOLATE_HIDE
                                     })}><span className='glyphicon glyphicon-remove text-danger'></span></button>

@@ -40,12 +40,6 @@ export default (trackId, detections) => {
                         newDetections
                     }
                 });
-                events.trigger('g:alert', {
-                    text: 'Interpolation completed',
-                    type: 'info',
-                    timeout: 3000,
-                    icon: 'info'
-                });
             });
         });
     };

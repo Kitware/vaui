@@ -193,7 +193,7 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(detectionToChange, { g0 });
+            Object.assign(detectionToChange, { g0, src: 'truth' });
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
