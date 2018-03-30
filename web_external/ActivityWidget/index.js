@@ -1,4 +1,4 @@
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import _ from 'underscore';
 import bootbox from 'bootbox';
@@ -220,33 +220,29 @@ class ActivityWidget extends PureComponent {
                 <div className='panel-body'>
                     <form className='form-horizontal'>
                         <label>Activity</label>
-                        <div className='form-group form-group-xs'>
-                            {!this.props.creatingActivity &&
-                                <Fragment>
-                                    <label className='col-sm-2 control-label'>Id:</label>
-                                    <div className='col-sm-3'>
-                                        {!this.state.editing && <p className='form-control-static'>{this.state.id2}</p>}
-                                        {this.state.editing && <FrameNumberInput className='form-control' min={1} value={this.state.id2}
-                                            onChange={(id2) => {
-                                                if (!this.props.annotationActivityContainer.validateNewActivityId(id2)) {
-                                                    bootbox.alert({
-                                                        size: 'small',
-                                                        message: 'An activity with this id already exists'
-                                                    });
-                                                } else {
-                                                    this.setState({ id2, changed: true });
-                                                }
-                                            }} />}
-                                    </div>
-                                </Fragment>}
-                        </div>
+                        {!this.props.creatingActivity && <div className='form-group form-group-xs'>
+                            <label className='col-sm-2 control-label'>Id:</label>
+                            <div className='col-sm-3'>
+                                {!this.state.editing && <p className='form-control-static'>{this.state.id2}</p>}
+                                {this.state.editing && <FrameNumberInput className='form-control' min={1} value={this.state.id2}
+                                    onChange={(id2) => {
+                                        if (!this.props.annotationActivityContainer.validateNewActivityId(id2)) {
+                                            bootbox.alert({
+                                                size: 'small',
+                                                message: 'An activity with this id already exists'
+                                            });
+                                        } else {
+                                            this.setState({ id2, changed: true });
+                                        }
+                                    }} />}
+                            </div>
+                        </div>}
                         <div className='form-group form-group-xs'>
                             <label className='col-sm-2 control-label'>Type:</label>
                             <div className='col-sm-9'>
                                 {!this.state.editing && <p className='form-control-static'>{type}</p>}
                                 {this.state.editing && <select className='form-control'
                                     value={type}
-                                    disabled={!this.state.editing}
                                     onChange={(e) => {
                                         this.setState({
                                             act2: e.target.value ? { [e.target.value]: 1.0 } : null,
@@ -442,7 +438,8 @@ class ActivityWidget extends PureComponent {
                                                     })
                                                 } else {
                                                     this.props.dispatch({
-                                                        type: EDIT_ACTIVITY_STOP
+                                                        type: EDIT_ACTIVITY_STOP,
+                                                        payload: this.state.id2
                                                     });
                                                 }
                                             }}><span className='glyphicon glyphicon-remove text-danger'></span></button>

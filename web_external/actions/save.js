@@ -9,28 +9,28 @@ export default () => {
             type: `${SAVE}_PENDING`
         });
         return Promise.all([
-            ...annotationDetectionContainer.getRemoved().map(([flattenDetection]) => {
+            ...annotationDetectionContainer.getRemoved().map((detection) => {
                 return restRequest({
                     method: 'DELETE',
-                    url: `/detection/${flattenDetection._id}`,
+                    url: `/detection/${detection._id}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenDetection)
+                    data: JSON.stringify(detection)
                 });
             }),
-            ...annotationDetectionContainer.getEdited().map(([flattenDetection]) => {
+            ...annotationDetectionContainer.getEdited().map((detection) => {
                 return restRequest({
                     method: 'PUT',
-                    url: `/detection/${flattenDetection._id}`,
+                    url: `/detection/${detection._id}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenDetection)
+                    data: JSON.stringify(detection)
                 });
             }),
-            ...annotationDetectionContainer.getAdded().map(([flattenDetection, detection]) => {
+            ...annotationDetectionContainer.getAdded().map((detection) => {
                 return restRequest({
                     method: 'POST',
-                    url: `/detection/${flattenDetection.folderId}`,
+                    url: `/detection/${detection.folderId}`,
                     contentType: 'application/json',
-                    data: JSON.stringify(flattenDetection)
+                    data: JSON.stringify(detection)
                 }).then((savedDetection) => {
                     detection._id = savedDetection._id;
                 });

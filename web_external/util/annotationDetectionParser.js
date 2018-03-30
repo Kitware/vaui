@@ -71,6 +71,16 @@ class AnnotationDetectionContainer {
         return Array.from(this._trackMap.keys());
     }
 
+    getDetection(id0) {
+        for (let map of this._frameMap.values()) {
+            for (let detection of map.values()) {
+                if (id0 === detection.id0) {
+                    return detection;
+                }
+            }
+        }
+    }
+
     getEnableState(id1) {
         return this._trackMap.get(id1).enableState;
     }
@@ -147,9 +157,13 @@ class AnnotationDetectionContainer {
         var frameRange = track.frameRange;
         var trackDetections = [];
         for (let i = frameRange[0]; i < frameRange[1] + 1; i++) {
-            var detection = this._frameMap.get(i).get(trackId);
+            var map = this._frameMap.get(i);
+            if (!map) {
+                continue;
+            }
+            var detection = map.get(trackId);
             if (detection) {
-                trackDetections = [...trackDetections, detection];
+                trackDetections.push(detection);
             }
         }
         return trackDetections;
@@ -179,7 +193,7 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(detectionToChange, { g0 });
+            Object.assign(detectionToChange, { g0, src: 'truth' });
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
@@ -205,6 +219,16 @@ class AnnotationDetectionContainer {
             // Update modification records; since there was no previous state,
             // this is an addition
             this._added.set(newDetection.id0, newDetection);
+        }
+        return this.copy();
+    }
+
+    changeAttributes(id0, attributes) {
+        var detection = this.getDetection(id0);
+        detection.occlusion = attributes.occlusion;
+        detection.src = attributes.src;
+        if (!this._added.has(detection.id0)) {
+            this._edited.set(detection.id0, detection);
         }
         return this.copy();
     }
@@ -241,22 +265,16 @@ class AnnotationDetectionContainer {
         return this.copy();
     }
 
-    _flattenDetection(detection) {
-        let newDetection = Object.assign({}, detection, detection.keyValues);
-        delete newDetection.keyValues;
-        return [newDetection, detection];
-    }
-
     getAdded() {
-        return [...this._added.values()].map(this._flattenDetection);
+        return [...this._added.values()];
     }
 
     getEdited() {
-        return [...this._edited.values()].map(this._flattenDetection);
+        return [...this._edited.values()];
     }
 
     getRemoved() {
-        return [...this._removed.values()].map(this._flattenDetection);
+        return [...this._removed.values()];
     }
 
     reset() {
@@ -279,27 +297,7 @@ class AnnotationDetection {
         this.ts1 = 0;
         this.g0 = null;
         this.src = 'truth';
-        this.keyValues = {};
-        for (let key in detection) {
-            this.set(key, detection[key]);
-        }
-    }
-    set(key, value) {
-        switch (key) {
-            case '_id':
-            case 'folderId':
-            case 'g0':
-            case 'id0':
-            case 'id1':
-            case 'ts0':
-            case 'ts1':
-            case 'src':
-                this[key] = value;
-                break;
-            default:
-                this.keyValues[key] = value;
-                break;
-        }
+        Object.assign(this, detection);
     }
 }
 

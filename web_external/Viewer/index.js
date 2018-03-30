@@ -95,8 +95,8 @@ class Viewer extends PureComponent {
                             <div key='control-bar' className='control-bar'>
                                 <button className={'btn btn-deault btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     this.setState({ drawingToZoom: !this.state.drawingToZoom });
-                                }} title='shortcut: Shift'><span className='glyphicon glyphicon-zoom-in'></span></button>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='shortcut: T'>New Track</button>
+                                }} title='Zoom to region (Shift)'><span className='glyphicon glyphicon-zoom-in'></span></button>
+                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='Create new Track (T)'>New Track</button>
                                 <button className={'btn btn-deault btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     if (!this.props.creatingActivity) {
                                         this.props.dispatch({
@@ -337,17 +337,16 @@ class Viewer extends PureComponent {
                 if (d.detection.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
-                var attributes = d.detection.keyValues;
-                if (attributes.src === 'truth') {
-                    if (attributes.eval0 === 'tp') {
+                if (d.detection.src === 'truth') {
+                    if (d.detection.eval0 === 'tp') {
                         return { r: 0, g: 1, b: 0.0 };
-                    } else if (attributes.eval0 === 'fn') {
+                    } else if (d.detection.eval0 === 'fn') {
                         return { r: 1, g: 1, b: 0.0 };
                     }
-                } else if (attributes.src === 'computed') {
-                    if (attributes.eval0 === 'tp') {
+                } else if (d.detection.src === 'computed') {
+                    if (d.detection.eval0 === 'tp') {
                         return { r: 0, g: 0, b: 1 };
-                    } else if (attributes.eval0 === 'fp') {
+                    } else if (d.detection.eval0 === 'fp') {
                         return { r: 1, g: 0, b: 0.0 };
                     }
                 }

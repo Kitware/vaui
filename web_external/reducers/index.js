@@ -18,6 +18,7 @@ function app(state, action) {
             currentFrame: 0,
             maxFrame: null,
             selectedAnnotation: null,
+            selectedDetectionId: null,
             selectedTrackId: null,
             editingTrackId: null,
             selectedActivityId: null,
@@ -39,7 +40,7 @@ function app(state, action) {
         case types.SELECTED_ITEM_CHANGE:
             return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
-            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
+            return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
             return { ...state, ...action.payload, ...{ loadingAnnotation: false } };
         case types.LOAD_ANNOTATION + '_REJECTED':
@@ -51,11 +52,14 @@ function app(state, action) {
             var annotationDetectionContainer = state.annotationDetectionContainer.toggleState(action.payload.track, action.payload.enabled);
             return { ...state, ...{ annotationDetectionContainer } };
         case types.ANNOTATION_CLICKED:
-            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null } };
+            return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, selectedDetectionId: action.payload ? action.payload.detection.id0 : null } };
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
+            return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
+        case types.CHANGE_DETECTION_ATTRIBUTES:
+            var annotationDetectionContainer = state.annotationDetectionContainer.changeAttributes(action.payload.id0, action.payload.attributes);
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         case types.DELETE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.remove(action.payload.frame, action.payload.trackId);
@@ -96,13 +100,10 @@ function app(state, action) {
         case types.EDIT_ACTIVITY_START:
             return { ...state, ...{ editingActivityId: action.payload } };
         case types.EDIT_ACTIVITY_STOP:
-            return { ...state, ...{ editingActivityId: null, selectedActivityId: state.editingActivityId } };
-        case types.CHANGE_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.activityId, action.payload.newActivityAct2, action.payload.newTimespan);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
+            return { ...state, ...{ editingActivityId: null, selectedActivityId: action.payload } };
         case types.CHANGE_ACTIVITY2:
             var activity = action.payload.activity;
-            var annotationActivityContainer = state.annotationActivityContainer.change2(action.payload.id2, activity);
+            var annotationActivityContainer = state.annotationActivityContainer.change(action.payload.id2, activity);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.DELETE_ACTIVITY:
             var annotationActivityContainer = state.annotationActivityContainer.remove(action.payload);
@@ -111,9 +112,6 @@ function app(state, action) {
             var activity = action.payload;
             var annotationActivityContainer = state.annotationActivityContainer.new(activity);
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
-        case types.CHANGE_TRACK_ACTIVITY:
-            var annotationActivityContainer = state.annotationActivityContainer.changeTrackActivity(action.payload.activityId, action.payload.trackId, action.payload.newTimespan);
-            return { ...state, ...{ annotationActivityContainer, pendingSave: true } };
         case types.SELECT_TRACK_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
         case types.CURRENT_FRAME_CHANGE:
@@ -121,7 +119,7 @@ function app(state, action) {
         case types.MAX_FRAME_CHANGE:
             return { ...state, ...{ maxFrame: action.payload } };
         case types.CREATE_ACTIVITY_START:
-            return { ...state, ...{ creatingActivity: true } };
+            return { ...state, ...{ creatingActivity: true, interpolationWidget: false } };
         case types.CREATE_ACTIVITY_STOP:
             return { ...state, ...{ creatingActivity: false } };
         case types.IMPORT_PROGRESS_CHANGE:

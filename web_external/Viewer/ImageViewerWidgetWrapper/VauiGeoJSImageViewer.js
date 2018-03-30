@@ -18,8 +18,6 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         var interactorOpts = map.interactor().options();
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
-        console.log(interactorOpts.actions);
-        // interactorOpts.actions.splice(2, 8);
         interactorOpts.actions = [
             interactorOpts.actions[0],
             interactorOpts.actions[2],

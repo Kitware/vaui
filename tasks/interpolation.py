@@ -29,8 +29,8 @@ def _interpolateDetactionToDetection(a, b):
     newDetections = []
     for i in range(1, steps + 1):
         newDetections.append({
-            "src": 'linear-interpolation',
-            "g0": [
+            'src': 'linear-interpolation',
+            'g0': [
                 [
                     int(start1 + i * d1),
                     int(start2 + i * d2)
@@ -40,8 +40,7 @@ def _interpolateDetactionToDetection(a, b):
                     int(start4 + i * d4)
                 ]
             ],
-            "keyValues": {
-            },
-            "ts0": startTs + i
+            'occlusion': '',
+            'ts0': startTs + i
         })
     return newDetections
