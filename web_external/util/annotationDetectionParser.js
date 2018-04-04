@@ -2,6 +2,7 @@ class AnnotationDetectionTrack {
     constructor() {
         this._map = new Map(); // frame => detection id
         this.enableState = true;
+        this._frameRange = null;
         this.resetFrameRange();
     }
 

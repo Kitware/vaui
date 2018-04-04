@@ -5,6 +5,7 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     initialize(settings) {
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
+        this.getAvailableTrackTrails = settings.getAvailableTrackTrails;
         this._annotationLeftClick = null;
         this._annotationRightClick = null;
         this.pendingFrame = null;
@@ -199,8 +200,9 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 }
 
                 this._drawAnnotation = (frame) => {
-                    if (this.lastFeatureFrame) {
-                        this.featureLayer.deleteFeature(this.lastFeatureFrame);
+                    if (this.lastFeature) {
+                        this.featureLayer.deleteFeature(this.lastFeature);
+                        this.featureLayer.deleteFeature(this.lastLineFeature);
                     }
                     this.annotationLayer.removeAllAnnotations(true);
                     this.annotationLayer.mode(null);
@@ -209,28 +211,26 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         return;
                     }
                     var { data, style, editingTrackId, editingStyle } = result;
-                    var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true });
-                    feature.data(data);
-                    feature.polygon((d) => {
-                        var g0 = d.detection.g0;
-                        return {
-                            outer: [{ x: g0[0][0], y: g0[0][1] },
-                            { x: g0[1][0], y: g0[0][1] },
-                            { x: g0[1][0], y: g0[1][1] },
-                            { x: g0[0][0], y: g0[1][1] }]
-                        };
-                    });
-                    for (let key in style) {
-                        feature.style(key, style[key]);
-                    }
-                    feature.geoOn(geo.event.feature.mouseclick, (e) => {
-                        if (e.mouse.buttonsDown.left) {
-                            this._triggerAnnotationLeftClickEvent(e.data);
-                        } else if (e.mouse.buttonsDown.right) {
-                            this._triggerAnnotationRightClickEvent(e.data);
-                        }
-                    });
-                    this.lastFeatureFrame = feature;
+                    var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true })
+                        .data(data)
+                        .polygon((d) => {
+                            var g0 = d.detection.g0;
+                            return {
+                                outer: [{ x: g0[0][0], y: g0[0][1] },
+                                { x: g0[1][0], y: g0[0][1] },
+                                { x: g0[1][0], y: g0[1][1] },
+                                { x: g0[0][0], y: g0[1][1] }]
+                            };
+                        })
+                        .style(style)
+                        .geoOn(geo.event.feature.mouseclick, (e) => {
+                            if (e.mouse.buttonsDown.left) {
+                                this._triggerAnnotationLeftClickEvent(e.data);
+                            } else if (e.mouse.buttonsDown.right) {
+                                this._triggerAnnotationRightClickEvent(e.data);
+                            }
+                        });
+                    this.lastFeature = feature;
                     var record = data.find((record) => { return record.detection.id1 === editingTrackId });
                     if (record) {
                         var g0 = record.detection.g0;
@@ -244,6 +244,18 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.annotationLayer.addAnnotation(rect);
                         this.annotationLayer.draw();
                     }
+
+                    var { trackTrails, style } = this.getAvailableTrackTrails(frame);
+                    var lineFeature = this.featureLayer.createFeature('line')
+                        .data(trackTrails)
+                        .line((d) => d.line)
+                        .style(style)
+                        .position(function (d, index, d2, index2) {
+                            return { x: d[0], y: d[1] };
+                        });
+
+                    this.lastLineFeature = lineFeature;
+
                     this.viewer.draw();
                 };
 

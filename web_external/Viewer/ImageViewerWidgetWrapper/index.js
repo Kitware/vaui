@@ -54,6 +54,7 @@ class ImageViewerWidgetWrapper extends Component {
             itemId: this.props.item._id,
             model: new ItemModel(this.props.item),
             getAnnotation: this.props.getAnnotation,
+            getAvailableTrackTrails: this.props.getAvailableTrackTrails,
             editMode: this.props.editMode
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {

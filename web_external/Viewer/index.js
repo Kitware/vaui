@@ -16,6 +16,7 @@ class Viewer extends PureComponent {
     constructor(props) {
         super(props);
         this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
+        this.getAvailableTrackTrails = this.getAvailableTrackTrails.bind(this);
         this.state = {
             playing: false,
             videoPlaying: false,
@@ -27,6 +28,7 @@ class Viewer extends PureComponent {
             zoomRegion: null
         };
         this.draggingSlider = false;
+        this.trackTrailMap = null;
     }
     componentWillReceiveProps(nextProps) {
         if (nextProps.selectedItem !== this.props.selectedItem) {
@@ -40,6 +42,9 @@ class Viewer extends PureComponent {
         }
         if (this.props.requestFrame !== nextProps.requestFrame) {
             this.requestToFrame(nextProps.requestFrame.frame);
+        }
+        if (this.props.annotationDetectionContainer !== nextProps.annotationDetectionContainer) {
+            this.trackTrailMap = null;
         }
     }
 
@@ -128,6 +133,7 @@ class Viewer extends PureComponent {
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotationForAFrame}
+                                getAvailableTrackTrails={this.getAvailableTrackTrails}
                                 editingTrackId={this.props.editingTrackId}
                                 selectedTrackId={this.props.selectedTrackId}
                                 selectedActivityId={this.props.selectedActivityId}
@@ -365,6 +371,66 @@ class Viewer extends PureComponent {
                 strokeOpacity: 0.8
             }
         };
+    }
+
+    getAvailableTrackTrails(frame) {
+        var annotationDetectionContainer = this.props.annotationDetectionContainer;
+        if (!this.trackTrailMap) {
+            this.trackTrailMap = annotationDetectionContainer.getAllItems()
+                .reduce((map, trackId) => {
+                    var detections = annotationDetectionContainer.getByTrackId(trackId);
+                    var line = [];
+                    var lastCenter = null;
+                    for (let detection of detections) {
+                        let center = [(detection.g0[0][0] + detection.g0[1][0]) / 2, (detection.g0[0][1] + detection.g0[1][1]) / 2, detection.ts0];
+                        if (!lastCenter || !(lastCenter[0] === center[0] && lastCenter[1] === center[1])) {
+                            line.push(center);
+                        }
+                        lastCenter = center;
+                    }
+                    map.set(trackId, line);
+                    return map;
+                }, new Map());
+        }
+
+        var selectedTrackId = this.props.selectedTrackId;
+        var editingTrackId = this.props.editingTrackId;
+
+        var allTracks = annotationDetectionContainer.getAllItems();
+        var trackTrails = [];
+        for (let trackId of allTracks) {
+            if (!annotationDetectionContainer.getEnableState(trackId)) {
+                continue;
+            }
+            var frameRange = annotationDetectionContainer.getTrackFrameRange(trackId);
+            if (frame <= frameRange[0] || frame >= frameRange[1] + 10) {
+                continue;
+            }
+            trackTrails.push({
+                trackId,
+                line: this.trackTrailMap.get(trackId).filter((center) => center[2] <= frame),
+                frameRange
+            })
+        }
+        var style = {
+            stroke: true,
+            strokeColor(a, b, d, e) {
+                if (trackTrails[e].trackId === selectedTrackId) {
+                    return { r: 1, g: 0.08, b: 0.58 };
+                }
+                return { r: 1, g: 0.87, b: 0.0 };
+            },
+            strokeWidth: 1.25,
+            strokeOpacity(a, b, d, e) {
+                var frameRange = trackTrails[e].frameRange;
+                if (frame >= frameRange[0] && frame <= frameRange[1]) {
+                    return 0.8;
+                }
+                return 0.5;
+            },
+            uniformPolygon: true
+        };
+        return { trackTrails, style };
     }
 
     newTrack() {
