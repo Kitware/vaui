@@ -5,12 +5,13 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
     initialize(settings) {
         GeojsImageViewerWidget.prototype.initialize.apply(this, arguments);
         this.getAnnotation = settings.getAnnotation;
-        this.getAvailableTrackTrails = settings.getAvailableTrackTrails;
+        this.getTrackTrails = settings.getTrackTrails;
         this._annotationLeftClick = null;
         this._annotationRightClick = null;
         this.pendingFrame = null;
         this.editEnabled = false;
         this.editMode = settings.editMode;
+        this._showTrackTrail = settings.showTrackTrail;
         this.detectionFeature = null;
         this.trackTrailFeature = null;
     },
@@ -207,7 +208,14 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.edit(false);
                         this.edit(true);
                     }
-                }
+                };
+
+                this.showTrackTrail = (showTrackTrail) => {
+                    this._showTrackTrail = showTrackTrail;
+                    if (!this.playing) {
+                        this._drawAnnotation(frame);
+                    }
+                };
 
                 this._drawAnnotation = (frame) => {
                     this.annotationLayer.removeAllAnnotations(true);
@@ -228,7 +236,8 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 { x: g0[0][0], y: g0[1][1] }]
                             };
                         })
-                        .style(style);
+                        .style(style)
+                        .draw();
 
                     var record = data.find((record) => { return record.detection.id1 === editingTrackId });
                     if (record) {
@@ -243,17 +252,20 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.annotationLayer.addAnnotation(rect);
                         this.annotationLayer.draw();
                     }
-                    result = this.getAvailableTrackTrails(frame);
-                    var { trackTrails, style } = result;
-                    this.trackTrailFeature.data(trackTrails)
-                        .line((d) => d.line)
-                        .style(style)
-                        .position(function (d, index, d2, index2) {
-                            return { x: d[0], y: d[1] };
-                        })
-                        .rdpSimplifyData(undefined, 1);
-
-                    this.viewer.draw();
+                    if (this._showTrackTrail) {
+                        result = this.getTrackTrails(frame);
+                        var { trackTrails, style } = result;
+                        this.trackTrailFeature.data(trackTrails)
+                            .line((d) => d.line)
+                            .style(style)
+                            .position(function (d, index, d2, index2) {
+                                return { x: d[0], y: d[1] };
+                            })
+                            .rdpSimplifyData(undefined, 1)
+                            .draw();
+                    } else {
+                        this.trackTrailFeature.data([]).draw();
+                    }
                 };
 
                 map.geoOn(geo.event.mouseclick, (e) => {

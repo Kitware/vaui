@@ -45,6 +45,9 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.zoomRegion !== nextProps.zoomRegion) {
             this.geojsViewer.zoomTo(nextProps.zoomRegion);
         }
+        if (this.props.showTrackTrail !== nextProps.showTrackTrail) {
+            this.geojsViewer.showTrackTrail(nextProps.showTrackTrail);
+        }
     }
 
     componentDidMount() {
@@ -54,8 +57,9 @@ class ImageViewerWidgetWrapper extends Component {
             itemId: this.props.item._id,
             model: new ItemModel(this.props.item),
             getAnnotation: this.props.getAnnotation,
-            getAvailableTrackTrails: this.props.getAvailableTrackTrails,
-            editMode: this.props.editMode
+            editMode: this.props.editMode,
+            getTrackTrails: this.props.getTrackTrails,
+            showTrackTrail:this.props.showTrackTrail
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
                 this.props.onProgress(currentFrame, numberOfFrames);

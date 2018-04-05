@@ -16,7 +16,7 @@ class Viewer extends PureComponent {
     constructor(props) {
         super(props);
         this.getAnnotation = this.getAnnotation.bind(this);
-        this.getAvailableTrackTrails = this.getAvailableTrackTrails.bind(this);
+        this.getTrackTrails = this.getTrackTrails.bind(this);
         this.state = {
             playing: false,
             videoPlaying: false,
@@ -25,7 +25,8 @@ class Viewer extends PureComponent {
             ready: false,
             editMode: 'draw',
             drawingToZoom: false,
-            zoomRegion: null
+            zoomRegion: null,
+            showTrackTrail: true
         };
         this.draggingSlider = false;
         this.trackTrailMap = null;
@@ -98,11 +99,23 @@ class Viewer extends PureComponent {
                     {this.props.selectedItem &&
                         [
                             <div key='control-bar' className='control-bar'>
-                                <button className={'btn btn-deault btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                <div className='btn-group btn-group-xs'>
+                                    <button type='button' className='btn dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
+                                        <span className='glyphicon glyphicon-menu-hamburger' aria-hidden='true'></span>
+                                    </button>
+                                    <ul className='dropdown-menu'>
+                                        <li><a>
+                                            <label className='checkbox-inline'>
+                                                <input type='checkbox' checked={this.state.showTrackTrail} onChange={() => { this.setState({ showTrackTrail: !this.state.showTrackTrail }); }} />Track Trail</label>
+                                        </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <button className={'btn btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     this.setState({ drawingToZoom: !this.state.drawingToZoom });
                                 }} title='Zoom to region (Shift)'><span className='glyphicon glyphicon-zoom-in'></span></button>
-                                <button className='btn btn-deault btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='Create new Track (T)'>New Track</button>
-                                <button className={'btn btn-deault btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                <button className='btn btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='Create new Track (T)'>New Track</button>
+                                <button className={'btn btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     if (!this.props.creatingActivity) {
                                         this.props.dispatch({
                                             type: CREATE_ACTIVITY_START
@@ -113,7 +126,7 @@ class Viewer extends PureComponent {
                                         });
                                     }
                                 }}>New Activity</button>
-                                <button className={'btn btn-deault btn-xs' + (this.props.interpolationWidget ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
+                                <button className={'btn btn-xs' + (this.props.interpolationWidget ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
                                     if (!this.props.interpolationWidget) {
                                         this.props.dispatch({
                                             type: INTERPOLATE_SHOW
@@ -124,7 +137,7 @@ class Viewer extends PureComponent {
                                         });
                                     }
                                 }}>Interpolate</button>
-                                {this.props.editingTrackId !== null && <button className='btn btn-deault btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
+                                {this.props.editingTrackId !== null && <button className='btn btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
@@ -133,7 +146,8 @@ class Viewer extends PureComponent {
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
                                 getAnnotation={this.getAnnotation}
-                                getAvailableTrackTrails={this.getAvailableTrackTrails}
+                                getTrackTrails={this.getTrackTrails}
+                                showTrackTrail={this.state.showTrackTrail}
                                 editingTrackId={this.props.editingTrackId}
                                 selectedTrackId={this.props.selectedTrackId}
                                 selectedActivityId={this.props.selectedActivityId}
@@ -373,7 +387,7 @@ class Viewer extends PureComponent {
         };
     }
 
-    getAvailableTrackTrails(frame) {
+    getTrackTrails(frame) {
         if (!this.props.annotationDetectionContainer) {
             return;
         }
