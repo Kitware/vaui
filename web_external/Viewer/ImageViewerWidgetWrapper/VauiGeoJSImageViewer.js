@@ -11,11 +11,21 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
         this.pendingFrame = null;
         this.editEnabled = false;
         this.editMode = settings.editMode;
+        this.detectionFeature = null;
+        this.trackTrailFeature = null;
     },
 
     render() {
         GeojsImageViewerWidget.prototype.render.call(this);
         var map = this.viewer;
+        this.detectionFeature = this.featureLayer.createFeature('polygon', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
+            if (e.mouse.buttonsDown.left) {
+                this._triggerAnnotationLeftClickEvent(e.data);
+            } else if (e.mouse.buttonsDown.right) {
+                this._triggerAnnotationRightClickEvent(e.data);
+            }
+        });
+        this.trackTrailFeature = this.featureLayer.createFeature('line');
         var interactorOpts = map.interactor().options();
         interactorOpts.keyboard.focusHighlight = false;
         interactorOpts.keyboard.actions = {};
@@ -200,10 +210,6 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                 }
 
                 this._drawAnnotation = (frame) => {
-                    if (this.lastFeature) {
-                        this.featureLayer.deleteFeature(this.lastFeature);
-                        this.featureLayer.deleteFeature(this.lastLineFeature);
-                    }
                     this.annotationLayer.removeAllAnnotations(true);
                     this.annotationLayer.mode(null);
                     var result = this.getAnnotation(frame);
@@ -211,8 +217,8 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         return;
                     }
                     var { data, style, editingTrackId, editingStyle } = result;
-                    var feature = this.featureLayer.createFeature('polygon', { selectionAPI: true })
-                        .data(data)
+
+                    this.detectionFeature.data(data)
                         .polygon((d) => {
                             var g0 = d.detection.g0;
                             return {
@@ -222,15 +228,8 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                                 { x: g0[0][0], y: g0[1][1] }]
                             };
                         })
-                        .style(style)
-                        .geoOn(geo.event.feature.mouseclick, (e) => {
-                            if (e.mouse.buttonsDown.left) {
-                                this._triggerAnnotationLeftClickEvent(e.data);
-                            } else if (e.mouse.buttonsDown.right) {
-                                this._triggerAnnotationRightClickEvent(e.data);
-                            }
-                        });
-                    this.lastFeature = feature;
+                        .style(style);
+
                     var record = data.find((record) => { return record.detection.id1 === editingTrackId });
                     if (record) {
                         var g0 = record.detection.g0;
@@ -244,17 +243,15 @@ var VauiGeoJSImageViewer = GeojsImageViewerWidget.extend({
                         this.annotationLayer.addAnnotation(rect);
                         this.annotationLayer.draw();
                     }
-
-                    var { trackTrails, style } = this.getAvailableTrackTrails(frame);
-                    var lineFeature = this.featureLayer.createFeature('line')
-                        .data(trackTrails)
+                    result = this.getAvailableTrackTrails(frame);
+                    var { trackTrails, style } = result;
+                    this.trackTrailFeature.data(trackTrails)
                         .line((d) => d.line)
                         .style(style)
                         .position(function (d, index, d2, index2) {
                             return { x: d[0], y: d[1] };
-                        });
-
-                    this.lastLineFeature = lineFeature;
+                        })
+                        .rdpSimplifyData(undefined, 1);
 
                     this.viewer.draw();
                 };

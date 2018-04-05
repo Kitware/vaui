@@ -15,7 +15,7 @@ import './slider.styl';
 class Viewer extends PureComponent {
     constructor(props) {
         super(props);
-        this.getAnnotationForAFrame = this.getAnnotationForAFrame.bind(this);
+        this.getAnnotation = this.getAnnotation.bind(this);
         this.getAvailableTrackTrails = this.getAvailableTrackTrails.bind(this);
         this.state = {
             playing: false,
@@ -132,7 +132,7 @@ class Viewer extends PureComponent {
                                 detectionContainer={this.props.annotationDetectionContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
-                                getAnnotation={this.getAnnotationForAFrame}
+                                getAnnotation={this.getAnnotation}
                                 getAvailableTrackTrails={this.getAvailableTrackTrails}
                                 editingTrackId={this.props.editingTrackId}
                                 selectedTrackId={this.props.selectedTrackId}
@@ -287,7 +287,7 @@ class Viewer extends PureComponent {
         }
     }
 
-    getAnnotationForAFrame(frame) {
+    getAnnotation(frame) {
         if (!this.props.annotationDetectionContainer ||
             !this.props.annotationActivityContainer ||
             !this.props.annotationTypeContainer) {
@@ -374,6 +374,9 @@ class Viewer extends PureComponent {
     }
 
     getAvailableTrackTrails(frame) {
+        if (!this.props.annotationDetectionContainer) {
+            return;
+        }
         var annotationDetectionContainer = this.props.annotationDetectionContainer;
         if (!this.trackTrailMap) {
             this.trackTrailMap = annotationDetectionContainer.getAllItems()
