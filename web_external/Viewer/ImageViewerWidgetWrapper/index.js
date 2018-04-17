@@ -58,7 +58,7 @@ class ImageViewerWidgetWrapper extends Component {
             getAnnotation: this.props.getAnnotation,
             editMode: this.props.editMode,
             getTrackTrails: this.props.getTrackTrails,
-            showTrackTrail:this.props.showTrackTrail
+            showTrackTrail: this.props.showTrackTrail
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
                 this.props.onProgress(currentFrame, numberOfFrames);
@@ -71,10 +71,18 @@ class ImageViewerWidgetWrapper extends Component {
             if (this.props.onReady) {
                 this.props.onReady();
             }
-        }).on('annotationLeftClick', (annotation) => {
-            this.props.annotationLeftClick(annotation);
-        }).on('annotationRightClick', (annotation) => {
-            this.props.annotationRightClick(annotation);
+        }).on('viewerLeftClick', (annotation) => {
+            this.props.detectionLeftClick(null);
+        }).on('viewerRightClick', (annotation) => {
+            this.props.detectionRightClick(null);
+        }).on('detectionLeftClick', (annotation) => {
+            this.props.detectionLeftClick(annotation);
+        }).on('detectionRightClick', (annotation) => {
+            this.props.detectionRightClick(annotation);
+        }).on('trackTrailClick', (trackId) => {
+            this.props.trackTrailClick(trackId);
+        }).on('trackTrailTruthPointClick', (trackId, frame) => {
+            this.props.trackTrailTruthPointClick(trackId, frame);
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });

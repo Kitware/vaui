@@ -25,6 +25,7 @@ function app(state, action) {
             editingActivityId: null,
             saving: false,
             pendingSave: false,
+            requestFrame: null,
             requestFrameRange: null,
             creatingActivity: false,
             interpolationWidget: false
@@ -114,6 +115,8 @@ function app(state, action) {
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.SELECT_TRACK_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
+        case types.GOTO_FRAME:
+            return { ...state, ...{ requestFrame: { frame: action.payload } } };
         case types.CURRENT_FRAME_CHANGE:
             return { ...state, ...{ currentFrame: action.payload } };
         case types.MAX_FRAME_CHANGE:

@@ -5,7 +5,7 @@ import bootbox from 'bootbox';
 import mousetrap from 'mousetrap';
 import _ from 'underscore';
 
-import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, CREATE_ACTIVITY_STOP, INTERPOLATE_SHOW, INTERPOLATE_HIDE } from '../actions/types';
+import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, GOTO_FRAME, SELECT_TRACK, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, CREATE_ACTIVITY_STOP, INTERPOLATE_SHOW, INTERPOLATE_HIDE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
 
@@ -83,11 +83,8 @@ class Viewer extends PureComponent {
         mousetrap.unbind('shift', 'keyup');
     }
     requestToFrame(frame) {
-        // This works now but can be improved, the player and this controller still has some data racing issue
         this.setState({ playing: false, videoPlaying: false }, () => {
-            setTimeout(() => {
-                this.setState({ videoCurrentFrame: Math.min(frame, this.state.videoMaxFrame) });
-            }, 100);
+            this.setState({ videoCurrentFrame: Math.min(frame, this.state.videoMaxFrame) });
         });
     }
     render() {
@@ -174,15 +171,27 @@ class Viewer extends PureComponent {
                                         ready: true
                                     });
                                 }}
-                                annotationLeftClick={(annotation) => this.props.dispatch({
+                                detectionLeftClick={(annotation) => this.props.dispatch({
                                     type: ANNOTATION_CLICKED,
                                     payload: annotation
                                 })}
-                                annotationRightClick={(annotation) => {
+                                detectionRightClick={(annotation) => {
                                     this.setState({ drawingToZoom: false });
                                     this.props.dispatch({
                                         type: EDIT_TRACK,
                                         payload: annotation ? annotation.detection.id1 : null
+                                    });
+                                }}
+                                trackTrailClick={(trackId) => {
+                                    this.props.dispatch({
+                                        type: SELECT_TRACK,
+                                        payload: trackId
+                                    });
+                                }}
+                                trackTrailTruthPointClick={(trackId, frame) => {
+                                    this.props.dispatch({
+                                        type: GOTO_FRAME,
+                                        payload: frame
                                     });
                                 }}
                                 rectangleDrawn={(g0) => {
@@ -396,10 +405,8 @@ class Viewer extends PureComponent {
                     var line = [];
                     var lastCenter = null;
                     for (let detection of detections) {
-                        let center = [(detection.g0[0][0] + detection.g0[1][0]) / 2, (detection.g0[0][1] + detection.g0[1][1]) / 2, detection.ts0];
-                        if (!lastCenter || !(lastCenter[0] === center[0] && lastCenter[1] === center[1])) {
-                            line.push(center);
-                        }
+                        let center = [(detection.g0[0][0] + detection.g0[1][0]) / 2, (detection.g0[0][1] + detection.g0[1][1]) / 2, detection.ts0, detection.src === 'truth'];
+                        line.push(center);
                         lastCenter = center;
                     }
                     map.set(trackId, line);
@@ -412,6 +419,7 @@ class Viewer extends PureComponent {
 
         var allTracks = annotationDetectionContainer.getAllItems();
         var trackTrails = [];
+        var trackTrailTruthPoints = [];
         for (let trackId of allTracks) {
             if (!annotationDetectionContainer.getEnableState(trackId)) {
                 continue;
@@ -420,13 +428,49 @@ class Viewer extends PureComponent {
             if (frame <= frameRange[0] || frame >= frameRange[1] + 10) {
                 continue;
             }
-            trackTrails.push({
-                trackId,
-                line: this.trackTrailMap.get(trackId).filter((center) => center[2] <= frame),
-                frameRange
-            })
+            var lastCenter = null;
+            var trackTrail = null;
+            var trackTrailTruthPointsForCurrentTrack = [];
+            var hasNonTruthDetection = false;
+            for (let center of this.trackTrailMap.get(trackId)) {
+                if (center[2] > frame) {
+                    break;
+                }
+                if (!lastCenter || lastCenter[2] !== center[2] - 1) {
+                    trackTrail = {
+                        trackId,
+                        frameRange,
+                        line: []
+                    };
+                    trackTrails.push(trackTrail);
+                    if (lastCenter) {
+                        trackTrails.push({
+                            trackId,
+                            frameRange,
+                            gap: true,
+                            line: [lastCenter, center]
+                        })
+                    }
+                }
+                lastCenter = center;
+                trackTrail.line.push(center);
+
+                if (center[2] <= frame && center[3]) {
+                    trackTrailTruthPointsForCurrentTrack.push({
+                        trackId,
+                        point: center
+                    });
+                } else {
+                    hasNonTruthDetection = true;
+                }
+            }
+            // Only add track point if not all detections are truth
+            if (hasNonTruthDetection) {
+                trackTrailTruthPoints = [...trackTrailTruthPoints, ...trackTrailTruthPointsForCurrentTrack];
+            }
+
         }
-        var style = {
+        var trackTrailStyle = {
             stroke: true,
             strokeColor(a, b, d, e) {
                 if (trackTrails[e].trackId === selectedTrackId) {
@@ -436,6 +480,9 @@ class Viewer extends PureComponent {
             },
             strokeWidth: 1.25,
             strokeOpacity(a, b, d, e) {
+                if (trackTrails[e].gap) {
+                    return 0.3;
+                }
                 var frameRange = trackTrails[e].frameRange;
                 if (frame >= frameRange[0] && frame <= frameRange[1]) {
                     return 0.8;
@@ -444,7 +491,20 @@ class Viewer extends PureComponent {
             },
             uniformPolygon: true
         };
-        return { trackTrails, style };
+
+        var trackTrailTruthPointStyle = {
+            stroke: true,
+            strokeColor(a, b, d, e) {
+                if (a.trackId === selectedTrackId) {
+                    return { r: 1, g: 0.08, b: 0.58 };
+                }
+                return { r: 1, g: 0.87, b: 0.0 };
+            },
+            strokeWidth: 2,
+            radius: 2
+        };
+
+        return { trackTrails, trackTrailStyle, trackTrailTruthPoints, trackTrailTruthPointStyle };
     }
 
     newTrack() {

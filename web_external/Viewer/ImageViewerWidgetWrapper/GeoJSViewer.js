@@ -15,8 +15,7 @@ class GeoJSViewer {
         this.getTrackTrails = settings.getTrackTrails;
         this.editMode = settings.editMode;
         this._showTrackTrail = settings.showTrackTrail;
-        this._annotationLeftClick = null;
-        this._annotationRightClick = null;
+        this._viewerClickHandle = null;
         this._video = null;
         this._viewer = null;
         this._frame = 0;
@@ -28,6 +27,7 @@ class GeoJSViewer {
         this.editEnabled = false;
         this.detectionFeature = null;
         this.trackTrailFeature = null;
+        this.trackTrailTruthPointFeature = null;
     }
 
     initialize() {
@@ -83,13 +83,25 @@ class GeoJSViewer {
                     });
 
                     this.detectionFeature = this.featureLayer.createFeature('polygon', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
+                        clearTimeout(this._viewerClickHandle);
                         if (e.mouse.buttonsDown.left) {
-                            this._triggerAnnotationLeftClickEvent(e.data);
+                            this.trigger('detectionLeftClick', e.data);
                         } else if (e.mouse.buttonsDown.right) {
-                            this._triggerAnnotationRightClickEvent(e.data);
+                            this.trigger('detectionRightClick', e.data);
                         }
                     });
-                    this.trackTrailFeature = this.featureLayer.createFeature('line');
+                    this.trackTrailFeature = this.featureLayer.createFeature('line', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
+                        if (e.mouse.buttonsDown.left) {
+                            clearTimeout(this._viewerClickHandle);
+                            this.trigger('trackTrailClick', e.data.trackId);
+                        }
+                    });
+                    this.trackTrailTruthPointFeature = this.featureLayer.createFeature('point', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
+                        if (e.mouse.buttonsDown.left) {
+                            this.trigger('trackTrailTruthPointClick', e.data.trackId, e.data.point[2]);
+                        }
+                    });
+
                     var interactorOpts = this._viewer.interactor().options();
                     interactorOpts.keyboard.focusHighlight = false;
                     interactorOpts.keyboard.actions = {};
@@ -103,12 +115,14 @@ class GeoJSViewer {
                     this._viewer.interactor().options(interactorOpts);
 
                     this._viewer.geoOn(geo.event.mouseclick, (e) => {
-                        if (e.buttonsDown.left) {
-                            this._triggerAnnotationLeftClickEvent();
-                        }
-                        if (e.buttonsDown.right) {
-                            this._triggerAnnotationRightClickEvent();
-                        }
+                        this._viewerClickHandle = setTimeout(() => {
+                            if (e.buttonsDown.left) {
+                                this.trigger('viewerLeftClick');
+                            }
+                            if (e.buttonsDown.right) {
+                                this.trigger('viewerRightClick');
+                            }
+                        }, 0);
                     });
 
                     var quads = this.quadFeatureLayer.createFeature('quad').data([{
@@ -299,34 +313,26 @@ class GeoJSViewer {
         }
         if (this._showTrackTrail) {
             result = this.getTrackTrails(frame);
-            var { trackTrails, style } = result;
+            var { trackTrails, trackTrailStyle, trackTrailTruthPoints, trackTrailTruthPointStyle } = result;
             this.trackTrailFeature.data(trackTrails)
                 .line((d) => d.line)
-                .style(style)
+                .style(trackTrailStyle)
                 .position(function (d, index, d2, index2) {
                     return { x: d[0], y: d[1] };
                 })
                 .rdpSimplifyData(undefined, 1.5)
                 .draw();
+
+            this.trackTrailTruthPointFeature.data(trackTrailTruthPoints)
+                .style(trackTrailTruthPointStyle)
+                .position(function (d, index, d2, index2) {
+                    return { x: d.point[0], y: d.point[1] };
+                })
+                .draw();
         } else {
             this.trackTrailFeature.data([]).draw();
+            this.trackTrailTruthPointFeature.data([]).draw();
         }
-    }
-
-    _triggerAnnotationLeftClickEvent = (annotation) => {
-        this._annotationLeftClick = annotation ? annotation : null;
-        clearTimeout(this._annotationEventHandle);
-        this._annotationEventHandle = setTimeout(() => {
-            this.trigger('annotationLeftClick', this._annotationLeftClick);
-        }, 0);
-    }
-
-    _triggerAnnotationRightClickEvent = (annotation) => {
-        this._annotationRightClick = annotation || null;
-        clearTimeout(this._annotationRightClickHandle);
-        this._annotationRightClickHandle = setTimeout(() => {
-            this.trigger('annotationRightClick', this._annotationRightClick);
-        }, 0);
     }
 
     zoomTo = (g0) => {
