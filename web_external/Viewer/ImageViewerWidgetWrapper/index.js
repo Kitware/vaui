@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ItemModel from 'girder/models/ItemModel';
 import mousetrap from 'mousetrap';
 
-import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
+import GeoJSViewer from './GeoJSViewer';
 
 class ImageViewerWidgetWrapper extends Component {
     mode = 'add'
@@ -51,11 +51,10 @@ class ImageViewerWidgetWrapper extends Component {
     }
 
     componentDidMount() {
-        this.geojsViewer = new VauiGeoJSImageViewer({
+        this.geojsViewer = new GeoJSViewer({
             parentView: null,
             el: this.container,
-            itemId: this.props.item._id,
-            model: new ItemModel(this.props.item),
+            item: this.props.item,
             getAnnotation: this.props.getAnnotation,
             editMode: this.props.editMode,
             getTrackTrails: this.props.getTrackTrails,
@@ -79,6 +78,7 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });
+        this.geojsViewer.initialize();
         mousetrap.bind(['del', 'backspace', 'd'], () => {
             if (this.props.editingTrackId !== null) {
                 this.props.deleteAnnotation();

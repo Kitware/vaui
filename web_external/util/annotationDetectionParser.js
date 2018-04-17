@@ -150,7 +150,7 @@ class AnnotationDetectionContainer {
 
     getByFrame(frame) {
         var trackDetectionMap = this._frameMap.get(frame);
-        return trackDetectionMap ? Array.from(trackDetectionMap.values()) : null;
+        return trackDetectionMap ? Array.from(trackDetectionMap.values()) : [];
     }
 
     getByTrackId(trackId) {

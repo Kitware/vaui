@@ -164,7 +164,7 @@ class Viewer extends PureComponent {
                                 onProgress={(currentFrame, numberOfFrames) => {
                                     if (!this.draggingSlider) {
                                         this.setState({
-                                            videoMaxFrame: numberOfFrames - 1,
+                                            videoMaxFrame: numberOfFrames,
                                             videoCurrentFrame: currentFrame
                                         });
                                     }
@@ -311,9 +311,6 @@ class Viewer extends PureComponent {
         var detectionContainer = this.props.annotationDetectionContainer;
         var activityContainer = this.props.annotationActivityContainer;
         var detections = detectionContainer.getByFrame(frame);
-        if (!detections) {
-            return;
-        }
         var data = detections.map((detection) => {
             var activities = activityContainer.getEnabledActivities(detection.id1, frame);
             return {
