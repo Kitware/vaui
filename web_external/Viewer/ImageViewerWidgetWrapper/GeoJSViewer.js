@@ -90,6 +90,10 @@ class GeoJSViewer {
                             this.trigger('detectionRightClick', e.data);
                         }
                     });
+                    this.detectionFeature.geoOn(
+                        geo.event.feature.mouseclick_order,
+                        this.detectionFeature.mouseOverOrderClosestBorder
+                    );
                     this.trackTrailFeature = this.featureLayer.createFeature('line', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
                         if (e.mouse.buttonsDown.left) {
                             clearTimeout(this._viewerClickHandle);
