@@ -57,7 +57,7 @@ function app(state, action) {
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
-            var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
+            var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, { g0: action.payload.g0, src: 'truth' });
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         case types.CHANGE_DETECTION_ATTRIBUTES:
             var annotationDetectionContainer = state.annotationDetectionContainer.changeAttributes(action.payload.id0, action.payload.attributes);
@@ -134,7 +134,7 @@ function app(state, action) {
         case types.INTERPOLATE + '_FULFILLED':
             var annotationDetectionContainer = state.annotationDetectionContainer;
             for (let detection of action.payload.newDetections) {
-                annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, detection.g0, { src: detection.src });
+                annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, { g0: detection.g0, src: detection.src });
             }
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         default:

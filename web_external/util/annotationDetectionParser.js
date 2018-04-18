@@ -186,7 +186,7 @@ class AnnotationDetectionContainer {
         return undefined;
     }
 
-    change(frame, trackId, g0, attributes) {
+    change(frame, trackId, attributes) {
         // Look up ID of possibly existing detection
         let detectionId = this._getState(frame, trackId);
 
@@ -194,7 +194,7 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(detectionToChange, { g0, src: 'truth' });
+            Object.assign(detectionToChange, attributes);
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
@@ -209,7 +209,6 @@ class AnnotationDetectionContainer {
                     id0: ++this._id0,
                     id1: trackId,
                     ts0: frame,
-                    g0,
                     folderId: this._folderId,
                     src: 'truth'
                 },
