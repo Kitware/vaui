@@ -12,6 +12,9 @@ class ImageViewerWidgetWrapper extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (this.props.playbackRate !== nextProps.playbackRate) {
+            this.geojsViewer.setPlaybackRate(nextProps.playbackRate);
+        }
         if (this.props.playing !== nextProps.playing) {
             if (nextProps.playing) {
                 this.geojsViewer.play();
@@ -56,6 +59,7 @@ class ImageViewerWidgetWrapper extends Component {
             el: this.container,
             item: this.props.item,
             getAnnotation: this.props.getAnnotation,
+            playbackRate: this.props.playbackRate,
             editMode: this.props.editMode,
             getTrackTrails: this.props.getTrackTrails,
             showTrackTrail: this.props.showTrackTrail

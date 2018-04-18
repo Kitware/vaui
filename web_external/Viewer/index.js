@@ -19,6 +19,7 @@ class Viewer extends PureComponent {
         this.getTrackTrails = this.getTrackTrails.bind(this);
         this.state = {
             playing: false,
+            playbackRate: 1,
             videoPlaying: false,
             videoCurrentFrame: 0,
             videoMaxFrame: 100,
@@ -72,6 +73,8 @@ class Viewer extends PureComponent {
         mousetrap.bind('t', () => this.newTrack());
         mousetrap.bind('left', () => this._previousFrame());
         mousetrap.bind('right', () => this._nextFrame());
+        mousetrap.bind('up', () => this._skipBackward());
+        mousetrap.bind('down', () => this._skipForward());
         mousetrap.bind('shift', () => this.setState({ drawingToZoom: true }), 'keydown');
         mousetrap.bind('shift', () => this.setState({ drawingToZoom: false }), 'keyup');
     }
@@ -79,6 +82,8 @@ class Viewer extends PureComponent {
         mousetrap.unbind('t');
         mousetrap.unbind('left');
         mousetrap.unbind('right');
+        mousetrap.unbind('up');
+        mousetrap.unbind('down');
         mousetrap.unbind('shift', 'keydown');
         mousetrap.unbind('shift', 'keyup');
     }
@@ -139,6 +144,7 @@ class Viewer extends PureComponent {
                             <ImageViewerWidgetWrapper className='video'
                                 item={this.props.selectedItem}
                                 playing={this.state.videoPlaying}
+                                playbackRate={this.state.playbackRate}
                                 detectionContainer={this.props.annotationDetectionContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
@@ -154,7 +160,8 @@ class Viewer extends PureComponent {
                                     if (!this.draggingSlider) {
                                         this.setState({
                                             playing: false,
-                                            videoPlaying: false
+                                            videoPlaying: false,
+                                            playbackRate: 1
                                         });
                                     }
                                 }}
@@ -223,35 +230,56 @@ class Viewer extends PureComponent {
                                 <span>{message.text}</span>
                             </div>,
                             <div className='control' key='control'>
-                                <div className='buttons btn-group'>
-                                    {/* <button className='fast-backword btn btn-default' disabled={true}>
-                                    <i className='icon-fast-bw'></i>
-                                </button>
-                                <button className='reverse btn btn-default' disabled={true}>
-                                    <i className='icon-play'></i>
-                                </button> */}
-                                    <button className='previous-frame btn btn-default'
-                                        disabled={playDisabled || this.state.videoCurrentFrame <= 0}
-                                        onClick={() => this._previousFrame()}>
-                                        <i className='icon-to-start'></i>
-                                    </button>
+                                <div className='buttons btn-group btn-group-sm'>
                                     {!this.state.playing
                                         ? <button className='play btn btn-default'
                                             onClick={() => {
                                                 this.setState({ playing: true, videoPlaying: true });
                                             }}
                                             disabled={playDisabled}>
-                                            <i className='icon-play'></i>
+                                            <span className='glyphicon glyphicon-play'></span>
+                                            <span> {this.state.playbackRate}x</span>
                                         </button>
                                         : <button className='pause btn btn-default' onClick={() => {
-                                            this.setState({ playing: false, videoPlaying: false });
+                                            this.setState({
+                                                playing: false,
+                                                videoPlaying: false,
+                                                playbackRate: 1
+                                            });
                                         }}>
-                                            <i className='icon-pause'></i>
+                                            <span className='glyphicon glyphicon-pause'></span>
+                                            <span> {this.state.playbackRate}x</span>
                                         </button>}
+                                    <button
+                                        className='forward btn btn-default'
+                                        disabled={playDisabled}
+                                        onClick={() => {
+                                            var playbackRate = this.state.playbackRate < 0 ? 1 : this.state.playbackRate < 16 ? this.state.playbackRate * 2 : this.state.playbackRate;
+                                            this.setState({
+                                                playing: true,
+                                                videoPlaying: true,
+                                                playbackRate
+                                            });
+                                        }}>
+                                        <span className='glyphicon glyphicon-forward'></span>
+                                    </button>
+                                    <button className='previous-frame btn btn-default'
+                                        disabled={playDisabled || this.state.videoCurrentFrame <= 0}
+                                        onClick={() => this._previousFrame()}>
+                                        <span className='glyphicon glyphicon-step-backward'></span>
+                                    </button>
                                     <button className='next-frame btn btn-default'
                                         disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
                                         onClick={() => this._nextFrame()}>
-                                        <i className='icon-to-end'></i>
+                                        <span className='glyphicon glyphicon-step-forward'></span>
+                                    </button>
+                                    <button className='fast-backward btn btn-default' disabled={playDisabled}
+                                        onClick={() => this._skipBackward()}>
+                                        <span className='glyphicon glyphicon-fast-backward'></span>
+                                    </button>
+                                    <button className='fast-forward btn btn-default' disabled={playDisabled}
+                                        onClick={() => this._skipForward()}>
+                                        <span className='glyphicon glyphicon-fast-forward'></span>
                                     </button>
                                 </div>
                                 <div className='time-control'>
@@ -538,8 +566,7 @@ class Viewer extends PureComponent {
     }
 
     _previousFrame() {
-        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
-        if (playDisabled) {
+        if (!this.state.ready || this.props.loadingAnnotation) {
             return;
         }
         if (this.state.videoCurrentFrame > 0) {
@@ -552,8 +579,7 @@ class Viewer extends PureComponent {
     }
 
     _nextFrame() {
-        var playDisabled = !this.state.ready || this.props.loadingAnnotation;
-        if (playDisabled) {
+        if (!this.state.ready || this.props.loadingAnnotation) {
             return;
         }
         if (this.state.videoCurrentFrame < this.state.videoMaxFrame) {
@@ -561,6 +587,34 @@ class Viewer extends PureComponent {
                 playing: false,
                 videoPlaying: false,
                 videoCurrentFrame: this.state.videoCurrentFrame + 1
+            });
+        }
+    }
+
+    _skipForward() {
+        if (!this.state.ready || this.props.loadingAnnotation) {
+            return;
+        }
+        var newFrame = Math.min(this.state.videoMaxFrame, this.state.videoCurrentFrame + 15);
+        if (newFrame !== this.state.videoCurrentFrame) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: newFrame
+            });
+        }
+    }
+
+    _skipBackward() {
+        if (!this.state.ready || this.props.loadingAnnotation) {
+            return;
+        }
+        var newFrame = Math.max(0, this.state.videoCurrentFrame - 15);
+        if (newFrame !== this.state.videoCurrentFrame) {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: newFrame
             });
         }
     }

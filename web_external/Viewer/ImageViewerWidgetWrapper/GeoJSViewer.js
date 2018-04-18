@@ -15,6 +15,7 @@ class GeoJSViewer {
         this.getTrackTrails = settings.getTrackTrails;
         this.editMode = settings.editMode;
         this._showTrackTrail = settings.showTrackTrail;
+        this._playbackRate = settings.playbackRate;
         this._viewerClickHandle = null;
         this._video = null;
         this._viewer = null;
@@ -42,6 +43,7 @@ class GeoJSViewer {
             this._videoFPS = videoItem.meta.vaui.frameRate;
 
             var video = document.createElement('video');
+            video.playbackRate = this._playbackRate;
             video.preload = 'auto';
             window.thevideo = video;
             this._video = video;
@@ -157,7 +159,7 @@ class GeoJSViewer {
         }
     }
 
-    _updateFrame = (frame) => {
+    _updateFrame(frame) {
         this._updating = true;
         return new Promise((resolve, reject) => {
             this._video.currentTime = this._frame / this._videoFPS;
@@ -179,7 +181,6 @@ class GeoJSViewer {
             this._video.play();
             this._video.onpause = () => {
                 this.stop();
-                this._playing = false;
             }
             this._syncWithVideo();
         }
@@ -223,7 +224,7 @@ class GeoJSViewer {
         this.trigger('rectangleDrawn', g0);
     }
 
-    edit = (enabled) => {
+    edit(enabled) {
         if (this.editEnabled === enabled) {
             return;
         }
@@ -263,7 +264,7 @@ class GeoJSViewer {
         this.editEnabled = enabled;
     }
 
-    setEditMode = (mode) => {
+    setEditMode(mode) {
         this.editMode = mode;
         if (!this.editEnabled) {
             return;
@@ -273,14 +274,14 @@ class GeoJSViewer {
         }
     }
 
-    showTrackTrail = (showTrackTrail) => {
+    showTrackTrail(showTrackTrail) {
         this._showTrackTrail = showTrackTrail;
         if (!this._playing) {
             this._drawAnnotation(this._frame);
         }
     }
 
-    _drawAnnotation = (frame) => {
+    _drawAnnotation(frame) {
         this.annotationLayer.removeAllAnnotations(true);
         this.annotationLayer.mode(null);
         var result = this.getAnnotation(frame);
@@ -339,7 +340,12 @@ class GeoJSViewer {
         }
     }
 
-    zoomTo = (g0) => {
+    setPlaybackRate(playbackRate) {
+        this._playbackRate = playbackRate;
+        this._video.playbackRate = playbackRate;
+    }
+
+    zoomTo(g0) {
         var { center, zoom } = this._viewer.zoomAndCenterFromBounds({
             left: g0[0][0],
             right: g0[1][0],
