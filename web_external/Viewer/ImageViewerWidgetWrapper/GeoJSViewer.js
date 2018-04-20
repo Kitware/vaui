@@ -7,6 +7,7 @@ class GeoJSViewer {
     constructor(settings) {
         _.extend(this, Backbone.Events);
         this._syncWithVideo = this._syncWithVideo.bind(this);
+        this._getImage = _.debounce(this._getImage, 50);
 
         this.el = settings.el;
         this.itemId = settings.itemId;
@@ -22,6 +23,7 @@ class GeoJSViewer {
         this._frame = 0;
         this._maxFrame = 0;
         this._videoFPS = 0;
+        this._frameIds = [];
         this._playing = false;
         this._updating = false;
         this.pendingFrame = null;
@@ -32,15 +34,28 @@ class GeoJSViewer {
     }
 
     initialize() {
-        return restRequest({
-            type: 'GET',
-            url: 'item/',
-            data: {
-                folderId: this.item.folderId,
-                name: 'video.mp4'
-            }
-        }).then(([videoItem]) => {
+        return Promise.all([
+            restRequest({
+                type: 'GET',
+                url: 'item/',
+                data: {
+                    folderId: this.item.folderId,
+                    name: 'video.mp4'
+                }
+            }),
+            restRequest({
+                type: 'GET',
+                url: 'item/',
+                data: {
+                    folderId: this.item.folderId,
+                    limit: 0
+                }
+            }).then((items) => items
+                .filter((item) => item.largeImage)
+                .map((item) => item._id)),
+        ]).then(([[videoItem], frameIds]) => {
             this._videoFPS = videoItem.meta.vaui.frameRate;
+            this._frameIds = frameIds;
 
             var video = document.createElement('video');
             video.playbackRate = this._playbackRate;
@@ -51,7 +66,9 @@ class GeoJSViewer {
 
             video.onstalled = (e) => {
                 console.log('stalled');
+                this.stop();
             };
+
             video.onsuspend = (e) => {
                 console.log('suspend');
             };
@@ -64,18 +81,20 @@ class GeoJSViewer {
 
                     var params = geo.util.pixelCoordinateParams(
                         this.el, videoWidth, videoHeight, videoWidth, videoHeight);
-                    params.layer.useCredentials = true;
-                    // params.layer.url = this._getTileUrl('{z}', '{x}', '{y}');
                     this._viewer = geo.map(params.map);
 
                     // change from our default of only allowing to zoom to 1 pixel is 1 pixel
                     // to allow 1 pixel to be 8x8.
                     this._viewer.zoomRange({ min: this._viewer.zoomRange().origMin, max: this._viewer.zoomRange().max + 3 });
-                    // this._viewer.createLayer('osm', params.layer);
 
-                    this.quadFeatureLayer = this._viewer.createLayer('feature', {
+                    this._quadFeatureLayer = this._viewer.createLayer('feature', {
                         features: ['quad.video']
                     });
+
+                    params.layer.url = this._getTileUrl(this._frameIds[0]);
+                    params.layer.useCredentials = true;
+                    this._imageLayer = this._viewer.createLayer('osm', params.layer);
+
                     this.featureLayer = this._viewer.createLayer('feature', {
                         features: ['point', 'line', 'polygon']
                     });
@@ -131,7 +150,7 @@ class GeoJSViewer {
                         }, 0);
                     });
 
-                    var quads = this.quadFeatureLayer.createFeature('quad').data([{
+                    var quads = this._quadFeatureLayer.createFeature('quad').data([{
                         ul: { x: 0, y: 0 },
                         lr: { x: video.videoWidth, y: video.videoHeight },
                         video: video
@@ -167,7 +186,7 @@ class GeoJSViewer {
             this._video.onseeked = (e) => {
                 // console.timeEnd();
                 this._video.onseeked = undefined;
-                this.quadFeatureLayer.renderer()._renderFrame();
+                this._quadFeatureLayer.renderer()._renderFrame();
                 this._drawAnnotation(frame);
                 resolve();
                 this._updating = false;
@@ -175,8 +194,31 @@ class GeoJSViewer {
         });
     }
 
+    _getImage() {
+        if (!this._playing) {
+            this._imageLayer.url(this._getTileUrl(this._frameIds[this._frame]));
+            this._viewer.onIdle(() => {
+                if (!this._playing) {
+                    this._imageLayer.zIndex(1, true);
+                    this._quadFeatureLayer.zIndex(0, true);
+                }
+            });
+        }
+
+    }
+
+    _getTileUrl(itemId) {
+        return getApiRoot() + '/item/' + itemId + '/tiles/zxy/{z}/{x}/{y}?encoding=PNG&redirect=encoding';
+    }
+
+    _hideImage() {
+        this._imageLayer.zIndex(0, true);
+        this._quadFeatureLayer.zIndex(1, true);
+    }
+
     play() {
         if (!this._playing) {
+            this._hideImage();
             this._playing = true;
             this._video.play();
             this._video.onpause = () => {
@@ -187,10 +229,14 @@ class GeoJSViewer {
     }
 
     stop() {
-        this._video.pause();
+        console.log('here');
+        if (!this._video.paused) {
+            this._video.pause();
+        }
         this._video.onpause = null;
         this._playing = false;
         this.trigger('pause');
+        this._getImage();
     }
 
     setFrame(newFrame) {
@@ -199,6 +245,7 @@ class GeoJSViewer {
         }
         if (newFrame >= 0 && newFrame <= this._maxFrame) {
             if (!this._updating) {
+                this._hideImage();
                 this._frame = newFrame;
                 this._video.currentTime = newFrame / this._videoFPS;
                 this._updateFrame(this._frame)
@@ -207,6 +254,7 @@ class GeoJSViewer {
                             this.setFrame(this.pendingFrame);
                             this.pendingFrame = null;
                         } else {
+                            this._getImage();
                             this.trigger('progress', this._frame, this._maxFrame);
                         }
                         return undefined;
