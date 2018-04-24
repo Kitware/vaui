@@ -8,7 +8,6 @@ function app(state, action) {
             user: getCurrentUser(),
             treePanel: 'track',
             selectedFolder: null,
-            selectedItem: null,
             loadingAnnotation: false,
             loadingAnnotationFailed: false,
             importProgress: null,
@@ -38,8 +37,6 @@ function app(state, action) {
             return { ...state, ...{ treePanel: action.payload } };
         case types.SELECTED_FOLDER_CHANGE:
             return { ...state, ...{ selectedFolder: action.folder } };
-        case types.SELECTED_ITEM_CHANGE:
-            return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
             return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
         case types.LOAD_ANNOTATION + '_FULFILLED':

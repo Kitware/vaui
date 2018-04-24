@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import ItemModel from 'girder/models/ItemModel';
 import mousetrap from 'mousetrap';
 
 import GeoJSViewer from './GeoJSViewer';
@@ -57,7 +56,7 @@ class ImageViewerWidgetWrapper extends Component {
         this.geojsViewer = new GeoJSViewer({
             parentView: null,
             el: this.container,
-            item: this.props.item,
+            folder: this.props.folder,
             getAnnotation: this.props.getAnnotation,
             playbackRate: this.props.playbackRate,
             editMode: this.props.editMode,

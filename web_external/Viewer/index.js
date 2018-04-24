@@ -33,7 +33,7 @@ class Viewer extends PureComponent {
         this.trackTrailMap = null;
     }
     componentWillReceiveProps(nextProps) {
-        if (nextProps.selectedItem !== this.props.selectedItem) {
+        if (nextProps.selectedFolder !== this.props.selectedFolder) {
             this.setState({ ready: false });
         }
         if (this.props.requestFrameRange !== nextProps.requestFrameRange) {
@@ -98,7 +98,7 @@ class Viewer extends PureComponent {
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
-                    {this.props.selectedItem &&
+                    {this.props.selectedFolder &&
                         [
                             <div key='control-bar' className='control-bar'>
                                 <div className='btn-group btn-group-xs'>
@@ -142,7 +142,7 @@ class Viewer extends PureComponent {
                                 {this.props.editingTrackId !== null && <button className='btn btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
                             </div>,
                             <ImageViewerWidgetWrapper className='video'
-                                item={this.props.selectedItem}
+                                folder={this.props.selectedFolder}
                                 playing={this.state.videoPlaying}
                                 playbackRate={this.state.playbackRate}
                                 detectionContainer={this.props.annotationDetectionContainer}
@@ -225,7 +225,7 @@ class Viewer extends PureComponent {
                                         trackId: this.props.editingTrackId
                                     }
                                 })}
-                                key={this.props.selectedItem._id} />,
+                                key={this.props.selectedFolder._id} />,
                             message && <div className={message.classes} key='message'>
                                 <span>{message.text}</span>
                             </div>,
@@ -621,7 +621,7 @@ class Viewer extends PureComponent {
 }
 const mapStateToProps = (state, ownProps) => {
     return {
-        selectedItem: state.selectedItem,
+        selectedFolder: state.selectedFolder,
         importProgress: state.importProgress,
         loadingAnnotation: state.loadingAnnotation,
         loadingAnnotationFailed: state.loadingAnnotationFailed,

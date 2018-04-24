@@ -10,8 +10,7 @@ class GeoJSViewer {
         this._getImage = _.debounce(this._getImage, 50);
 
         this.el = settings.el;
-        this.itemId = settings.itemId;
-        this.item = settings.item;
+        this.folder = settings.folder;
         this.getAnnotation = settings.getAnnotation;
         this.getTrackTrails = settings.getTrackTrails;
         this.editMode = settings.editMode;
@@ -39,7 +38,7 @@ class GeoJSViewer {
                 type: 'GET',
                 url: 'item/',
                 data: {
-                    folderId: this.item.folderId,
+                    folderId: this.folder._id,
                     name: 'video.mp4'
                 }
             }),
@@ -47,15 +46,27 @@ class GeoJSViewer {
                 type: 'GET',
                 url: 'item/',
                 data: {
-                    folderId: this.item.folderId,
+                    folderId: this.folder._id,
                     limit: 0
                 }
             }).then((items) => items
                 .filter((item) => item.largeImage)
                 .map((item) => item._id)),
         ]).then(([[videoItem], frameIds]) => {
-            this._videoFPS = videoItem.meta.vaui.frameRate;
             this._frameIds = frameIds;
+
+            this._videoFPS = this.folder.meta.vaui.frameRate;
+            var params = geo.util.pixelCoordinateParams(
+                this.el, this.folder.meta.vaui.width, this.folder.meta.vaui.height, this.folder.meta.vaui.width, this.folder.meta.vaui.height);
+            this._viewer = geo.map(params.map);
+
+            // change from our default of only allowing to zoom to 1 pixel is 1 pixel
+            // to allow 1 pixel to be 8x8.
+            this._viewer.zoomRange({ min: this._viewer.zoomRange().origMin, max: this._viewer.zoomRange().max + 3 });
+
+            this._quadFeatureLayer = this._viewer.createLayer('feature', {
+                features: ['quad.video']
+            });
 
             var video = document.createElement('video');
             video.playbackRate = this._playbackRate;
@@ -76,20 +87,6 @@ class GeoJSViewer {
             return new Promise((resolve, reject) => {
                 video.onloadeddata = () => {
                     video.onloadeddata = null;
-                    var videoWidth = video.videoWidth;
-                    var videoHeight = video.videoHeight;
-
-                    var params = geo.util.pixelCoordinateParams(
-                        this.el, videoWidth, videoHeight, videoWidth, videoHeight);
-                    this._viewer = geo.map(params.map);
-
-                    // change from our default of only allowing to zoom to 1 pixel is 1 pixel
-                    // to allow 1 pixel to be 8x8.
-                    this._viewer.zoomRange({ min: this._viewer.zoomRange().origMin, max: this._viewer.zoomRange().max + 3 });
-
-                    this._quadFeatureLayer = this._viewer.createLayer('feature', {
-                        features: ['quad.video']
-                    });
 
                     params.layer.url = this._getTileUrl(this._frameIds[0]);
                     params.layer.useCredentials = true;
@@ -152,7 +149,7 @@ class GeoJSViewer {
 
                     var quads = this._quadFeatureLayer.createFeature('quad').data([{
                         ul: { x: 0, y: 0 },
-                        lr: { x: video.videoWidth, y: video.videoHeight },
+                        lr: { x: this.folder.meta.vaui.width, y: this.folder.meta.vaui.height },
                         video: video
                     }]).draw();
 
@@ -373,7 +370,6 @@ class GeoJSViewer {
                 .position(function (d, index, d2, index2) {
                     return { x: d[0], y: d[1] };
                 })
-                .rdpSimplifyData(undefined, 1.5)
                 .draw();
 
             this.trackTrailTruthPointFeature.data(trackTrailTruthPoints)
