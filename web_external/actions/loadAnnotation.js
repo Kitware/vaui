@@ -7,20 +7,20 @@ import annotationDetectionParser, { AnnotationDetectionContainer } from '../util
 import annotationActivityParser, { AnnotationActivityContainer } from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
 
-export default (item, reImport) => {
+export default (folder, reImport) => {
     return (dispatch, getState) => {
         dispatch({
             type: `${LOAD_ANNOTATION}_PENDING`
         });
         return restRequest({
-            url: `/vaui-annotation/status/${item.folderId}`
+            url: `/vaui-annotation/status/${folder._id}`
         }).then((result) => {
             var existKPF = Object.values(result.kpf).reduce((exist, value) => exist & value, true);
             var records = !!Object.values(result.records).reduce((total, value) => total + value, 0);
             if (existKPF && (!records || reImport)) {
                 return new Promise((resolve, reject) => {
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', `/api/v1/vaui-annotation/import/${item.folderId}`, true);
+                    xhr.open('POST', `/api/v1/vaui-annotation/import/${folder._id}`, true);
                     xhr.setRequestHeader('Girder-Token', getCurrentToken());
                     xhr.onprogress = (e) => {
                         dispatch({
@@ -40,25 +40,25 @@ export default (item, reImport) => {
             }
         }).then(() => {
             return restRequest({
-                url: `/folder/${item.folderId}`
+                url: `/folder/${folder._id}`
             });
         }).then((folder) => {
             return Promise.all([
                 restRequest({
-                    url: `/activities/${item.folderId}`
+                    url: `/activities/${folder._id}`
                 }).then((activities) => {
-                    var annotationActivityContainer = annotationActivityParser(item.folderId, activities);
+                    var annotationActivityContainer = annotationActivityParser(folder._id, activities);
                     return annotationActivityContainer;
                 }),
                 restRequest({
-                    url: `/types/${item.folderId}`
+                    url: `/types/${folder._id}`
                 }).then((types) => {
-                    return annotationTypeParser(item.folderId, types);
+                    return annotationTypeParser(folder._id, types);
                 }),
                 restRequest({
-                    url: `/detection/${item.folderId}`
+                    url: `/detection/${folder._id}`
                 }).then((detections) => {
-                    return annotationDetectionParser(item.folderId, detections);
+                    return annotationDetectionParser(folder._id, detections);
                 })
             ]).then(([annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer]) => {
                 dispatch({

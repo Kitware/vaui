@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import ItemModel from 'girder/models/ItemModel';
 import mousetrap from 'mousetrap';
 
-import VauiGeoJSImageViewer from './VauiGeoJSImageViewer';
+import GeoJSViewer from './GeoJSViewer';
 
 class ImageViewerWidgetWrapper extends Component {
     mode = 'add'
@@ -12,6 +11,9 @@ class ImageViewerWidgetWrapper extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if (this.props.playbackRate !== nextProps.playbackRate) {
+            this.geojsViewer.setPlaybackRate(nextProps.playbackRate);
+        }
         if (this.props.playing !== nextProps.playing) {
             if (nextProps.playing) {
                 this.geojsViewer.play();
@@ -45,16 +47,21 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.zoomRegion !== nextProps.zoomRegion) {
             this.geojsViewer.zoomTo(nextProps.zoomRegion);
         }
+        if (this.props.showTrackTrail !== nextProps.showTrackTrail) {
+            this.geojsViewer.showTrackTrail(nextProps.showTrackTrail);
+        }
     }
 
     componentDidMount() {
-        this.geojsViewer = new VauiGeoJSImageViewer({
+        this.geojsViewer = new GeoJSViewer({
             parentView: null,
             el: this.container,
-            itemId: this.props.item._id,
-            model: new ItemModel(this.props.item),
+            folder: this.props.folder,
             getAnnotation: this.props.getAnnotation,
-            editMode: this.props.editMode
+            playbackRate: this.props.playbackRate,
+            editMode: this.props.editMode,
+            getTrackTrails: this.props.getTrackTrails,
+            showTrackTrail: this.props.showTrackTrail
         }).on('progress', (currentFrame, numberOfFrames) => {
             if (this.props.onProgress) {
                 this.props.onProgress(currentFrame, numberOfFrames);
@@ -67,13 +74,22 @@ class ImageViewerWidgetWrapper extends Component {
             if (this.props.onReady) {
                 this.props.onReady();
             }
-        }).on('annotationLeftClick', (annotation) => {
-            this.props.annotationLeftClick(annotation);
-        }).on('annotationRightClick', (annotation) => {
-            this.props.annotationRightClick(annotation);
+        }).on('viewerLeftClick', (annotation) => {
+            this.props.detectionLeftClick(null);
+        }).on('viewerRightClick', (annotation) => {
+            this.props.detectionRightClick(null);
+        }).on('detectionLeftClick', (annotation) => {
+            this.props.detectionLeftClick(annotation);
+        }).on('detectionRightClick', (annotation) => {
+            this.props.detectionRightClick(annotation);
+        }).on('trackTrailClick', (trackId) => {
+            this.props.trackTrailClick(trackId);
+        }).on('trackTrailTruthPointClick', (trackId, frame) => {
+            this.props.trackTrailTruthPointClick(trackId, frame);
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });
+        this.geojsViewer.initialize();
         mousetrap.bind(['del', 'backspace', 'd'], () => {
             if (this.props.editingTrackId !== null) {
                 this.props.deleteAnnotation();

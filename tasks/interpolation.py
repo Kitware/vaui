@@ -15,7 +15,10 @@ def interpolate(self, detections):
         newDetections.append(detections[i])
     return newDetections
 
+
 def _interpolateDetactionToDetection(a, b):
+    a['src'] = 'truth'
+    b['src'] = 'truth'
     startTs = a['ts0']
     steps = b['ts0'] - startTs - 1
     start1 = a['g0'][0][0]

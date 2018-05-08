@@ -2,6 +2,7 @@ class AnnotationDetectionTrack {
     constructor() {
         this._map = new Map(); // frame => detection id
         this.enableState = true;
+        this._frameRange = null;
         this.resetFrameRange();
     }
 
@@ -149,7 +150,7 @@ class AnnotationDetectionContainer {
 
     getByFrame(frame) {
         var trackDetectionMap = this._frameMap.get(frame);
-        return trackDetectionMap ? Array.from(trackDetectionMap.values()) : null;
+        return trackDetectionMap ? Array.from(trackDetectionMap.values()) : [];
     }
 
     getByTrackId(trackId) {
@@ -185,7 +186,7 @@ class AnnotationDetectionContainer {
         return undefined;
     }
 
-    change(frame, trackId, g0, attributes) {
+    change(frame, trackId, attributes) {
         // Look up ID of possibly existing detection
         let detectionId = this._getState(frame, trackId);
 
@@ -193,7 +194,7 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
-            Object.assign(detectionToChange, { g0, src: 'truth' });
+            Object.assign(detectionToChange, attributes);
 
             // Update modification records; if state was added, it is still
             // added; otherwise, it is edited
@@ -208,7 +209,6 @@ class AnnotationDetectionContainer {
                     id0: ++this._id0,
                     id1: trackId,
                     ts0: frame,
-                    g0,
                     folderId: this._folderId,
                     src: 'truth'
                 },

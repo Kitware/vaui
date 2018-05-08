@@ -8,7 +8,6 @@ function app(state, action) {
             user: getCurrentUser(),
             treePanel: 'track',
             selectedFolder: null,
-            selectedItem: null,
             loadingAnnotation: false,
             loadingAnnotationFailed: false,
             importProgress: null,
@@ -25,6 +24,7 @@ function app(state, action) {
             editingActivityId: null,
             saving: false,
             pendingSave: false,
+            requestFrame: null,
             requestFrameRange: null,
             creatingActivity: false,
             interpolationWidget: false
@@ -37,8 +37,6 @@ function app(state, action) {
             return { ...state, ...{ treePanel: action.payload } };
         case types.SELECTED_FOLDER_CHANGE:
             return { ...state, ...{ selectedFolder: action.folder } };
-        case types.SELECTED_ITEM_CHANGE:
-            return { ...state, ...{ selectedItem: action.payload } };
         case types.LOAD_ANNOTATION + '_PENDING':
             return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
         case types.LOAD_ANNOTATION + '_FULFILLED':
@@ -56,7 +54,7 @@ function app(state, action) {
         case types.EDIT_TRACK:
             return { ...state, ...{ editingTrackId: action.payload } };
         case types.CHANGE_DETECTION:
-            var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, action.payload.g0);
+            var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, { g0: action.payload.g0, src: 'truth' });
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         case types.CHANGE_DETECTION_ATTRIBUTES:
             var annotationDetectionContainer = state.annotationDetectionContainer.changeAttributes(action.payload.id0, action.payload.attributes);
@@ -114,6 +112,8 @@ function app(state, action) {
             return { ...state, ...{ annotationActivityContainer, pendingSave: true, selectedActivityId: activity.id2 } };
         case types.SELECT_TRACK_ACTIVITY:
             return { ...state, ...{ selectedActivityId: action.payload.activityId, selectedTrackId: action.payload.trackId, editingTrackId: null } };
+        case types.GOTO_FRAME:
+            return { ...state, ...{ requestFrame: { frame: action.payload } } };
         case types.CURRENT_FRAME_CHANGE:
             return { ...state, ...{ currentFrame: action.payload } };
         case types.MAX_FRAME_CHANGE:
@@ -131,7 +131,7 @@ function app(state, action) {
         case types.INTERPOLATE + '_FULFILLED':
             var annotationDetectionContainer = state.annotationDetectionContainer;
             for (let detection of action.payload.newDetections) {
-                annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, detection.g0, { src: detection.src });
+                annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, { g0: detection.g0, src: detection.src });
             }
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
         default:

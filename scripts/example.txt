@@ -1,0 +1,1 @@
+python mark_large_image.py --apiurl http://localhost:8081/api/v1 collection/MY/CLIP

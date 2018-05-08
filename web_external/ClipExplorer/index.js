@@ -13,7 +13,6 @@ class ClipExplorer extends Component {
             currentFolders: [],
             rootFolders: null,
             annotationFolders: new Set(),
-            selectedItem: null,
             selectedFolder: null,
             showMode: 'all',
             reImport: false
@@ -72,13 +71,12 @@ class ClipExplorer extends Component {
             this.setState({
                 paths: [...this.state.paths, { name: folder.name, folderId: folder._id }],
                 currentFolders: [],
-                selectedItem: null,
                 selectedFolder: null
             }, () => {
                 this.fetchFolder();
             });
         } else {
-            this.setState({ selectedItem: folder.imageItem, selectedFolder: folder });
+            this.setState({ selectedFolder: folder });
         }
     }
 
@@ -147,7 +145,6 @@ class ClipExplorer extends Component {
     backClick() {
         this.setState({
             paths: this.state.paths.slice(0, -1),
-            selectedItem: null,
             selectedFolder: null,
             currentFolders: []
         }, () => {
@@ -224,8 +221,8 @@ class ClipExplorer extends Component {
             <Modal.Footer>
                 <Button onClick={() => this.tryClose()}>Cancel</Button>
                 <Button bsStyle='primary'
-                    onClick={(e) => { this.props.onItemSelected(this.state.selectedFolder, this.state.selectedItem, this.state.reImport); }}
-                    disabled={!this.state.selectedItem}>Select</Button>
+                    onClick={(e) => { this.props.onFolderSelected(this.state.selectedFolder, this.state.reImport); }}
+                    disabled={!this.state.selectedFolder}>Select</Button>
             </Modal.Footer>
         </Modal>;
     }
