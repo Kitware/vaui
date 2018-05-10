@@ -79,7 +79,7 @@ class TrackWidget extends PureComponent {
                                 }} >
                                     <option value='' disabled></option>
                                     <option value='multiple' disabled>Multiple</option>
-                                    {_.sortBy(trackTypes).map((type) => {
+                                    {trackTypes.map((type) => {
                                         return <option key={type} value={type}>{type}</option>
                                     })}
                                 </select>
