@@ -43,7 +43,9 @@ class ClipExplorer extends Component {
             })
         ]).then((results) => {
             var folders = _.flatten(results);
-            return this.attachImageItem(folders);
+            return this.attachImageItem(folders).then(() => {
+                return folders;
+            });
         });
     }
 
@@ -67,7 +69,7 @@ class ClipExplorer extends Component {
     }
 
     folderClick(folder) {
-        if (!folder.imageItem) {
+        if (!folder.imageItem && !folder.videoItem) {
             this.setState({
                 paths: [...this.state.paths, { name: folder.name, folderId: folder._id }],
                 currentFolders: [],
@@ -92,6 +94,18 @@ class ClipExplorer extends Component {
         });
     }
 
+    tryGetVideoItem(folderId) {
+        return restRequest({
+            url: '/item',
+            data: {
+                folderId,
+                name: 'video.mp4'
+            }
+        }).then(([videoItem]) => {
+            return videoItem;
+        });
+    }
+
     loadSubFolders(folderId) {
         return restRequest({
             url: '/folder',
@@ -101,18 +115,27 @@ class ClipExplorer extends Component {
                 limit: 0
             }
         }).then((folders) => {
-            return this.attachImageItem(folders);
+            return this.attachImageItem(folders).then(() => {
+                return folders;
+            });
         });
     }
 
     attachImageItem(folders) {
         return Promise.all(
             folders.map((folder) => {
-                return this.tryGetImageItem(folder._id)
-                    .then((item) => {
-                        folder.imageItem = item;
-                        return folder;
-                    });
+                return Promise.all([
+                    this.tryGetImageItem(folder._id)
+                        .then((item) => {
+                            folder.imageItem = item;
+                            return folder;
+                        }),
+                    this.tryGetVideoItem(folder._id)
+                        .then((videoItem) => {
+                            folder.videoItem = videoItem;
+                            return folder;
+                        })
+                ])
             })
         );
     }
@@ -188,7 +211,7 @@ class ClipExplorer extends Component {
                                             className={(this.state.selectedFolder && folder._id === this.state.selectedFolder._id) ? 'selected' : ''}
                                         >
                                             <div>
-                                                <Glyphicon className='file-icon' glyph={folder.imageItem ? 'film' : 'folder-open'} />
+                                                <Glyphicon className='file-icon' glyph={(folder.imageItem || folder.videoItem) ? 'film' : 'folder-open'} />
                                                 {folder.name}
                                                 {this.state.annotationFolders.has(folder._id) &&
                                                     <Glyphicon className='file-icon annotated-icon' title='Annotated' glyph={'tag'} />

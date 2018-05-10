@@ -4,6 +4,10 @@ import mousetrap from 'mousetrap';
 import GeoJSViewer from './GeoJSViewer';
 
 class ImageViewerWidgetWrapper extends Component {
+    constructor(props){
+        super(props);
+        console.log('constructor');
+    }
     mode = 'add'
 
     shouldComponentUpdate() { // eslint-disable-line

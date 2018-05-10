@@ -7,7 +7,6 @@ class GeoJSViewer {
     constructor(settings) {
         _.extend(this, Backbone.Events);
         this._syncWithVideo = this._syncWithVideo.bind(this);
-        this._getImage = _.debounce(this._getImage, 50);
 
         this.el = settings.el;
         this.folder = settings.folder;
@@ -22,7 +21,6 @@ class GeoJSViewer {
         this._frame = 0;
         this._maxFrame = 0;
         this._videoFPS = 0;
-        this._frameIds = [];
         this._playing = false;
         this._updating = false;
         this.pendingFrame = null;
@@ -33,40 +31,18 @@ class GeoJSViewer {
     }
 
     initialize() {
-        return Promise.all([
-            restRequest({
-                type: 'GET',
-                url: 'item/',
-                data: {
-                    folderId: this.folder._id,
-                    name: 'video.mp4'
-                }
-            }),
-            restRequest({
-                type: 'GET',
-                url: 'item/',
-                data: {
-                    folderId: this.folder._id,
-                    limit: 0
-                }
-            }).then((items) => items
-                .filter((item) => item.largeImage)
-                .map((item) => item._id)),
-        ]).then(([[videoItem], frameIds]) => {
-            this._frameIds = frameIds;
+        restRequest({
+            type: 'GET',
+            url: 'item/',
+            data: {
+                folderId: this.folder._id,
+                name: 'video.mp4'
+            }
+        }).then(([videoItem]) => {
 
             this._videoFPS = this.folder.meta.vaui.frameRate;
             var params = geo.util.pixelCoordinateParams(
                 this.el, this.folder.meta.vaui.width, this.folder.meta.vaui.height, this.folder.meta.vaui.width, this.folder.meta.vaui.height);
-            this._viewer = geo.map(params.map);
-
-            // change from our default of only allowing to zoom to 1 pixel is 1 pixel
-            // to allow 1 pixel to be 8x8.
-            this._viewer.zoomRange({ min: this._viewer.zoomRange().origMin, max: this._viewer.zoomRange().max + 3 });
-
-            this._quadFeatureLayer = this._viewer.createLayer('feature', {
-                features: ['quad.video']
-            });
 
             var video = document.createElement('video');
             video.playbackRate = this._playbackRate;
@@ -88,9 +64,15 @@ class GeoJSViewer {
                 video.onloadeddata = () => {
                     video.onloadeddata = null;
 
-                    params.layer.url = this._getTileUrl(this._frameIds[0]);
-                    params.layer.useCredentials = true;
-                    this._imageLayer = this._viewer.createLayer('osm', params.layer);
+                    this._viewer = geo.map(params.map);
+
+                    // change from our default of only allowing to zoom to 1 pixel is 1 pixel
+                    // to allow 1 pixel to be 8x8.
+                    this._viewer.zoomRange({ min: this._viewer.zoomRange().origMin, max: this._viewer.zoomRange().max + 3 });
+
+                    this._quadFeatureLayer = this._viewer.createLayer('feature', {
+                        features: ['quad.video']
+                    });
 
                     this.featureLayer = this._viewer.createLayer('feature', {
                         features: ['point', 'line', 'polygon']
@@ -191,31 +173,8 @@ class GeoJSViewer {
         });
     }
 
-    _getImage() {
-        if (!this._playing) {
-            this._imageLayer.url(this._getTileUrl(this._frameIds[this._frame]));
-            this._viewer.onIdle(() => {
-                if (!this._playing) {
-                    this._imageLayer.zIndex(1, true);
-                    this._quadFeatureLayer.zIndex(0, true);
-                }
-            });
-        }
-
-    }
-
-    _getTileUrl(itemId) {
-        return getApiRoot() + '/item/' + itemId + '/tiles/zxy/{z}/{x}/{y}?encoding=PNG&redirect=encoding';
-    }
-
-    _hideImage() {
-        this._imageLayer.zIndex(0, true);
-        this._quadFeatureLayer.zIndex(1, true);
-    }
-
     play() {
         if (!this._playing) {
-            this._hideImage();
             this._playing = true;
             this._video.play();
             this._video.onpause = () => {
@@ -233,7 +192,6 @@ class GeoJSViewer {
         this._video.onpause = null;
         this._playing = false;
         this.trigger('pause');
-        this._getImage();
     }
 
     setFrame(newFrame) {
@@ -242,7 +200,6 @@ class GeoJSViewer {
         }
         if (newFrame >= 0 && newFrame <= this._maxFrame) {
             if (!this._updating) {
-                this._hideImage();
                 this._frame = newFrame;
                 this._video.currentTime = newFrame / this._videoFPS;
                 this._updateFrame(this._frame)
@@ -251,7 +208,6 @@ class GeoJSViewer {
                             this.setFrame(this.pendingFrame);
                             this.pendingFrame = null;
                         } else {
-                            this._getImage();
                             this.trigger('progress', this._frame, this._maxFrame);
                         }
                         return undefined;
@@ -403,6 +359,11 @@ class GeoJSViewer {
     redrawAnnotation() {
         if (this._viewer) {
             this._drawAnnotation(this._frame);
+        } else {
+            clearTimeout(this.redrawHandle);
+            this.redrawHandle = setTimeout(() => {
+                this.redrawAnnotation();
+            }, 100);
         }
     }
 
