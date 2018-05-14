@@ -4,10 +4,6 @@ import mousetrap from 'mousetrap';
 import GeoJSViewer from './GeoJSViewer';
 
 class ImageViewerWidgetWrapper extends Component {
-    constructor(props){
-        super(props);
-        console.log('constructor');
-    }
     mode = 'add'
 
     shouldComponentUpdate() { // eslint-disable-line
@@ -62,6 +58,7 @@ class ImageViewerWidgetWrapper extends Component {
             el: this.container,
             folder: this.props.folder,
             getAnnotation: this.props.getAnnotation,
+            frameLimit: this.props.frameLimit,
             playbackRate: this.props.playbackRate,
             editMode: this.props.editMode,
             getTrackTrails: this.props.getTrackTrails,

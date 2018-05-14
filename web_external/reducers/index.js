@@ -15,6 +15,7 @@ function app(state, action) {
             annotationTypeContainer: null,
             annotationDetectionContainer: null,
             currentFrame: 0,
+            frameLimit: null,
             maxFrame: null,
             selectedAnnotation: null,
             selectedDetectionId: null,
@@ -36,6 +37,7 @@ function app(state, action) {
         case types.TREE_PANEL_SELECT:
             return { ...state, ...{ treePanel: action.payload } };
         case types.SELECTED_FOLDER_CHANGE:
+            console.log('SELECTED_FOLDER_CHANGE');
             return { ...state, ...{ selectedFolder: action.folder } };
         case types.LOAD_ANNOTATION + '_PENDING':
             return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };
@@ -134,6 +136,8 @@ function app(state, action) {
                 annotationDetectionContainer = annotationDetectionContainer.change(detection.ts0, action.payload.trackId, { g0: detection.g0, src: detection.src });
             }
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
+        case types.LIMIT_FRAME:
+            return { ...state, ...{ frameLimit: action.payload } };
         default:
             return state;
     }

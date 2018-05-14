@@ -15,10 +15,11 @@ class GeoJSViewer {
         this.editMode = settings.editMode;
         this._showTrackTrail = settings.showTrackTrail;
         this._playbackRate = settings.playbackRate;
+        this._frameLimit = settings.frameLimit;
         this._viewerClickHandle = null;
         this._video = null;
         this._viewer = null;
-        this._frame = 0;
+        this._frame = Math.max(0, this._frameLimit[0]);
         this._maxFrame = 0;
         this._videoFPS = 0;
         this._playing = false;
@@ -140,7 +141,7 @@ class GeoJSViewer {
 
                     this._updateFrame(this._frame);
 
-                    this._maxFrame = Math.round(this._videoFPS * video.duration);
+                    this._maxFrame = Math.min(this._frameLimit[1], Math.round(this._videoFPS * video.duration));
 
                     this.trigger('ready');
                     this.trigger('progress', this._frame, this._maxFrame);
@@ -153,6 +154,10 @@ class GeoJSViewer {
     _syncWithVideo() {
         if (this._playing) {
             var frame = Math.round(this._video.currentTime * this._videoFPS);
+            if (frame > this._maxFrame) {
+                this.stop();
+                frame = this._maxFrame;
+            }
             this._frame = frame;
             this.trigger('progress', this._frame, this._maxFrame);
             this._drawAnnotation(this._frame);

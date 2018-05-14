@@ -1,8 +1,9 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import $ from 'jquery';
 import { connect } from 'react-redux';
 import events from 'girder/events';
 import { getCurrentUser } from 'girder/auth';
+import { HashRouter as Router, Route, Link, Switch } from "react-router-dom";
 
 import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
@@ -34,10 +35,17 @@ class AppContainer extends PureComponent {
     }
 
     render() {
-        return [
-            <HeaderBar className='v-header' key='header-bar' />,
-            <IndexView key={this.props.selectedFolder ? this.props.selectedFolder._id : ''} />
-        ];
+        return <Router>
+            <Switch>
+                <Route exact path='/' render={() =>
+                    <div>Missing activityGroupItemId and folderId</div>
+                } />
+                <Route exact path='/:activityGroupItemId/:folderId' render={(props) => <Fragment>
+                    <HeaderBar className='v-header' key='header-bar' />
+                    {this.props.selectedFolder && this.props.frameLimit && <IndexView />}
+                </Fragment>} />
+            </Switch>
+        </Router>
     }
 }
 
@@ -45,7 +53,8 @@ const mapStateToProps = (state, ownProps) => {
     return {
         saving: state.saving,
         loadingAnnotation: state.loadingAnnotation,
-        selectedFolder: state.selectedFolder
+        selectedFolder: state.selectedFolder,
+        frameLimit: state.frameLimit
     };
 };
 

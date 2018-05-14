@@ -21,7 +21,7 @@ class Viewer extends PureComponent {
             playing: false,
             playbackRate: 1,
             videoPlaying: false,
-            videoCurrentFrame: 0,
+            videoCurrentFrame: this.props.frameLimit[0],
             videoMaxFrame: 100,
             ready: false,
             editMode: 'draw',
@@ -148,6 +148,7 @@ class Viewer extends PureComponent {
                                 detectionContainer={this.props.annotationDetectionContainer}
                                 annotationActivityContainer={this.props.annotationActivityContainer}
                                 currentFrame={this.state.videoCurrentFrame}
+                                frameLimit={this.props.frameLimit}
                                 getAnnotation={this.getAnnotation}
                                 getTrackTrails={this.getTrackTrails}
                                 showTrackTrail={this.state.showTrackTrail}
@@ -293,6 +294,7 @@ class Viewer extends PureComponent {
                                     <ReactBootstrapSlider
                                         value={this.state.videoCurrentFrame}
                                         max={this.state.videoMaxFrame}
+                                        min={Math.max(0, this.props.frameLimit[0])}
                                         tooltip='hide'
                                         disabled={playDisabled ? 'disabled' : 'enabled'}
                                         slideStop={(e) => {
@@ -312,7 +314,7 @@ class Viewer extends PureComponent {
                                         }} />
                                     <SpinBox
                                         suffix={' / ' + this.state.videoMaxFrame}
-                                        min={0}
+                                        min={Math.max(0, this.props.frameLimit[0])}
                                         max={this.state.videoMaxFrame}
                                         value={this.state.videoCurrentFrame}
                                         disabled={playDisabled}
@@ -647,7 +649,8 @@ const mapStateToProps = (state, ownProps) => {
         requestFrameRange: state.requestFrameRange,
         requestFrame: state.requestFrame,
         creatingActivity: state.creatingActivity,
-        interpolationWidget: state.interpolationWidget
+        interpolationWidget: state.interpolationWidget,
+        frameLimit: state.frameLimit
     };
 };
 
