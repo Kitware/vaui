@@ -315,6 +315,7 @@ class GeoJSViewer {
         var record = data.find((record) => { return record.detection.id1 === editingTrackId });
         if (record) {
             var g0 = record.detection.g0;
+            editingStyle.strokeWidth = record.detection.src === 'truth' ? 2.7 : 1;
             var rect = geo.annotation.rectangleAnnotation({
                 corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }],
                 style: editingStyle,
@@ -334,6 +335,7 @@ class GeoJSViewer {
                 .position(function (d, index, d2, index2) {
                     return { x: d[0], y: d[1] };
                 })
+                .rdpSimplifyData(undefined, 1.5)
                 .draw();
 
             this.trackTrailTruthPointFeature.data(trackTrailTruthPoints)

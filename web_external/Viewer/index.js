@@ -400,22 +400,14 @@ class Viewer extends PureComponent {
                 if (d.detection.id1 === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
-                if (d.detection.src === 'truth') {
-                    if (d.detection.eval0 === 'tp') {
-                        return { r: 0, g: 1, b: 0.0 };
-                    } else if (d.detection.eval0 === 'fn') {
-                        return { r: 1, g: 1, b: 0.0 };
-                    }
-                } else if (d.detection.src === 'computed') {
-                    if (d.detection.eval0 === 'tp') {
-                        return { r: 0, g: 0, b: 1 };
-                    } else if (d.detection.eval0 === 'fp') {
-                        return { r: 1, g: 0, b: 0.0 };
-                    }
-                }
                 return { r: 1, g: 0.87, b: 0.0 };
             },
-            strokeWidth: 1.25,
+            strokeWidth(a, b, d) {
+                if (d.detection.src === 'truth') {
+                    return 2.7;
+                }
+                return 1;
+            },
             strokeOpacity: 0.8,
             uniformPolygon: true
         };
@@ -424,7 +416,7 @@ class Viewer extends PureComponent {
                 fill: false,
                 stroke: true,
                 strokeColor: { r: 0.5, g: 1, b: 1 },
-                strokeWidth: 1.25,
+                // strokeWidth: 1.25,
                 strokeOpacity: 0.8
             }
         };

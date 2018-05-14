@@ -9,7 +9,6 @@ import { restRequest } from 'girder/rest';
 
 import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import save from '../actions/save';
-import loadClip from '../actions/loadClip';
 import processActivityGroup from '../actions/processActivityGroup';
 
 import './style.styl';
@@ -24,7 +23,6 @@ class HeaderBar extends PureComponent {
 
     componentDidMount() {
         var { folderId, activityGroupItemId } = this.props.match.params;
-        // this.props.dispatch(loadClip(folderId, activityGroupItemId));
         restRequest({
             url: `/folder/${folderId}`
         }).then((folder) => {

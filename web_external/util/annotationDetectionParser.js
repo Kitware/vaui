@@ -1,3 +1,5 @@
+import interpolate from './interpolate';
+
 class AnnotationDetectionTrack {
     constructor() {
         this._map = new Map(); // frame => detection id
@@ -187,6 +189,7 @@ class AnnotationDetectionContainer {
     }
 
     change(frame, trackId, attributes) {
+        var currentDetection = null;
         // Look up ID of possibly existing detection
         let detectionId = this._getState(frame, trackId);
 
@@ -201,6 +204,7 @@ class AnnotationDetectionContainer {
             if (!this._added.has(detectionToChange.id0)) {
                 this._edited.set(detectionToChange.id0, detectionToChange);
             }
+            currentDetection = detectionToChange;
         }
         else {
             // Entirely new detection; add it
@@ -219,7 +223,49 @@ class AnnotationDetectionContainer {
             // Update modification records; since there was no previous state,
             // this is an addition
             this._added.set(newDetection.id0, newDetection);
+            currentDetection = newDetection;
         }
+
+        if (currentDetection.src === 'truth') {
+            let previousTruthFrame = null;
+            for (let i = frame - 1; i >= 0; i--) {
+                let map = this._frameMap.get(i);
+                if (!map) {
+                    continue;
+                }
+                var detection = map.get(trackId);
+                if (detection && detection.src === 'truth') {
+                    previousTruthFrame = detection;
+                    break;
+                }
+            }
+            if (previousTruthFrame) {
+                interpolate(previousTruthFrame, currentDetection).forEach((detection) => {
+                    this.change(detection.ts0, trackId, detection);
+                });
+            }
+
+            let nextTruthFrame = null;
+            for (let i = frame + 1; i <= Math.max.apply(null, Array.from(this._frameMap.keys())); i++) {
+                let map = this._frameMap.get(i);
+                if (!map) {
+                    continue;
+                }
+                var detection = map.get(trackId);
+                if (detection && detection.src === 'truth') {
+                    nextTruthFrame = detection;
+                    break;
+                }
+            }
+            if (nextTruthFrame) {
+                interpolate(currentDetection, nextTruthFrame).forEach((detection) => {
+                    this.change(detection.ts0, trackId, detection);
+                });
+            }
+
+        }
+
+
         return this.copy();
     }
 

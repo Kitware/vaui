@@ -69,7 +69,7 @@ export default (folderId, activityGroupItemId) => {
                         id0: detections.length + 1,
                         id1: type.id1,
                         src: detection.src,
-                        g0: [[splits[0], splits[1]], [splits[2], splits[3]]],
+                        g0: [[parseInt(splits[0]), parseInt(splits[1])], [parseInt(splits[2]), parseInt(splits[3])]],
                         ts0: detection.ts0,
                         ts1: 0
                     })
