@@ -19,7 +19,7 @@ class GeoJSViewer {
         this._viewerClickHandle = null;
         this._video = null;
         this._viewer = null;
-        this._frame = Math.max(0, this._frameLimit[0]);
+        this._frame = Math.max(0, this._frameLimit[0], settings.startFrame);
         this._maxFrame = 0;
         this._videoFPS = 0;
         this._playing = false;

@@ -21,7 +21,7 @@ class Viewer extends PureComponent {
             playing: false,
             playbackRate: 1,
             videoPlaying: false,
-            videoCurrentFrame: this.props.frameLimit[0],
+            videoCurrentFrame: Math.max(this.props.frameLimit[0], this.props.requestFrame.frame),
             videoMaxFrame: 100,
             ready: false,
             editMode: 'draw',

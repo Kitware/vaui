@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 
-import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, LIMIT_FRAME } from '../actions/types';
+import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, GOTO_FRAME, LIMIT_FRAME } from '../actions/types';
 import annotationDetectionParser, { AnnotationDetectionContainer } from '../util/annotationDetectionParser';
 import annotationActivityParser, { AnnotationActivityContainer } from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
@@ -98,8 +98,12 @@ export default (folderId, activityGroupItemId) => {
                 payload: { annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer }
             });
             dispatch({
+                type: GOTO_FRAME,
+                payload: activityTimespan[0]
+            });
+            dispatch({
                 type: LIMIT_FRAME,
-                payload: [Math.max(activityTimespan[0] - 60), activityTimespan[1] + 60]
+                payload: [Math.max(activityTimespan[0] - 30), activityTimespan[1] + 30]
             });
         });
     };

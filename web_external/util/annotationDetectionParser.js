@@ -39,7 +39,7 @@ class AnnotationDetectionContainer {
         this._id0 = 0;
 
         this._trackMap = new Map(); // track id -> AnnotationDetectionTrack
-        this._frameMap = new Map(); // frame -> Map(track id -> detections)
+        this._frameMap = new Map(); // frame -> Map(track id -> detection)
 
         this._added = new Map();
         this._edited = new Map();
@@ -227,46 +227,54 @@ class AnnotationDetectionContainer {
         }
 
         if (currentDetection.src === 'truth') {
-            let previousTruthFrame = null;
-            for (let i = frame - 1; i >= 0; i--) {
-                let map = this._frameMap.get(i);
-                if (!map) {
-                    continue;
-                }
-                var detection = map.get(trackId);
-                if (detection && detection.src === 'truth') {
-                    previousTruthFrame = detection;
-                    break;
-                }
-            }
-            if (previousTruthFrame) {
-                interpolate(previousTruthFrame, currentDetection).forEach((detection) => {
+            let previousTruthDetection = this._getPreviousTruthDetection(trackId, frame);
+            if (previousTruthDetection) {
+                interpolate(previousTruthDetection, currentDetection).forEach((detection) => {
                     this.change(detection.ts0, trackId, detection);
                 });
             }
 
-            let nextTruthFrame = null;
-            for (let i = frame + 1; i <= Math.max.apply(null, Array.from(this._frameMap.keys())); i++) {
-                let map = this._frameMap.get(i);
-                if (!map) {
-                    continue;
-                }
-                var detection = map.get(trackId);
-                if (detection && detection.src === 'truth') {
-                    nextTruthFrame = detection;
-                    break;
-                }
-            }
-            if (nextTruthFrame) {
-                interpolate(currentDetection, nextTruthFrame).forEach((detection) => {
+            let nextTruthDetection = this._getNextTruthDetection(trackId, frame);
+            if (nextTruthDetection) {
+                interpolate(currentDetection, nextTruthDetection).forEach((detection) => {
                     this.change(detection.ts0, trackId, detection);
                 });
             }
-
         }
 
-
         return this.copy();
+    }
+
+    _getPreviousTruthDetection(trackId, frame) {
+        var previousTruthDetection = null;
+        for (let i = frame - 1; i >= 0; i--) {
+            let map = this._frameMap.get(i);
+            if (!map) {
+                continue;
+            }
+            var detection = map.get(trackId);
+            if (detection && detection.src === 'truth') {
+                previousTruthDetection = detection;
+                break;
+            }
+        }
+        return previousTruthDetection;
+    }
+
+    _getNextTruthDetection(trackId, frame) {
+        var nextTruthDetection = null;
+        for (let i = frame + 1; i <= Math.max.apply(null, Array.from(this._frameMap.keys())); i++) {
+            let map = this._frameMap.get(i);
+            if (!map) {
+                continue;
+            }
+            var detection = map.get(trackId);
+            if (detection && detection.src === 'truth') {
+                nextTruthDetection = detection;
+                break;
+            }
+        }
+        return nextTruthDetection;
     }
 
     changeAttributes(id0, attributes) {
@@ -297,17 +305,41 @@ class AnnotationDetectionContainer {
         trackIdToDetectionMap.delete(trackId);
     }
 
-    remove(frame, trackId) {
+    remove(frame, trackId, type = 'truth') {
+
         // Look up ID of detection
         let detectionId = this._getState(frame, trackId);
 
-        if (detectionId !== undefined) {
-            let track = this._trackMap.get(trackId);
-            track.map.delete(frame);
-            track.recomputeFrameRange();
-
-            this._remove(this._frameMap.get(frame), trackId, detectionId);
+        if (detectionId === undefined) {
+            return this;
         }
+
+        var detection = this._frameMap.get(frame).get(trackId);
+        if (detection.src !== type) {
+            return this;
+        }
+
+        let track = this._trackMap.get(trackId);
+        track.map.delete(frame);
+        track.recomputeFrameRange();
+
+        this._remove(this._frameMap.get(frame), trackId, detectionId);
+
+        if (type === 'truth') {
+            let previousTruthDetection = this._getPreviousTruthDetection(trackId, frame);
+            let nextTruthDetection = this._getNextTruthDetection(trackId, frame);
+            if (previousTruthDetection && nextTruthDetection) {
+                interpolate(previousTruthDetection, nextTruthDetection).forEach((detection) => {
+                    this.change(detection.ts0, trackId, detection);
+                });
+            }
+            if (previousTruthDetection && !nextTruthDetection) {
+                for (let i = frame; i > previousTruthDetection.ts0; i--) {
+                    this.remove(i, trackId, 'linear-interpolation');
+                }
+            }
+        }
+
         return this.copy();
     }
 

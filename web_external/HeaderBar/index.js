@@ -5,10 +5,12 @@ import events from 'girder/events';
 import { getApiRoot } from 'girder/rest';
 import bootbox from 'bootbox';
 import { withRouter } from 'react-router-dom';
+import qs from 'query-string';
 import { restRequest } from 'girder/rest';
 
 import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
-import save from '../actions/save';
+// import save from '../actions/save';
+import submit from '../actions/submit';
 import processActivityGroup from '../actions/processActivityGroup';
 
 import './style.styl';
@@ -17,7 +19,7 @@ class HeaderBar extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            showClipExplorer: false
+            previewMode: false
         };
     }
 
@@ -32,25 +34,20 @@ class HeaderBar extends PureComponent {
             });
         });
         this.props.dispatch(processActivityGroup(folderId, activityGroupItemId));
+        var queryParams = qs.parse(location.search);
+        this.setState({ previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId });
     }
 
     render() {
         let user = this.props.user;
+        var { folderId, activityGroupItemId } = this.props.match.params;
+        var queryParams = qs.parse(location.search);
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
-                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving} onClick={(e) => this.props.dispatch(save())}>{this.props.saving ? 'Saving' : 'Save'}</button>
+                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.props.dispatch(submit(folderId, activityGroupItemId, qs.parse(location.search)))}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
-            <div className='clip-name'>{this.props.selectedFolder ? this.props.selectedFolder.name : null}</div>
         </div>;
     }
-
-    // folderSelected(folder, reImport) {
-    //     this.props.dispatch({
-    //         type: SELECTED_FOLDER_CHANGE,
-    //         folder
-    //     });
-    //     this.props.dispatch(loadAnnotation(folder, reImport));
-    // }
 }
 
 const mapStateToProps = (state, ownProps) => {

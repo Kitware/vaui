@@ -60,6 +60,7 @@ class ImageViewerWidgetWrapper extends Component {
             getAnnotation: this.props.getAnnotation,
             frameLimit: this.props.frameLimit,
             playbackRate: this.props.playbackRate,
+            startFrame: this.props.currentFrame,
             editMode: this.props.editMode,
             getTrackTrails: this.props.getTrackTrails,
             showTrackTrail: this.props.showTrackTrail

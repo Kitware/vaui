@@ -5,4 +5,4 @@ class Activities(Base):
 
     def initialize(self):
         self.name = 'activities'
-        self.ensureIndex('folderId')
+        self.ensureIndex('assignmentId')
