@@ -95,9 +95,12 @@ class GeoJSViewer {
                         this.detectionFeature.mouseOverOrderClosestBorder
                     );
                     this.trackTrailFeature = this.featureLayer.createFeature('line', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
+                        clearTimeout(this._viewerClickHandle);
                         if (e.mouse.buttonsDown.left) {
-                            clearTimeout(this._viewerClickHandle);
                             this.trigger('trackTrailClick', e.data.trackId);
+                        }
+                        if (e.mouse.buttonsDown.right) {
+                            this.trigger('trackTrailRightClick', e.data.trackId);
                         }
                     });
                     this.trackTrailTruthPointFeature = this.featureLayer.createFeature('point', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {

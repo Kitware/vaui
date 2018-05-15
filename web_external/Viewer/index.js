@@ -195,6 +195,13 @@ class Viewer extends PureComponent {
                                         payload: trackId
                                     });
                                 }}
+                                trackTrailRightClick={(trackId) => {
+                                    this.setState({ drawingToZoom: false });
+                                    this.props.dispatch({
+                                        type: EDIT_TRACK,
+                                        payload: trackId
+                                    });
+                                }}
                                 trackTrailTruthPointClick={(trackId, frame) => {
                                     this.props.dispatch({
                                         type: GOTO_FRAME,
@@ -501,6 +508,9 @@ class Viewer extends PureComponent {
         var trackTrailStyle = {
             stroke: true,
             strokeColor(a, b, d, e) {
+                if (trackTrails[e].trackId === editingTrackId) {
+                    return { r: 0.5, g: 1, b: 1 };
+                }
                 if (trackTrails[e].trackId === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }
@@ -509,13 +519,13 @@ class Viewer extends PureComponent {
             strokeWidth: 1.25,
             strokeOpacity(a, b, d, e) {
                 if (trackTrails[e].gap) {
-                    return 0.3;
+                    return 0.4;
                 }
                 var frameRange = trackTrails[e].frameRange;
                 if (frame >= frameRange[0] && frame <= frameRange[1]) {
                     return 0.8;
                 }
-                return 0.5;
+                return 0.6;
             },
             uniformPolygon: true
         };
@@ -523,6 +533,9 @@ class Viewer extends PureComponent {
         var trackTrailTruthPointStyle = {
             stroke: true,
             strokeColor(a, b, d, e) {
+                if (a.trackId === editingTrackId) {
+                    return { r: 0.5, g: 1, b: 1 };
+                }
                 if (a.trackId === selectedTrackId) {
                     return { r: 1, g: 0.08, b: 0.58 };
                 }

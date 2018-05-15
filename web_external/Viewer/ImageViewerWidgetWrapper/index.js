@@ -88,6 +88,8 @@ class ImageViewerWidgetWrapper extends Component {
             this.props.detectionRightClick(annotation);
         }).on('trackTrailClick', (trackId) => {
             this.props.trackTrailClick(trackId);
+        }).on('trackTrailRightClick', (trackId) => {
+            this.props.trackTrailRightClick(trackId);
         }).on('trackTrailTruthPointClick', (trackId, frame) => {
             this.props.trackTrailTruthPointClick(trackId, frame);
         }).on('rectangleDrawn', (g0) => {
