@@ -22,7 +22,9 @@ from girder.api import access
 from girder.api.describe import autoDescribeRoute, Description
 from girder.constants import AccessType
 from girder.api.rest import Resource, setResponseHeader, rawResponse
+from girder.models.user import User
 from girder.models.folder import Folder
+from girder.models.collection import Collection
 from girder.models.item import Item
 from girder.plugins.vaui.models.detection import Detection
 from girder.plugins.vaui.models.types import Types
@@ -35,12 +37,12 @@ class SubmitResource(Resource):
         super(SubmitResource, self).__init__()
 
         self.resourceName = 'submit'
-        self.route('POST', (':folderId', ':activityGroupItemId',), self.submit)
+        self.route('POST', (), self.submit)
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('folderId', model=Folder, level=AccessType.READ)
-        .modelParam('activityGroupItemId', model=Item, level=AccessType.READ)
+        .modelParam('folderId', model=Folder, level=AccessType.READ, paramType='query')
+        .modelParam('activityGroupItemId', model=Item, level=AccessType.READ, paramType='query')
         .param('assignmentId', '')
         .param('hitId', '')
         .param('workerId', '')
@@ -68,5 +70,18 @@ class SubmitResource(Resource):
             activity['assignmentId'] = assignmentId
             Activities().save(activity)
 
-        cursor = Types().findByFolder(folder)
-        return list(cursor)
+        adminUser = User().getAdmins().next()
+        collection = Collection().createCollection('TURK', creator=adminUser,
+                                                   description='', public=True, reuseExisting=True)
+        folder = Folder().createFolder(
+            collection, 'results', parentType='collection', public=False,
+            creator=adminUser, reuseExisting=True)
+        item = Item().createItem(assignmentId, adminUser, folder, reuseExisting=True)
+        Item().setMetadata(item, {
+            'folderId': str(folder['_id']),
+            'activityGroupItemId': str(item['_id']),
+            'assignmentId': assignmentId,
+            'hitId': hitId,
+            'workerId': workerId,
+            'turkSubmitTo': turkSubmitTo
+        })

@@ -4,10 +4,13 @@ import { connect } from 'react-redux';
 import events from 'girder/events';
 import { getCurrentUser } from 'girder/auth';
 import { HashRouter as Router, Route, Link, Switch } from "react-router-dom";
+import qs from 'query-string';
 
 import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
 import HeaderBar from './HeaderBar';
+import Instruction from './Instruction';
+import FormSubmitter from './FormSubmitter';
 
 import './contextmenu-ext/contextMenu.css';
 
@@ -37,13 +40,24 @@ class AppContainer extends PureComponent {
     render() {
         return <Router>
             <Switch>
-                <Route exact path='/' render={() =>
-                    <div>Missing activityGroupItemId and folderId</div>
-                } />
-                <Route exact path='/:activityGroupItemId/:folderId' render={(props) => <Fragment>
-                    <HeaderBar className='v-header' key='header-bar' />
-                    {this.props.selectedFolder && this.props.frameLimit && <IndexView />}
-                </Fragment>} />
+                <Route exact path='' render={(props) => {
+                    var queryParams = qs.parse(location.search);
+                    if (!('folderId' in queryParams &&
+                        'activityGroupItemId' in queryParams &&
+                        'assignmentId' in queryParams &&
+                        'hitId' in queryParams &&
+                        'turkSubmitTo' in queryParams &&
+                        'workerId' in queryParams)) {
+                        return <div>Missing folderId, activityGroupItemId, assignmentId, hitId, turkSubmitTo, or workerId in query parameter</div>
+                    } else {
+                        return <Fragment>
+                            <HeaderBar className='v-header' key='header-bar' />
+                            {this.props.selectedFolder && this.props.frameLimit && <IndexView />}
+                        </Fragment>
+                    }
+                }} />
+                <Route exact path="/instruction" component={Instruction} />
+                <Route exact path="/submit" component={FormSubmitter} />
             </Switch>
         </Router>
     }

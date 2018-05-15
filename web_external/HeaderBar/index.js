@@ -24,7 +24,8 @@ class HeaderBar extends PureComponent {
     }
 
     componentDidMount() {
-        var { folderId, activityGroupItemId } = this.props.match.params;
+        var queryParams = qs.parse(location.search);
+        var { folderId, activityGroupItemId } = queryParams;
         restRequest({
             url: `/folder/${folderId}`
         }).then((folder) => {
@@ -34,17 +35,14 @@ class HeaderBar extends PureComponent {
             });
         });
         this.props.dispatch(processActivityGroup(folderId, activityGroupItemId));
-        var queryParams = qs.parse(location.search);
         this.setState({ previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId });
     }
 
     render() {
         let user = this.props.user;
-        var { folderId, activityGroupItemId } = this.props.match.params;
-        var queryParams = qs.parse(location.search);
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
-                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.props.dispatch(submit(folderId, activityGroupItemId, qs.parse(location.search)))}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
+                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.props.dispatch(submit(qs.parse(location.search)))}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
         </div>;
     }

@@ -373,24 +373,22 @@ class Viewer extends PureComponent {
         var editingTrackId = this.props.editingTrackId;
         var style = {
             fill(d) {
-                if (!d.activities) {
-                    return false;
-                }
-                return true;
+                return d.detection.src !== 'truth';
             },
             fillColor(a, b, d) {
-                if (!d.activities) {
-                    return 'black';
+                if (d.detection.id1 === editingTrackId) {
+                    return { r: 0.5, g: 1, b: 1 };
                 }
-                for (let activity of d.activities) {
-                    if (activity.id2 === selectedActivityId) {
-                        return { r: 1, g: 0.08, b: 0.58 };
-                    }
+                if (d.detection.id1 === selectedTrackId) {
+                    return { r: 1, g: 0.08, b: 0.58 };
                 }
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
-            fillOpacity: 0.3,
+            fillOpacity: 0.2,
             stroke(d) {
+                if (d.detection.src !== 'truth') {
+                    return false;
+                }
                 if (d.detection.id1 === editingTrackId) {
                     return false;
                 }
@@ -402,12 +400,7 @@ class Viewer extends PureComponent {
                 }
                 return { r: 1, g: 0.87, b: 0.0 };
             },
-            strokeWidth(a, b, d) {
-                if (d.detection.src === 'truth') {
-                    return 2.7;
-                }
-                return 1;
-            },
+            strokeWidth: 2,
             strokeOpacity: 0.8,
             uniformPolygon: true
         };
@@ -416,7 +409,7 @@ class Viewer extends PureComponent {
                 fill: false,
                 stroke: true,
                 strokeColor: { r: 0.5, g: 1, b: 1 },
-                // strokeWidth: 1.25,
+                strokeWidth: 2,
                 strokeOpacity: 0.8
             }
         };
@@ -454,17 +447,13 @@ class Viewer extends PureComponent {
                 continue;
             }
             var frameRange = annotationDetectionContainer.getTrackFrameRange(trackId);
-            if (frame <= frameRange[0] || frame >= frameRange[1] + 10) {
+            if (frame < frameRange[0] || frame > frameRange[1]) {
                 continue;
             }
             var lastCenter = null;
             var trackTrail = null;
             var trackTrailTruthPointsForCurrentTrack = [];
-            var hasNonTruthDetection = false;
             for (let center of this.trackTrailMap.get(trackId)) {
-                if (center[2] > frame) {
-                    break;
-                }
                 if (!lastCenter || lastCenter[2] !== center[2] - 1) {
                     trackTrail = {
                         trackId,
@@ -484,19 +473,14 @@ class Viewer extends PureComponent {
                 lastCenter = center;
                 trackTrail.line.push(center);
 
-                if (center[2] <= frame && center[3]) {
+                if (center[3]) {
                     trackTrailTruthPointsForCurrentTrack.push({
                         trackId,
                         point: center
                     });
-                } else {
-                    hasNonTruthDetection = true;
                 }
             }
-            // Only add track point if not all detections are truth
-            if (hasNonTruthDetection) {
-                trackTrailTruthPoints = [...trackTrailTruthPoints, ...trackTrailTruthPointsForCurrentTrack];
-            }
+            trackTrailTruthPoints = [...trackTrailTruthPoints, ...trackTrailTruthPointsForCurrentTrack];
 
         }
         var trackTrailStyle = {
