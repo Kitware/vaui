@@ -37,7 +37,6 @@ function app(state, action) {
         case types.TREE_PANEL_SELECT:
             return { ...state, ...{ treePanel: action.payload } };
         case types.SELECTED_FOLDER_CHANGE:
-            console.log('SELECTED_FOLDER_CHANGE');
             return { ...state, ...{ selectedFolder: action.folder } };
         case types.LOAD_ANNOTATION + '_PENDING':
             return { ...state, ...{ loadingAnnotation: true, selectedAnnotation: null, selectedDetectionId: null, selectedTrackId: null, editingTrackId: null, selectedActivityId: null, editingActivityId: null, annotationTypeContainer: null, annotationDetectionContainer: null, annotationActivityContainer: null, interpolationWidget: false, pendingSave: false } };

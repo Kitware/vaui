@@ -39,8 +39,8 @@ class AppContainer extends PureComponent {
 
     render() {
         return <Router>
-            <Switch>
-                <Route exact path='' render={(props) => {
+            <Fragment>
+                <Route exact path='/' render={(props) => {
                     var queryParams = qs.parse(location.search);
                     if (!('folderId' in queryParams &&
                         'activityGroupItemId' in queryParams &&
@@ -58,7 +58,7 @@ class AppContainer extends PureComponent {
                 }} />
                 <Route exact path="/instruction" component={Instruction} />
                 <Route exact path="/submit" component={FormSubmitter} />
-            </Switch>
+            </Fragment>
         </Router>
     }
 }

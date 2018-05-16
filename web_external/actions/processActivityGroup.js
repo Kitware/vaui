@@ -16,43 +16,6 @@ export default (folderId, activityGroupItemId) => {
             url: `/item/${activityGroupItemId}/download`,
             contentType: 'application/json'
         }).then((activityGroup) => {
-            // - { types: {cset3: {Sitting Down: 1}, id1: 17} }
-            // - { act: { act2: {activity_standing: 1.0}, id2: 13, timespan: [{tsr0: [558, 688]}], src: truth, actors: [ {id1: 15 , timespan: [{tsr0: [558, 688 ]}]}] } }
-            // - { detection: { src: truth, g0: 325 672 471 370, id0: 32, id1: 11, ts0: 1827, ts1: 0 } }
-
-
-            // {
-            //     "type": "Sitting Down",
-            //     "detections": [
-            //       {
-            //         "g0": "160 716 382 396",
-            //         "src": "truth",
-            //         "ts0": 1845
-            //       },
-            //       {
-            //         "g0": "192 706 392 451",
-            //         "src": "truth",
-            //         "ts0": 1935
-            //       }
-            //     ],
-            //     "tracks": [
-            //       {
-            //         "type": "Person",
-            //         "detections": [
-            //           {
-            //             "g0": "233 684 346 489",
-            //             "src": "truth",
-            //             "ts0": 1935
-            //           },
-            //           {
-            //             "g0": "185 691 285 424",
-            //             "src": "truth",
-            //             "ts0": 1845
-            //           }
-            //         ]
-            //       }
-            //     ]
-            //   }
             var types = [];
             var detections = [];
             var activity = null;
@@ -89,10 +52,13 @@ export default (folderId, activityGroupItemId) => {
                 timespan: [{ tsr0: activityTimespan }],
                 actors
             };
-            console.log(activity);
             var annotationActivityContainer = annotationActivityParser(folderId, [activity]);
             var annotationTypeContainer = annotationTypeParser(folderId, types);
-            var annotationDetectionContainer = annotationDetectionParser(folderId, detections);
+            var annotationDetectionContainer = annotationDetectionParser(folderId, []);
+            // Linear interpolate
+            detections.forEach((detection) => {
+                annotationDetectionContainer.change(detection.ts0, detection.id1, detection);
+            });
             dispatch({
                 type: LOAD_ANNOTATION + '_FULFILLED',
                 payload: { annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer }

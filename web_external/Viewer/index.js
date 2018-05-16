@@ -100,47 +100,6 @@ class Viewer extends PureComponent {
                 <div className='panel-body'>
                     {this.props.selectedFolder &&
                         [
-                            <div key='control-bar' className='control-bar'>
-                                <div className='btn-group btn-group-xs'>
-                                    <button type='button' className='btn dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-                                        <span className='glyphicon glyphicon-menu-hamburger' aria-hidden='true'></span>
-                                    </button>
-                                    <ul className='dropdown-menu'>
-                                        <li><a>
-                                            <label className='checkbox-inline'>
-                                                <input type='checkbox' checked={this.state.showTrackTrail} onChange={() => { this.setState({ showTrackTrail: !this.state.showTrackTrail }); }} />Track Trail</label>
-                                        </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <button className={'btn btn-xs' + (this.state.drawingToZoom ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
-                                    this.setState({ drawingToZoom: !this.state.drawingToZoom });
-                                }} title='Zoom to region (Shift)'><span className='glyphicon glyphicon-zoom-in'></span></button>
-                                <button className='btn btn-xs' disabled={playDisabled} onClick={(e) => this.newTrack()} title='Create new Track (T)'>New Track</button>
-                                <button className={'btn btn-xs' + (this.props.creatingActivity ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
-                                    if (!this.props.creatingActivity) {
-                                        this.props.dispatch({
-                                            type: CREATE_ACTIVITY_START
-                                        });
-                                    } else {
-                                        this.props.dispatch({
-                                            type: CREATE_ACTIVITY_STOP
-                                        });
-                                    }
-                                }}>New Activity</button>
-                                <button className={'btn btn-xs' + (this.props.interpolationWidget ? ' active' : '')} disabled={playDisabled} onClick={(e) => {
-                                    if (!this.props.interpolationWidget) {
-                                        this.props.dispatch({
-                                            type: INTERPOLATE_SHOW
-                                        });
-                                    } else {
-                                        this.props.dispatch({
-                                            type: INTERPOLATE_HIDE
-                                        });
-                                    }
-                                }}>Interpolate</button>
-                                {this.props.editingTrackId !== null && <button className='btn btn-xs' onClick={(e) => this.setState({ editMode: this.state.editMode === 'edit' ? 'draw' : 'edit' })}>{this.state.editMode === 'edit' ? 'Draw mode' : 'Edit mode'}</button>}
-                            </div>,
                             <ImageViewerWidgetWrapper className='video'
                                 folder={this.props.selectedFolder}
                                 playing={this.state.videoPlaying}
@@ -384,7 +343,7 @@ class Viewer extends PureComponent {
                 }
                 return { r: 1.0, g: 0.839, b: 0.439 };
             },
-            fillOpacity: 0.2,
+            fillOpacity: 0.3,
             stroke(d) {
                 if (d.detection.src !== 'truth') {
                     return false;
@@ -600,7 +559,7 @@ class Viewer extends PureComponent {
         if (!this.state.ready || this.props.loadingAnnotation) {
             return;
         }
-        var newFrame = Math.max(0, this.state.videoCurrentFrame - 15);
+        var newFrame = Math.max(0, this.state.videoCurrentFrame - 15, this.props.frameLimit[0]);
         if (newFrame !== this.state.videoCurrentFrame) {
             this.setState({
                 playing: false,

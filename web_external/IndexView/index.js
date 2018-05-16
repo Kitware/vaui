@@ -1,13 +1,8 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-
-import TreeView from '../TreeView';
+import { Panel } from 'react-bootstrap';
+import TrackPane from '../TreeView/TrackPane';
 import Viewer from '../Viewer';
-import InfoView from '../InfoView';
-import TrackWidget from '../TrackWidget';
-import ActivityWidget from '../ActivityWidget';
-import DetectionWidget from '../DetectionWidget';
-import InterpolationWidget from '../InterpolationWidget';
 
 import './style.styl';
 
@@ -16,27 +11,15 @@ class IndexView extends PureComponent {
         return <div className='v-index clearbox'>
             <div className='left-sidebar'>
                 <div className='treeview-container'>
-                    <TreeView />
+                    <Panel className='simple-panel'>
+                    <Panel.Heading>Tracks</Panel.Heading>
+                        <Panel.Body>
+                            <TrackPane />
+                        </Panel.Body>
+                    </Panel>
                 </div>
             </div>
             <Viewer className='main' />
-            <div className='right-sidebar'>
-                {this.props.treePanel === 'track' &&
-                    this.props.selectedTrackId !== null &&
-                    !this.props.creatingActivity &&
-                    !this.props.interpolationWidget &&
-                    this.props.editingActivityId === null &&
-                    <TrackWidget />}
-                {(this.props.creatingActivity || this.props.editingActivityId !== null || (this.props.treePanel === 'activity' && this.props.selectedActivityId !== null)) &&
-                    !this.props.interpolationWidget &&
-                    <ActivityWidget />}
-                {this.props.interpolationWidget &&
-                    <InterpolationWidget />}
-                {this.props.selectedDetectionId !== null &&
-                    <DetectionWidget />
-                }
-                <InfoView />
-            </div>
         </div>;
     }
 }

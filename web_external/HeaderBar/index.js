@@ -4,7 +4,7 @@ import { logout } from 'girder/auth';
 import events from 'girder/events';
 import { getApiRoot } from 'girder/rest';
 import bootbox from 'bootbox';
-import { withRouter } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import qs from 'query-string';
 import { restRequest } from 'girder/rest';
 
@@ -38,11 +38,22 @@ class HeaderBar extends PureComponent {
         this.setState({ previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId });
     }
 
+    submitHandler() {
+        bootbox.confirm("Do you want to sumbit your result? this cannot be undone.",
+            (result) => {
+                this.props.dispatch(submit(qs.parse(location.search))).then(() => {
+                    this.props.history.push(`/submit`);
+                });
+            });
+    }
+
     render() {
         let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
-                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.props.dispatch(submit(qs.parse(location.search)))}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
+                <Link to="/instruction"><button className='btn btn-primary'>Instruction</button></Link>
+
+                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.submitHandler()}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
         </div>;
     }
