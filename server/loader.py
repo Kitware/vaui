@@ -12,7 +12,7 @@ def load(info):
     mako = os.path.join(os.path.dirname(__file__), "index.mako")
     webroot = Webroot(mako)
     webroot.updateHtmlVars(info['serverRoot'].vars)
-    html_vars = {'title': 'Vaui', 'externalJsUrls': []}
+    html_vars = {'title': 'Refiner', 'externalJsUrls': []}
     webroot.updateHtmlVars(html_vars)
 
     # Move girder app to /girder, serve app from /

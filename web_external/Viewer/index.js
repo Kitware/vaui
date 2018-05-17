@@ -60,6 +60,10 @@ class Viewer extends PureComponent {
         if (this.state.videoCurrentFrame !== prevState.videoCurrentFrame) {
             this.dispatchCurrentFrameChange();
         }
+        if (this.state.ready && !prevState.ready) {
+            this._unbindKeyboardShortcut();
+            this._bindKeyboardShortcut();
+        }
     }
 
     dispatchCurrentFrameChange() {
@@ -70,6 +74,9 @@ class Viewer extends PureComponent {
     }
 
     componentDidMount() {
+
+    }
+    _bindKeyboardShortcut() {
         mousetrap.bind('space', () => {
             if (this.state.playing) {
                 this.setState({
@@ -83,12 +90,40 @@ class Viewer extends PureComponent {
                 });
             }
         });
+        mousetrap.bind('enter', () => {
+            if (this.props.selectedTrackId) {
+                this.props.dispatch({
+                    type: EDIT_TRACK,
+                    payload: this.props.selectedTrackId
+                });
+            }
+        });
+        mousetrap.bind('esc', () => {
+            if (this.props.editingTrackId) {
+                this.props.dispatch({
+                    type: EDIT_TRACK,
+                    payload: null
+                });
+            }
+        });
+        mousetrap.bind('s', () => {
+            this.setState({
+                playing: false,
+                videoPlaying: false,
+                videoCurrentFrame: this.props.frameLimit[0]
+            });
+        });
         mousetrap.bind('left', () => this._previousFrame());
         mousetrap.bind('right', () => this._nextFrame());
         mousetrap.bind('up', () => this._skipBackward());
         mousetrap.bind('down', () => this._skipForward());
     }
     componentWillUnmount() {
+        this._unbindKeyboardShortcut();
+    }
+    _unbindKeyboardShortcut() {
+        mousetrap.unbind('enter');
+        mousetrap.unbind('esc');
         mousetrap.unbind('space');
         mousetrap.unbind('left');
         mousetrap.unbind('right');
@@ -202,7 +237,6 @@ class Viewer extends PureComponent {
                                         }
                                     })}
                                     key={this.props.selectedFolder._id} />
-                                {((this.state.videoCurrentFrame < this.props.frameLimit[2]) || (this.state.videoCurrentFrame > this.props.frameLimit[3])) && <div className='video-blocker'>Out of range</div>}
                             </div>,
                             message && <div className={message.classes} key='message'>
                                 <span>{message.text}</span>
@@ -217,9 +251,10 @@ class Viewer extends PureComponent {
                                                 this.setState({
                                                     playing: false,
                                                     videoPlaying: false,
-                                                    videoCurrentFrame: this.props.frameLimit[2]
+                                                    videoCurrentFrame: this.props.frameLimit[0]
                                                 });
-                                            }}>
+                                            }}
+                                            title="Go to start (S)">
                                             Start
                                         </button>
                                         <button
@@ -229,72 +264,75 @@ class Viewer extends PureComponent {
                                                 this.setState({
                                                     playing: false,
                                                     videoPlaying: false,
-                                                    videoCurrentFrame: this.props.frameLimit[3]
+                                                    videoCurrentFrame: this.props.frameLimit[1]
                                                 });
-                                            }}>
+                                            }}
+                                            title="Go to end">
                                             End
                                         </button>
                                     </div>
                                     <div className='middle btn-group btn-group-sm'>
-                                        {!this.state.playing
-                                            ? <button className='play btn btn-default'
-                                                onClick={() => {
-                                                    this.setState({ playing: true, videoPlaying: true });
-                                                }}
-                                                disabled={playDisabled}>
-                                                <span className='glyphicon glyphicon-play'></span>
-                                                <span> {playbackRateDisplay}</span>
+                                        <div className="btn-group btn-group-sm dropup">
+                                            {!this.state.playing
+                                                ?
+                                                <button className='play btn btn-default'
+                                                    onClick={() => {
+                                                        this.setState({ playing: true, videoPlaying: true });
+                                                    }}
+                                                    disabled={playDisabled}
+                                                    title='Play video (SPACE)'>
+                                                    <span className='glyphicon glyphicon-play'></span>
+                                                    <span> {playbackRateDisplay}</span>
+                                                </button>
+                                                : <button className='pause btn btn-default'
+                                                    onClick={() => {
+                                                        this.setState({
+                                                            playing: false,
+                                                            videoPlaying: false
+                                                        });
+                                                    }}
+                                                    title='Pause (SPACE)'>
+                                                    <span className='glyphicon glyphicon-pause'></span>
+                                                    <span> {playbackRateDisplay}</span>
+                                                </button>}
+                                            <button type="button" className="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled={playDisabled} title='Change playback speed'>
+                                                <span className="caret"></span>
+                                                <span className="sr-only">Toggle Dropdown</span>
                                             </button>
-                                            : <button className='pause btn btn-default' onClick={() => {
+                                            <ul className="dropdown-menu" onClick={(e) => {
                                                 this.setState({
-                                                    playing: false,
-                                                    videoPlaying: false,
-                                                    playbackRate: this.state.playbackRate
+                                                    playing: true,
+                                                    videoPlaying: true,
+                                                    playbackRate: parseFloat(e.target.name)
                                                 });
                                             }}>
-                                                <span className='glyphicon glyphicon-pause'></span>
-                                                <span> {playbackRateDisplay}</span>
-                                            </button>}
-                                        <div className='btn-group btn-group-sm'>
-                                            <button
-                                                className='backward btn btn-default'
-                                                disabled={playDisabled}
-                                                onClick={() => {
-                                                    var playbackRate = this.state.playbackRate <= 0.25 ? 0.25 : this.state.playbackRate / 2;
-                                                    this.setState({
-                                                        playbackRate
-                                                    });
-                                                }}>
-                                                <span className='glyphicon glyphicon-backward'></span>
-                                            </button>
-                                            <button
-                                                className='forward btn btn-default'
-                                                disabled={playDisabled}
-                                                onClick={() => {
-                                                    var playbackRate = this.state.playbackRate >= 2 ? 2 : this.state.playbackRate * 2;
-                                                    this.setState({
-                                                        playbackRate
-                                                    });
-                                                }}>
-                                                <span className='glyphicon glyphicon-forward'></span>
-                                            </button>
+                                                <li><a name='1'>Play speed 1x</a></li>
+                                                <li><a name='0.25'>Play speed 1/4x</a></li>
+                                                <li><a name='0.5'>Play speed 1/2x</a></li>
+                                                <li><a name='1.5'>Play speed 1.5x</a></li>
+                                                <li><a name='2'>Play speed 2x</a></li>
+                                            </ul>
                                         </div>
                                         <button className='previous-frame btn btn-default'
                                             disabled={playDisabled || this.state.videoCurrentFrame <= 0}
-                                            onClick={() => this._previousFrame()}>
+                                            onClick={() => this._previousFrame()}
+                                            title='go backward one frame (RIGHT)'>
                                             <span className='glyphicon glyphicon-step-backward'></span>
                                         </button>
                                         <button className='next-frame btn btn-default'
                                             disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
-                                            onClick={() => this._nextFrame()}>
+                                            onClick={() => this._nextFrame()}
+                                            title='go forward one frame (LEFT)'>
                                             <span className='glyphicon glyphicon-step-forward'></span>
                                         </button>
                                         <button className='fast-backward btn btn-default' disabled={playDisabled}
-                                            onClick={() => this._skipBackward()}>
+                                            onClick={() => this._skipBackward()}
+                                            title='go backward 0.5 second (DOWN)'>
                                             <span className='glyphicon glyphicon-fast-backward'></span>
                                         </button>
                                         <button className='fast-forward btn btn-default' disabled={playDisabled}
-                                            onClick={() => this._skipForward()}>
+                                            onClick={() => this._skipForward()}
+                                            title='go forward 0.5 second (UP)'>
                                             <span className='glyphicon glyphicon-fast-forward'></span>
                                         </button>
                                     </div>
@@ -322,14 +360,14 @@ class Viewer extends PureComponent {
                                             });
                                         }} />
                                     <SpinBox
-                                        suffix={' / ' + this.state.videoMaxFrame}
-                                        min={Math.max(0, this.props.frameLimit[0])}
-                                        max={this.state.videoMaxFrame}
-                                        value={this.state.videoCurrentFrame}
+                                        suffix={' / ' + (this.state.videoMaxFrame - this.props.frameLimit[0])}
+                                        min={0}
+                                        max={this.state.videoMaxFrame - this.props.frameLimit[0]}
+                                        value={this.state.videoCurrentFrame - this.props.frameLimit[0]}
                                         disabled={playDisabled}
                                         change={(e) => {
                                             this.setState({
-                                                videoCurrentFrame: parseInt(e.target.value)
+                                                videoCurrentFrame: parseInt(e.target.value) + this.props.frameLimit[0]
                                             });
                                         }} />
                                 </div>

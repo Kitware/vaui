@@ -11,9 +11,7 @@ import './style.styl';
 class Instruction extends PureComponent {
     render() {
         return <div className='b-instruction'>
-            <button className='btn btn-sm btn-primary' onClick={() => this.props.history.goBack()}>Back</button>
             <div className='container-fluid'>
-                <h4>Instruction</h4>
                 <div>
                     Annotate vehicles (exclude motorbike) on the image.
                     <ul>

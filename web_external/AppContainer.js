@@ -9,7 +9,6 @@ import qs from 'query-string';
 import { LOGIN_STATE_CHANGE } from './actions/types';
 import IndexView from './IndexView';
 import HeaderBar from './HeaderBar';
-import Instruction from './Instruction';
 import FormSubmitter from './FormSubmitter';
 
 import './contextmenu-ext/contextMenu.css';
@@ -56,7 +55,6 @@ class AppContainer extends PureComponent {
                         </Fragment>
                     }
                 }} />
-                <Route exact path="/instruction" component={Instruction} />
                 <Route exact path="/submit" component={FormSubmitter} />
             </Fragment>
         </Router>

@@ -4,6 +4,7 @@ import { logout } from 'girder/auth';
 import events from 'girder/events';
 import { getApiRoot } from 'girder/rest';
 import bootbox from 'bootbox';
+import { Modal, Button } from 'react-bootstrap';
 import { withRouter, Link } from 'react-router-dom';
 import qs from 'query-string';
 import { restRequest } from 'girder/rest';
@@ -12,6 +13,7 @@ import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 // import save from '../actions/save';
 import submit from '../actions/submit';
 import processActivityGroup from '../actions/processActivityGroup';
+import Instruction from '../Instruction';
 
 import './style.styl';
 
@@ -19,7 +21,8 @@ class HeaderBar extends PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            previewMode: false
+            previewMode: false,
+            showInstruction: false
         };
     }
 
@@ -49,14 +52,31 @@ class HeaderBar extends PureComponent {
             });
     }
 
+    hideInstruction() {
+        this.setState({ showInstruction: false });
+    }
+
     render() {
         let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
-                <Link to="/instruction"><button className='btn btn-primary btn-sm'>Instruction</button></Link>
+                <button className='btn btn-primary btn-sm' onClick={() => {
+                    this.setState({ showInstruction: true });
+                }}>Instruction</button>
 
                 <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.submitHandler()}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
+            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction() }} bsSize="large" keyboard={false} backdrop={'static'}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Instruction</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Instruction />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={() => { this.hideInstruction() }}>Close</Button>
+                </Modal.Footer>
+            </Modal>
         </div>;
     }
 }

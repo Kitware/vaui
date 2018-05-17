@@ -16,18 +16,12 @@
         flex 1
         position relative
 
-        .video, .video-blocker
+        .video
           position absolute
           top 0
           bottom 0
           left 0
           right 0
-          background #60606080
-          display flex
-          align-items center 
-          justify-content center 
-          color white
-          font-size 30px
 
       .control-bar
         margin-bottom 2px
@@ -69,6 +63,9 @@
 
         > button
           flex 1
+
+        button.play, button.pause
+          width 80px
 
     .time-control
       display flex
