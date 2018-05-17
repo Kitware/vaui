@@ -41,9 +41,11 @@ class HeaderBar extends PureComponent {
     submitHandler() {
         bootbox.confirm("Do you want to sumbit your result? this cannot be undone.",
             (result) => {
-                this.props.dispatch(submit(qs.parse(location.search))).then(() => {
-                    this.props.history.push(`/submit`);
-                });
+                if (result) {
+                    this.props.dispatch(submit(qs.parse(location.search))).then(() => {
+                        this.props.history.push(`/submit`);
+                    });
+                }
             });
     }
 
@@ -51,9 +53,9 @@ class HeaderBar extends PureComponent {
         let user = this.props.user;
         return <div className={['v-header-wrapper', this.props.className].join(' ')}>
             <div className='button-wrapper toolbutton'>
-                <Link to="/instruction"><button className='btn btn-primary'>Instruction</button></Link>
+                <Link to="/instruction"><button className='btn btn-primary btn-sm'>Instruction</button></Link>
 
-                <button className='btn btn-primary' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.submitHandler()}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
+                <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.submitHandler()}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
         </div>;
     }

@@ -70,22 +70,30 @@ class Viewer extends PureComponent {
     }
 
     componentDidMount() {
-        mousetrap.bind('t', () => this.newTrack());
+        mousetrap.bind('space', () => {
+            if (this.state.playing) {
+                this.setState({
+                    playing: false,
+                    videoPlaying: false
+                });
+            } else {
+                this.setState({
+                    playing: true,
+                    videoPlaying: true
+                });
+            }
+        });
         mousetrap.bind('left', () => this._previousFrame());
         mousetrap.bind('right', () => this._nextFrame());
         mousetrap.bind('up', () => this._skipBackward());
         mousetrap.bind('down', () => this._skipForward());
-        mousetrap.bind('shift', () => this.setState({ drawingToZoom: true }), 'keydown');
-        mousetrap.bind('shift', () => this.setState({ drawingToZoom: false }), 'keyup');
     }
     componentWillUnmount() {
-        mousetrap.unbind('t');
+        mousetrap.unbind('space');
         mousetrap.unbind('left');
         mousetrap.unbind('right');
         mousetrap.unbind('up');
         mousetrap.unbind('down');
-        mousetrap.unbind('shift', 'keydown');
-        mousetrap.unbind('shift', 'keyup');
     }
     requestToFrame(frame) {
         this.setState({ playing: false, videoPlaying: false }, () => {
@@ -95,159 +103,201 @@ class Viewer extends PureComponent {
     render() {
         var playDisabled = !this.state.ready || this.props.loadingAnnotation;
         var message = this._getMessage();
+        var playbackRateDisplay = (this.state.playbackRate >= 1 ? this.state.playbackRate : '1/' + 1 / this.state.playbackRate) + 'x';
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
                     {this.props.selectedFolder &&
                         [
-                            <ImageViewerWidgetWrapper className='video'
-                                folder={this.props.selectedFolder}
-                                playing={this.state.videoPlaying}
-                                playbackRate={this.state.playbackRate}
-                                detectionContainer={this.props.annotationDetectionContainer}
-                                annotationActivityContainer={this.props.annotationActivityContainer}
-                                currentFrame={this.state.videoCurrentFrame}
-                                frameLimit={this.props.frameLimit}
-                                getAnnotation={this.getAnnotation}
-                                getTrackTrails={this.getTrackTrails}
-                                showTrackTrail={this.state.showTrackTrail}
-                                editingTrackId={this.props.editingTrackId}
-                                selectedTrackId={this.props.selectedTrackId}
-                                selectedActivityId={this.props.selectedActivityId}
-                                editMode={this.state.editMode}
-                                drawingToZoom={this.state.drawingToZoom} zoomRegion={this.state.zoomRegion}
-                                onPause={() => {
-                                    if (!this.draggingSlider) {
+                            <div className='video-container' key='video-container'>
+                                <ImageViewerWidgetWrapper className='video'
+                                    folder={this.props.selectedFolder}
+                                    playing={this.state.videoPlaying}
+                                    playbackRate={this.state.playbackRate}
+                                    detectionContainer={this.props.annotationDetectionContainer}
+                                    annotationActivityContainer={this.props.annotationActivityContainer}
+                                    currentFrame={this.state.videoCurrentFrame}
+                                    frameLimit={this.props.frameLimit}
+                                    getAnnotation={this.getAnnotation}
+                                    getTrackTrails={this.getTrackTrails}
+                                    showTrackTrail={this.state.showTrackTrail}
+                                    editingTrackId={this.props.editingTrackId}
+                                    selectedTrackId={this.props.selectedTrackId}
+                                    selectedActivityId={this.props.selectedActivityId}
+                                    editMode={this.state.editMode}
+                                    drawingToZoom={this.state.drawingToZoom} zoomRegion={this.state.zoomRegion}
+                                    onPause={() => {
+                                        if (!this.draggingSlider) {
+                                            this.setState({
+                                                playing: false,
+                                                videoPlaying: false
+                                            });
+                                        }
+                                    }}
+                                    onProgress={(currentFrame, numberOfFrames) => {
+                                        if (!this.draggingSlider) {
+                                            this.setState({
+                                                videoMaxFrame: numberOfFrames,
+                                                videoCurrentFrame: currentFrame
+                                            });
+                                        }
+                                    }}
+                                    onReady={() => {
                                         this.setState({
-                                            playing: false,
-                                            videoPlaying: false,
-                                            playbackRate: 1
+                                            ready: true
                                         });
-                                    }
-                                }}
-                                onProgress={(currentFrame, numberOfFrames) => {
-                                    if (!this.draggingSlider) {
-                                        this.setState({
-                                            videoMaxFrame: numberOfFrames,
-                                            videoCurrentFrame: currentFrame
-                                        });
-                                    }
-                                }}
-                                onReady={() => {
-                                    this.setState({
-                                        ready: true
-                                    });
-                                }}
-                                detectionLeftClick={(annotation) => this.props.dispatch({
-                                    type: ANNOTATION_CLICKED,
-                                    payload: annotation
-                                })}
-                                detectionRightClick={(annotation) => {
-                                    this.setState({ drawingToZoom: false });
-                                    this.props.dispatch({
-                                        type: EDIT_TRACK,
-                                        payload: annotation ? annotation.detection.id1 : null
-                                    });
-                                }}
-                                trackTrailClick={(trackId) => {
-                                    this.props.dispatch({
-                                        type: SELECT_TRACK,
-                                        payload: trackId
-                                    });
-                                }}
-                                trackTrailRightClick={(trackId) => {
-                                    this.setState({ drawingToZoom: false });
-                                    this.props.dispatch({
-                                        type: EDIT_TRACK,
-                                        payload: trackId
-                                    });
-                                }}
-                                trackTrailTruthPointClick={(trackId, frame) => {
-                                    this.props.dispatch({
-                                        type: GOTO_FRAME,
-                                        payload: frame
-                                    });
-                                }}
-                                rectangleDrawn={(g0) => {
-                                    if (!this.drawingToZoom && this.props.editingTrackId !== null) {
+                                    }}
+                                    detectionLeftClick={(annotation) => this.props.dispatch({
+                                        type: ANNOTATION_CLICKED,
+                                        payload: annotation
+                                    })}
+                                    detectionRightClick={(annotation) => {
+                                        this.setState({ drawingToZoom: false });
                                         this.props.dispatch({
-                                            type: CHANGE_DETECTION,
-                                            payload: {
-                                                frame: this.state.videoCurrentFrame,
-                                                trackId: this.props.editingTrackId,
-                                                g0
-                                            }
+                                            type: EDIT_TRACK,
+                                            payload: annotation ? annotation.detection.id1 : null
                                         });
-                                    } else if (this.state.drawingToZoom) {
-                                        this.setState({
-                                            drawingToZoom: false,
-                                            zoomRegion: g0
+                                    }}
+                                    trackTrailClick={(trackId) => {
+                                        this.props.dispatch({
+                                            type: SELECT_TRACK,
+                                            payload: trackId
                                         });
-                                    }
-                                }}
-                                deleteAnnotation={() => this.props.dispatch({
-                                    type: DELETE_DETECTION,
-                                    payload: {
-                                        frame: this.state.videoCurrentFrame,
-                                        trackId: this.props.editingTrackId
-                                    }
-                                })}
-                                key={this.props.selectedFolder._id} />,
+                                    }}
+                                    trackTrailRightClick={(trackId) => {
+                                        this.setState({ drawingToZoom: false });
+                                        this.props.dispatch({
+                                            type: EDIT_TRACK,
+                                            payload: trackId
+                                        });
+                                    }}
+                                    trackTrailTruthPointClick={(trackId, frame) => {
+                                        this.props.dispatch({
+                                            type: GOTO_FRAME,
+                                            payload: frame
+                                        });
+                                    }}
+                                    rectangleDrawn={(g0) => {
+                                        if (!this.drawingToZoom && this.props.editingTrackId !== null) {
+                                            this.props.dispatch({
+                                                type: CHANGE_DETECTION,
+                                                payload: {
+                                                    frame: this.state.videoCurrentFrame,
+                                                    trackId: this.props.editingTrackId,
+                                                    g0
+                                                }
+                                            });
+                                        } else if (this.state.drawingToZoom) {
+                                            this.setState({
+                                                drawingToZoom: false,
+                                                zoomRegion: g0
+                                            });
+                                        }
+                                    }}
+                                    deleteAnnotation={() => this.props.dispatch({
+                                        type: DELETE_DETECTION,
+                                        payload: {
+                                            frame: this.state.videoCurrentFrame,
+                                            trackId: this.props.editingTrackId
+                                        }
+                                    })}
+                                    key={this.props.selectedFolder._id} />
+                                {((this.state.videoCurrentFrame < this.props.frameLimit[2]) || (this.state.videoCurrentFrame > this.props.frameLimit[3])) && <div className='video-blocker'>Out of range</div>}
+                            </div>,
                             message && <div className={message.classes} key='message'>
                                 <span>{message.text}</span>
                             </div>,
                             <div className='control' key='control'>
-                                <div className='buttons btn-group btn-group-sm'>
-                                    {!this.state.playing
-                                        ? <button className='play btn btn-default'
+                                <div className='buttons'>
+                                    <div className='side btn-group btn-group-sm'>
+                                        <button
+                                            className='start btn btn-default'
+                                            disabled={playDisabled}
                                             onClick={() => {
-                                                this.setState({ playing: true, videoPlaying: true });
-                                            }}
-                                            disabled={playDisabled}>
-                                            <span className='glyphicon glyphicon-play'></span>
-                                            <span> {this.state.playbackRate}x</span>
+                                                this.setState({
+                                                    playing: false,
+                                                    videoPlaying: false,
+                                                    videoCurrentFrame: this.props.frameLimit[2]
+                                                });
+                                            }}>
+                                            Start
                                         </button>
-                                        : <button className='pause btn btn-default' onClick={() => {
-                                            this.setState({
-                                                playing: false,
-                                                videoPlaying: false,
-                                                playbackRate: 1
-                                            });
-                                        }}>
-                                            <span className='glyphicon glyphicon-pause'></span>
-                                            <span> {this.state.playbackRate}x</span>
-                                        </button>}
-                                    <button
-                                        className='forward btn btn-default'
-                                        disabled={playDisabled}
-                                        onClick={() => {
-                                            var playbackRate = this.state.playbackRate < 0 ? 1 : this.state.playbackRate < 16 ? this.state.playbackRate * 2 : this.state.playbackRate;
-                                            this.setState({
-                                                playing: true,
-                                                videoPlaying: true,
-                                                playbackRate
-                                            });
-                                        }}>
-                                        <span className='glyphicon glyphicon-forward'></span>
-                                    </button>
-                                    <button className='previous-frame btn btn-default'
-                                        disabled={playDisabled || this.state.videoCurrentFrame <= 0}
-                                        onClick={() => this._previousFrame()}>
-                                        <span className='glyphicon glyphicon-step-backward'></span>
-                                    </button>
-                                    <button className='next-frame btn btn-default'
-                                        disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
-                                        onClick={() => this._nextFrame()}>
-                                        <span className='glyphicon glyphicon-step-forward'></span>
-                                    </button>
-                                    <button className='fast-backward btn btn-default' disabled={playDisabled}
-                                        onClick={() => this._skipBackward()}>
-                                        <span className='glyphicon glyphicon-fast-backward'></span>
-                                    </button>
-                                    <button className='fast-forward btn btn-default' disabled={playDisabled}
-                                        onClick={() => this._skipForward()}>
-                                        <span className='glyphicon glyphicon-fast-forward'></span>
-                                    </button>
+                                        <button
+                                            className='end btn btn-default'
+                                            disabled={playDisabled}
+                                            onClick={() => {
+                                                this.setState({
+                                                    playing: false,
+                                                    videoPlaying: false,
+                                                    videoCurrentFrame: this.props.frameLimit[3]
+                                                });
+                                            }}>
+                                            End
+                                        </button>
+                                    </div>
+                                    <div className='middle btn-group btn-group-sm'>
+                                        {!this.state.playing
+                                            ? <button className='play btn btn-default'
+                                                onClick={() => {
+                                                    this.setState({ playing: true, videoPlaying: true });
+                                                }}
+                                                disabled={playDisabled}>
+                                                <span className='glyphicon glyphicon-play'></span>
+                                                <span> {playbackRateDisplay}</span>
+                                            </button>
+                                            : <button className='pause btn btn-default' onClick={() => {
+                                                this.setState({
+                                                    playing: false,
+                                                    videoPlaying: false,
+                                                    playbackRate: this.state.playbackRate
+                                                });
+                                            }}>
+                                                <span className='glyphicon glyphicon-pause'></span>
+                                                <span> {playbackRateDisplay}</span>
+                                            </button>}
+                                        <div className='btn-group btn-group-sm'>
+                                            <button
+                                                className='backward btn btn-default'
+                                                disabled={playDisabled}
+                                                onClick={() => {
+                                                    var playbackRate = this.state.playbackRate <= 0.25 ? 0.25 : this.state.playbackRate / 2;
+                                                    this.setState({
+                                                        playbackRate
+                                                    });
+                                                }}>
+                                                <span className='glyphicon glyphicon-backward'></span>
+                                            </button>
+                                            <button
+                                                className='forward btn btn-default'
+                                                disabled={playDisabled}
+                                                onClick={() => {
+                                                    var playbackRate = this.state.playbackRate >= 2 ? 2 : this.state.playbackRate * 2;
+                                                    this.setState({
+                                                        playbackRate
+                                                    });
+                                                }}>
+                                                <span className='glyphicon glyphicon-forward'></span>
+                                            </button>
+                                        </div>
+                                        <button className='previous-frame btn btn-default'
+                                            disabled={playDisabled || this.state.videoCurrentFrame <= 0}
+                                            onClick={() => this._previousFrame()}>
+                                            <span className='glyphicon glyphicon-step-backward'></span>
+                                        </button>
+                                        <button className='next-frame btn btn-default'
+                                            disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
+                                            onClick={() => this._nextFrame()}>
+                                            <span className='glyphicon glyphicon-step-forward'></span>
+                                        </button>
+                                        <button className='fast-backward btn btn-default' disabled={playDisabled}
+                                            onClick={() => this._skipBackward()}>
+                                            <span className='glyphicon glyphicon-fast-backward'></span>
+                                        </button>
+                                        <button className='fast-forward btn btn-default' disabled={playDisabled}
+                                            onClick={() => this._skipForward()}>
+                                            <span className='glyphicon glyphicon-fast-forward'></span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className='time-control'>
                                     <ReactBootstrapSlider
@@ -331,27 +381,13 @@ class Viewer extends PureComponent {
         var selectedActivityId = this.props.selectedActivityId;
         var editingTrackId = this.props.editingTrackId;
         var style = {
-            fill(d) {
-                return d.detection.src !== 'truth';
-            },
-            fillColor(a, b, d) {
-                if (d.detection.id1 === editingTrackId) {
-                    return { r: 0.5, g: 1, b: 1 };
-                }
-                if (d.detection.id1 === selectedTrackId) {
-                    return { r: 1, g: 0.08, b: 0.58 };
-                }
-                return { r: 1.0, g: 0.839, b: 0.439 };
-            },
-            fillOpacity: 0.3,
+            fill: false,
+            fillColor: { r: 0.5, g: 1, b: 1 },
             stroke(d) {
-                if (d.detection.src !== 'truth') {
-                    return false;
+                if (d.detection.id1 !== editingTrackId) {
+                    return true;
                 }
-                if (d.detection.id1 === editingTrackId) {
-                    return false;
-                }
-                return d.trackEnabled;
+                return false;
             },
             strokeColor(a, b, d) {
                 if (d.detection.id1 === selectedTrackId) {
@@ -359,8 +395,18 @@ class Viewer extends PureComponent {
                 }
                 return { r: 1, g: 0.87, b: 0.0 };
             },
-            strokeWidth: 2,
-            strokeOpacity: 0.8,
+            strokeWidth(a, b, d) {
+                if (d.detection.src !== 'truth') {
+                    return 1;
+                }
+                return 2.5;
+            },
+            strokeOpacity(a, b, d) {
+                if (d.detection.src !== 'truth') {
+                    return 0.7;
+                }
+                return 0.9;
+            },
             uniformPolygon: true
         };
         return {
@@ -369,7 +415,7 @@ class Viewer extends PureComponent {
                 stroke: true,
                 strokeColor: { r: 0.5, g: 1, b: 1 },
                 strokeWidth: 2,
-                strokeOpacity: 0.8
+                strokeOpacity: 0.9
             }
         };
     }

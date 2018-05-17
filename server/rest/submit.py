@@ -51,7 +51,7 @@ class SubmitResource(Resource):
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
-    @access.user
+    @access.public
     def submit(self, folder, item, data, params):
         assignmentId = params['assignmentId']
         hitId = params['hitId']

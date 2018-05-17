@@ -8,6 +8,7 @@ class GeoJSViewer {
         _.extend(this, Backbone.Events);
         this._syncWithVideo = this._syncWithVideo.bind(this);
 
+        this._destroyed = false;
         this.el = settings.el;
         this.folder = settings.folder;
         this.getAnnotation = settings.getAnnotation;
@@ -48,7 +49,6 @@ class GeoJSViewer {
             var video = document.createElement('video');
             video.playbackRate = this._playbackRate;
             video.preload = 'auto';
-            window.thevideo = video;
             this._video = video;
             video.src = `${getApiRoot()}/item/${videoItem._id}/download?contentDisposition=inline`;
 
@@ -64,7 +64,10 @@ class GeoJSViewer {
             return new Promise((resolve, reject) => {
                 video.onloadeddata = () => {
                     video.onloadeddata = null;
-
+                    if (this._destroyed) {
+                        resolve();
+                        return;
+                    }
                     this._viewer = geo.map(params.map);
 
                     // change from our default of only allowing to zoom to 1 pixel is 1 pixel
@@ -314,7 +317,8 @@ class GeoJSViewer {
         var record = data.find((record) => { return record.detection.id1 === editingTrackId });
         if (record) {
             var g0 = record.detection.g0;
-            editingStyle.stroke = record.detection.src === 'truth';
+            editingStyle.strokeWidth = record.detection.src !== 'truth' ? 1 : 2.5;
+            editingStyle.strokeOpacity = record.detection.src !== 'truth' ? 0.7 : 0.9;
             var rect = geo.annotation.rectangleAnnotation({
                 corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }],
                 style: editingStyle,
@@ -377,7 +381,10 @@ class GeoJSViewer {
     }
 
     destroy() {
-        this._viewer.exit();
+        this._destroyed = true;
+        if (this._viewer) {
+            this._viewer.exit();
+        }
     }
 }
 

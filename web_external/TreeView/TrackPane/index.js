@@ -79,13 +79,6 @@ class TrackPane extends BasePane {
             </ul>
             <ContextMenu id='track-menu'>
                 <MenuItem onClick={(e) => this.props.dispatch({
-                    type: FOCUS_TRACK,
-                    payload: this.state.interactTrackId
-                })}>
-                    Focus
-                </MenuItem>
-                <MenuItem divider />
-                <MenuItem onClick={(e) => this.props.dispatch({
                     type: GOTO_TRACK_START,
                     payload: this.state.interactTrackId
                 })}>

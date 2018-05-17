@@ -53,7 +53,7 @@ function app(state, action) {
         case types.ANNOTATION_CLICKED:
             return { ...state, ...{ selectedAnnotation: action.payload, selectedTrackId: action.payload ? action.payload.detection.id1 : null, selectedDetectionId: action.payload ? action.payload.detection.id0 : null } };
         case types.EDIT_TRACK:
-            return { ...state, ...{ editingTrackId: action.payload } };
+            return { ...state, ...{ editingTrackId: action.payload, selectedTrackId: action.payload ? action.payload : state.selectedTrackId } };
         case types.CHANGE_DETECTION:
             var annotationDetectionContainer = state.annotationDetectionContainer.change(action.payload.frame, action.payload.trackId, { g0: action.payload.g0, src: 'truth' });
             return { ...state, ...{ annotationDetectionContainer, pendingSave: true } };
