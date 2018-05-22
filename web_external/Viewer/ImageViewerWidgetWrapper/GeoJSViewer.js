@@ -317,8 +317,8 @@ class GeoJSViewer {
         var record = data.find((record) => { return record.detection.id1 === editingTrackId });
         if (record) {
             var g0 = record.detection.g0;
-            editingStyle.strokeWidth = record.detection.src !== 'truth' ? 1 : 2.5;
-            editingStyle.strokeOpacity = record.detection.src !== 'truth' ? 0.7 : 0.9;
+            editingStyle.strokeWidth = (record.detection.src !== 'truth' && record.detection.src !== 'ground-truth') ? 1 : 2.5;
+            editingStyle.strokeOpacity = (record.detection.src !== 'truth' && record.detection.src !== 'ground-truth') ? 0.7 : 0.9;
             var rect = geo.annotation.rectangleAnnotation({
                 corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }],
                 style: editingStyle,

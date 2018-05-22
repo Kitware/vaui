@@ -58,20 +58,25 @@ class SubmitResource(Resource):
         workerId = params['workerId']
         turkSubmitTo = params['turkSubmitTo']
 
+        Detection().removeWithQuery(query={'assignmentId': assignmentId})
         for detection in data['detections']:
             detection['assignmentId'] = assignmentId
             Detection().save(detection)
 
+        Types().removeWithQuery(query={'assignmentId': assignmentId})
         for type in data['types']:
             type['assignmentId'] = assignmentId
             Types().save(type)
 
+        Activities().removeWithQuery(query={'assignmentId': assignmentId})
         for activity in data['activities']:
             activity['assignmentId'] = assignmentId
             Activities().save(activity)
 
+        feedback = data['feedback']
+
         adminUser = User().getAdmins().next()
-        collection = Collection().createCollection('TURK', creator=adminUser,
+        collection = Collection().createCollection('Refiner', creator=adminUser,
                                                    description='', public=True, reuseExisting=True)
         folder = Folder().createFolder(
             collection, 'results', parentType='collection', public=False,
@@ -83,5 +88,6 @@ class SubmitResource(Resource):
             'assignmentId': assignmentId,
             'hitId': hitId,
             'workerId': workerId,
-            'turkSubmitTo': turkSubmitTo
+            'turkSubmitTo': turkSubmitTo,
+            'feedback': feedback
         })

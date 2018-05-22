@@ -76,6 +76,7 @@ class DetectionWidget extends PureComponent {
                                     }} >
                                     <option value='' disabled></option>
                                     <option value='truth'>truth</option>
+                                    <option value='ground-truth'>ground-truth</option>
                                     <option value='computed'>computed</option>
                                     <option value='linear-interpolation'>linear-interpolation</option>
                                 </select>}

@@ -48,7 +48,7 @@ export default (folderId, activityGroupItemId) => {
             activity = {
                 id2: 1,
                 act2: { [activityGroup.type]: 1.0 },
-                src: 'truth',
+                src: 'ground-truth',
                 timespan: [{ tsr0: activityTimespan }],
                 actors
             };

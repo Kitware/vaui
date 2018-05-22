@@ -3,7 +3,7 @@ import { restRequest } from 'girder/rest';
 
 import { SAVE } from './types';
 
-export default (queryParams) => {
+export default (queryParams, feedback) => {
     return (dispatch, getState) => {
         var { annotationDetectionContainer, annotationTypeContainer, annotationActivityContainer } = getState();
         dispatch({
@@ -17,7 +17,7 @@ export default (queryParams) => {
             method: 'POST',
             url: `/submit?${qs.stringify(queryParams)}`,
             contentType: 'application/json',
-            data: JSON.stringify({ detections, types, activities })
+            data: JSON.stringify({ detections, types, activities, feedback })
         }).then(() => {
             annotationDetectionContainer = annotationDetectionContainer.reset();
             annotationTypeContainer = annotationTypeContainer.reset();

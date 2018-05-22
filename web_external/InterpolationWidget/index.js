@@ -68,6 +68,7 @@ class InterpolationWidget extends PureComponent {
                                                     sourceType: e.target.value
                                                 });
                                             }} >
+                                            <option value='ground-truth'>ground-truth</option>
                                             <option value='truth'>truth</option>
                                             <option value=''>any</option>
                                         </select>

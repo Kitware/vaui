@@ -197,6 +197,11 @@ class AnnotationDetectionContainer {
             // Detection already exists for the specified state; look it up and
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
+
+            if (detectionToChange.src === 'ground-truth') {
+                return this.copy();
+            }
+
             Object.assign(detectionToChange, attributes);
 
             // Update modification records; if state was added, it is still
@@ -226,7 +231,7 @@ class AnnotationDetectionContainer {
             currentDetection = newDetection;
         }
 
-        if (currentDetection.src === 'truth') {
+        if (currentDetection.src === 'truth' || currentDetection.src === 'ground-truth') {
             let previousTruthDetection = this._getPreviousTruthDetection(trackId, frame);
             if (previousTruthDetection) {
                 interpolate(previousTruthDetection, currentDetection).forEach((detection) => {
@@ -253,7 +258,7 @@ class AnnotationDetectionContainer {
                 continue;
             }
             var detection = map.get(trackId);
-            if (detection && detection.src === 'truth') {
+            if (detection && (detection.src === 'truth' || detection.src === 'ground-truth')) {
                 previousTruthDetection = detection;
                 break;
             }
@@ -269,7 +274,7 @@ class AnnotationDetectionContainer {
                 continue;
             }
             var detection = map.get(trackId);
-            if (detection && detection.src === 'truth') {
+            if (detection && (detection.src === 'truth' || detection.src === 'ground-truth')) {
                 nextTruthDetection = detection;
                 break;
             }

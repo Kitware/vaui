@@ -138,7 +138,7 @@ class Viewer extends PureComponent {
     render() {
         var playDisabled = !this.state.ready || this.props.loadingAnnotation;
         var message = this._getMessage();
-        var playbackRateDisplay = (this.state.playbackRate >= 1 ? this.state.playbackRate : '1/' + 1 / this.state.playbackRate) + 'x';
+        var playbackRateDisplay = this.state.playbackRate + 'x';
         return <div className={['v-viewer', this.props.className].join(' ')}>
             <div className='panel panel-default'>
                 <div className='panel-body'>
@@ -306,15 +306,15 @@ class Viewer extends PureComponent {
                                                     playbackRate: parseFloat(e.target.name)
                                                 });
                                             }}>
+                                                <li><a name='0.25'>Play speed 0.25x</a></li>
+                                                <li><a name='0.5'>Play speed 0.5x</a></li>
                                                 <li><a name='1'>Play speed 1x</a></li>
-                                                <li><a name='0.25'>Play speed 1/4x</a></li>
-                                                <li><a name='0.5'>Play speed 1/2x</a></li>
                                                 <li><a name='1.5'>Play speed 1.5x</a></li>
                                                 <li><a name='2'>Play speed 2x</a></li>
                                             </ul>
                                         </div>
                                         <button className='previous-frame btn btn-default'
-                                            disabled={playDisabled || this.state.videoCurrentFrame <= 0}
+                                            disabled={playDisabled || this.state.videoCurrentFrame <= this.props.frameLimit[0]}
                                             onClick={() => this._previousFrame()}
                                             title='go backward one frame (RIGHT)'>
                                             <span className='glyphicon glyphicon-step-backward'></span>
@@ -419,8 +419,11 @@ class Viewer extends PureComponent {
         var selectedActivityId = this.props.selectedActivityId;
         var editingTrackId = this.props.editingTrackId;
         var style = {
-            fill: false,
-            fillColor: { r: 0.5, g: 1, b: 1 },
+            fill(d) {
+                return d.detection.src === 'ground-truth';
+            },
+            fillColor: { r: 0.5, g: 0.5, b: 0.5 },
+            fillOpacity: 0.4,
             stroke(d) {
                 if (d.detection.id1 !== editingTrackId) {
                     return true;
@@ -434,13 +437,13 @@ class Viewer extends PureComponent {
                 return { r: 1, g: 0.87, b: 0.0 };
             },
             strokeWidth(a, b, d) {
-                if (d.detection.src !== 'truth') {
+                if (d.detection.src !== 'truth' && d.detection.src !== 'ground-truth') {
                     return 1;
                 }
                 return 2.5;
             },
             strokeOpacity(a, b, d) {
-                if (d.detection.src !== 'truth') {
+                if (d.detection.src !== 'truth' && d.detection.src !== 'ground-truth') {
                     return 0.7;
                 }
                 return 0.9;
@@ -470,7 +473,7 @@ class Viewer extends PureComponent {
                     var line = [];
                     var lastCenter = null;
                     for (let detection of detections) {
-                        let center = [(detection.g0[0][0] + detection.g0[1][0]) / 2, (detection.g0[0][1] + detection.g0[1][1]) / 2, detection.ts0, detection.src === 'truth'];
+                        let center = [(detection.g0[0][0] + detection.g0[1][0]) / 2, (detection.g0[0][1] + detection.g0[1][1]) / 2, detection.ts0, detection.src];
                         line.push(center);
                         lastCenter = center;
                     }
@@ -516,7 +519,7 @@ class Viewer extends PureComponent {
                 lastCenter = center;
                 trackTrail.line.push(center);
 
-                if (center[3]) {
+                if (center[3] === 'truth' || center[3] === 'ground-truth') {
                     trackTrailTruthPointsForCurrentTrack.push({
                         trackId,
                         point: center
@@ -603,7 +606,7 @@ class Viewer extends PureComponent {
         if (!this.state.ready || this.props.loadingAnnotation) {
             return;
         }
-        if (this.state.videoCurrentFrame > 0) {
+        if (this.state.videoCurrentFrame > this.props.frameLimit[0]) {
             this.setState({
                 playing: false,
                 videoPlaying: false,

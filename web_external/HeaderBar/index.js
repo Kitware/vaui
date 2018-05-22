@@ -22,7 +22,9 @@ class HeaderBar extends PureComponent {
         super(props);
         this.state = {
             previewMode: false,
-            showInstruction: false
+            showInstruction: false,
+            showSubmitConfirm: false,
+            feedback: ''
         };
     }
 
@@ -41,17 +43,6 @@ class HeaderBar extends PureComponent {
         this.setState({ previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId });
     }
 
-    submitHandler() {
-        bootbox.confirm("Do you want to sumbit your result? this cannot be undone.",
-            (result) => {
-                if (result) {
-                    this.props.dispatch(submit(qs.parse(location.search))).then(() => {
-                        this.props.history.push(`/submit`);
-                    });
-                }
-            });
-    }
-
     hideInstruction() {
         this.setState({ showInstruction: false });
     }
@@ -64,17 +55,41 @@ class HeaderBar extends PureComponent {
                     this.setState({ showInstruction: true });
                 }}>Instruction</button>
 
-                <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.submitHandler()}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
+                <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.setState({ showSubmitConfirm: true })}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
             <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction() }} bsSize="large" keyboard={false} backdrop={'static'}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Instruction</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Instruction />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => { this.hideInstruction() }}>Close</Button>
+                </Modal.Footer>
+            </Modal>
+            <Modal show={this.state.showSubmitConfirm} keyboard={false} backdrop={'static'}>
+                <Modal.Header>
+                    <Modal.Title>Confirm</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>Do you want to sumbit your result? This cannot be undone.</div>
+                    <br />
+                    <div>(Optional) Feedback, what can we improve?</div>
+                    <textarea className="form-control form-control-sm" rows="3" value={this.state.feedback} maxLength="180" onChange={(e) => { this.setState({ feedback: e.target.value }); }}></textarea>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={() => { this.setState({ showSubmitConfirm: false }); }}>Cancel</Button>
+                    <Button bsStyle="primary" onClick={() => {
+                        var query = qs.parse(location.search);
+                        this.props.dispatch(submit(query, this.state.feedback)).then(() => {
+                            if (!query.hitId || query.hitId === 'null') {
+                                this.setState({ showSubmitConfirm: false });
+                                bootbox.alert('Submitted successfully');
+                                return;
+                            }
+                            this.props.history.push(`/submit`);
+                        });
+                    }}>Yes</Button>
                 </Modal.Footer>
             </Modal>
         </div>;
