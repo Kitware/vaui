@@ -413,7 +413,7 @@ class Viewer extends PureComponent {
                 type: typeContainer.getItem(detection.id1)
             };
         }).filter((data) => {
-            return data.activities || data.trackEnabled;
+            return data.trackEnabled;
         });
         var selectedTrackId = this.props.selectedTrackId;
         var selectedActivityId = this.props.selectedActivityId;

@@ -57,7 +57,7 @@ class HeaderBar extends PureComponent {
 
                 <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.setState({ showSubmitConfirm: true })}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
-            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction() }} bsSize="large" keyboard={false} backdrop={'static'}>
+            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction() }} bsSize="large" keyboard={false} backdrop={true}>
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
