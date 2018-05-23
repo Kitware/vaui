@@ -44,10 +44,8 @@ class AppContainer extends PureComponent {
                     if (!('folderId' in queryParams &&
                         'activityGroupItemId' in queryParams &&
                         'assignmentId' in queryParams &&
-                        'hitId' in queryParams &&
-                        'turkSubmitTo' in queryParams &&
-                        'workerId' in queryParams)) {
-                        return <div>Missing folderId, activityGroupItemId, assignmentId, hitId, turkSubmitTo, or workerId in query parameter</div>
+                        'hitId' in queryParams)) {
+                        return <div>Missing folderId, activityGroupItemId, assignmentId, or hitId in query parameter</div>
                     } else {
                         return <Fragment>
                             <HeaderBar className='v-header' key='header-bar' />
