@@ -12,7 +12,7 @@ class Instruction extends PureComponent {
     render() {
         return <div className='b-instruction'>
             <div className='container-fluid'>
-                <h4>Instruction</h4>
+                <h4>Instructions</h4>
                 <ul>
                     <li>There are 3 kinds of boxes.</li>
                     <li>Key boxes are shown with a thick border. You will draw key boxes and be able to delete them.</li>

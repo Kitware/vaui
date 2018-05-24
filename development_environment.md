@@ -2,7 +2,7 @@
 
 ## Server  
   
-The following instruction is base on a clean Ubuntu 16.04.3.  
+The following instructions is base on a clean Ubuntu 16.04.3.  
   
 install mongodb https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-16-04  
 install node v8 with npm v5  

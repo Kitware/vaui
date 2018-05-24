@@ -22,9 +22,9 @@ response = client.create_hit(
     LifetimeInSeconds=3600,
     AssignmentDurationInSeconds=15 * 60,
     Reward='0.20',
-    Title='Image annotation',
-    Keywords='annotation,image,draw',
-    Description='Annotation vehicles on an image',
+    Title='Video annotation',
+    Keywords='annotation,video,draw',
+    Description='Annotation objects on a video clip',
     Question=externalQuestion
 )
 

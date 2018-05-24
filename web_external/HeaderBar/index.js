@@ -53,7 +53,7 @@ class HeaderBar extends PureComponent {
             <div className='button-wrapper toolbutton'>
                 <button className='btn btn-primary btn-sm' onClick={() => {
                     this.setState({ showInstruction: true });
-                }}>Instruction</button>
+                }}>Instructions</button>
 
                 <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.setState({ showSubmitConfirm: true })}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
             </div>
