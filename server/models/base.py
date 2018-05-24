@@ -19,5 +19,8 @@ class Base(Model):
 
         return self.find(query={'folderId': folder['_id']})
 
+    def findByAssignmentId(self, assignmentId):
+        return self.find(query={'assignmentId': assignmentId})
+
     def recordCount(self, folder):
         return self.findByFolder(folder).count()

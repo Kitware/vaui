@@ -32,11 +32,11 @@ class ActivitiesResource(Resource):
         super(ActivitiesResource, self).__init__()
 
         self.resourceName = 'activities'
-        self.route('GET', (':folderId',), self.getActivitiesOfFolder)
-        self.route('POST', (':folderId',), self.addActivitiesToFolder)
-        self.route('PUT', (':activityId',), self.updateActivity)
-        self.route('DELETE', (':activityId',), self.deleteActivity)
-        self.route('GET', ('export', ':folderId',), self.exportKPF)
+        # self.route('GET', (':folderId',), self.getActivitiesOfFolder)
+        # self.route('POST', (':folderId',), self.addActivitiesToFolder)
+        # self.route('PUT', (':activityId',), self.updateActivity)
+        # self.route('DELETE', (':activityId',), self.deleteActivity)
+        # self.route('GET', ('export', ':folderId',), self.exportKPF)
 
     @autoDescribeRoute(
         Description('')
@@ -101,12 +101,12 @@ class ActivitiesResource(Resource):
         return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(folder):
-        cursor = Activities().findByFolder(folder)
+    def generateKPFContent(assignmentId):
+        cursor = Activities().findByAssignmentId(assignmentId)
         output = []
         for activity in cursor:
             del activity['_id']
-            del activity['folderId']
+            del activity['assignmentId']
             activity = yaml.safe_dump(activity, default_flow_style=True,
                                       width=1000).rstrip()
             output.append('- {{ act: {0} }}'.format(activity))

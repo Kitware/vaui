@@ -80,7 +80,6 @@ class AnnotationActivityContainer {
 
     new(activity) {
         activity.id2 = ++this._id2;
-        activity.folderId = this._folderId;
         this.add(activity);
         this._added.add(activity);
         return this.copy();

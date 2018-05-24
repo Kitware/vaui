@@ -218,7 +218,7 @@ class AnnotationDetectionContainer {
                     id0: ++this._id0,
                     id1: trackId,
                     ts0: frame,
-                    folderId: this._folderId,
+                    // folderId: this._folderId,
                     src: 'truth'
                 },
                 ...attributes

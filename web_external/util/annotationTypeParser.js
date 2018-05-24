@@ -76,7 +76,7 @@ class AnnotationTypeContainer {
         var type = new AnnotationType({
             id1: trackId,
             cset3,
-            folderId: this._folderId
+            // folderId: this._folderId
         });
         this._added.add(type);
         this._mapper.set(trackId, type);

@@ -32,11 +32,11 @@ class TypesResource(Resource):
         super(TypesResource, self).__init__()
 
         self.resourceName = 'types'
-        self.route('GET', (':folderId',), self.getTypesOfFolder)
-        self.route('POST', (':folderId',), self.addTypesToFolder)
-        self.route('PUT', (':typesId',), self.updateTypes)
-        self.route('DELETE', (':typesId',), self.deleteTypes)
-        self.route('GET', ('export', ':folderId',), self.export)
+        # self.route('GET', (':folderId',), self.getTypesOfFolder)
+        # self.route('POST', (':folderId',), self.addTypesToFolder)
+        # self.route('PUT', (':typesId',), self.updateTypes)
+        # self.route('DELETE', (':typesId',), self.deleteTypes)
+        # self.route('GET', ('export', ':folderId',), self.export)
 
     @autoDescribeRoute(
         Description('')
@@ -101,12 +101,12 @@ class TypesResource(Resource):
         return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(folder):
-        cursor = Types().findByFolder(folder)
+    def generateKPFContent(assignmentId):
+        cursor = Types().findByAssignmentId(assignmentId)
         output = []
         for types in cursor:
             del types['_id']
-            del types['folderId']
+            del types['assignmentId']
             types = yaml.safe_dump(types, default_flow_style=True,
                                    width=1000).rstrip()
             output.append('- {{ types: {0} }}'.format(types))

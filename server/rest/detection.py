@@ -33,11 +33,11 @@ class DetectionResource(Resource):
         super(DetectionResource, self).__init__()
 
         self.resourceName = 'detection'
-        self.route('GET', (':folderId',), self.getDetectionsOfFolder)
-        self.route('POST', (':folderId',), self.addDetectionToFolder)
-        self.route('PUT', (':detectionId',), self.updateDetection)
-        self.route('DELETE', (':detectionId',), self.deleteDetection)
-        self.route('GET', ('export', ':folderId',), self.exportKPF)
+        # self.route('GET', (':folderId',), self.getDetectionsOfFolder)
+        # self.route('POST', (':folderId',), self.addDetectionToFolder)
+        # self.route('PUT', (':detectionId',), self.updateDetection)
+        # self.route('DELETE', (':detectionId',), self.deleteDetection)
+        # self.route('GET', ('export', ':assignmentId',), self.exportKPF)
 
     # The girder default serialization takes twice the time
     # as this custom serializer. Since detection could be relatively big,
@@ -114,15 +114,15 @@ class DetectionResource(Resource):
         return self.generateKPFContent(folder)
 
     @staticmethod
-    def generateKPFContent(folder):
+    def generateKPFContent(assignmentId):
         # The pyyaml without c yaml is not fast, so for detection, considering the
         # size, we build the yaml by hand
-        cursor = Detection().findByFolder(folder)
+        cursor = Detection().findByAssignmentId(assignmentId)
         output = []
         for detection in cursor:
             keyValues = []
             for key in detection:
-                if key == 'folderId' or key == '_id':
+                if key == 'assignmentId' or key == '_id':
                     continue
                 if key == 'g0':
                     value = str(detection['g0'][0][0]) + ' ' + str(detection['g0'][0][1]) + \

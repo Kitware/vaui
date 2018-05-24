@@ -49,9 +49,9 @@ class AnnotationResource(Resource):
         super(AnnotationResource, self).__init__()
 
         self.resourceName = 'vaui_annotation'
-        self.route('POST', ('import', ':folderId',), self.importAnnotation)
-        self.route('GET', ('status', ':folderId',), self.checkImportStatus)
-        self.route('GET', ('export', ':folderId',), self.export)
+        # self.route('POST', ('import', ':folderId',), self.importAnnotation)
+        # self.route('GET', ('status', ':folderId',), self.checkImportStatus)
+        self.route('GET', ('export', ':assignmentId',), self.export)
 
     @autoDescribeRoute(
         Description('')
@@ -179,7 +179,7 @@ class AnnotationResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .param('assignmentId','')
         .produces('application/zip')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
@@ -187,18 +187,18 @@ class AnnotationResource(Resource):
     @access.user
     @access.cookie
     @rawResponse
-    def export(self, folder, params):
+    def export(self, assignmentId, params):
         setResponseHeader('Content-Type', 'application/zip')
-        setContentDisposition(folder['name'] + '.zip')
+        setContentDisposition(assignmentId + '.zip')
 
         def stream():
-            zip = ziputil.ZipGenerator(folder['name'])
+            zip = ziputil.ZipGenerator(assignmentId)
 
-            for data in zip.addFile(DetectionResource.generateKPFContent(folder), folder['name'] + '.geom.kpf'):
+            for data in zip.addFile(DetectionResource.generateKPFContent(assignmentId), assignmentId + '.geom.kpf'):
                 yield data
-            for data in zip.addFile(TypesResource.generateKPFContent(folder), folder['name'] + '.types.kpf'):
+            for data in zip.addFile(TypesResource.generateKPFContent(assignmentId), assignmentId + '.types.kpf'):
                 yield data
-            for data in zip.addFile(ActivitiesResource.generateKPFContent(folder), folder['name'] + '.activities.kpf'):
+            for data in zip.addFile(ActivitiesResource.generateKPFContent(assignmentId), assignmentId + '.activities.kpf'):
                 yield data
             yield zip.footer()
         return stream
