@@ -24,6 +24,10 @@
     <div id="g-global-info-apiroot" class="hide">${apiRoot}</div>
     <div id="g-global-info-staticroot" class="hide">${staticRoot}</div>
 
+    <script src="https://cdn.ravenjs.com/3.25.2/raven.min.js" crossorigin="anonymous"></script>
+    <script>
+        // Raven.config('https://1b56183d068e4a389040754a3e56bf93@sentry.io/1215827').install();
+    </script>
     <script src="${staticRoot}/built/girder_lib.min.js"></script>
     <script src="${staticRoot}/built/girder_app.min.js"></script>
 
