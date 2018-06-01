@@ -32,7 +32,7 @@ class ActivitiesResource(Resource):
         super(ActivitiesResource, self).__init__()
 
         self.resourceName = 'activities'
-        # self.route('GET', (':folderId',), self.getActivitiesOfFolder)
+        self.route('GET', (':assignmentId',), self.getActivities)
         # self.route('POST', (':folderId',), self.addActivitiesToFolder)
         # self.route('PUT', (':activityId',), self.updateActivity)
         # self.route('DELETE', (':activityId',), self.deleteActivity)
@@ -40,13 +40,13 @@ class ActivitiesResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .param('assignmentId', '')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def getActivitiesOfFolder(self, folder, params):
-        cursor = Activities().findByFolder(folder)
+    def getActivities(self, assignmentId, params):
+        cursor = Activities().findByAssignmentId(assignmentId)
         return list(cursor)
 
     @autoDescribeRoute(

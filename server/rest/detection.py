@@ -33,7 +33,7 @@ class DetectionResource(Resource):
         super(DetectionResource, self).__init__()
 
         self.resourceName = 'detection'
-        # self.route('GET', (':folderId',), self.getDetectionsOfFolder)
+        self.route('GET', (':assignmentId',), self.getDetections)
         # self.route('POST', (':folderId',), self.addDetectionToFolder)
         # self.route('PUT', (':detectionId',), self.updateDetection)
         # self.route('DELETE', (':detectionId',), self.deleteDetection)
@@ -43,6 +43,7 @@ class DetectionResource(Resource):
     # as this custom serializer. Since detection could be relatively big,
     # it is worthwhile to use this custom serializer.
     class JSONEncoder(json.JSONEncoder):
+
         def default(self, obj):
             if isinstance(obj, ObjectId):
                 return str(obj)
@@ -50,15 +51,15 @@ class DetectionResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .param('assignmentId', '')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
     @rawResponse
-    def getDetectionsOfFolder(self, folder, params):
+    def getDetections(self, assignmentId, params):
         setResponseHeader('Content-Type', 'application/json')
-        cursor = Detection().findByFolder(folder)
+        cursor = Detection().findByAssignmentId(assignmentId)
         jsonString = self.JSONEncoder().encode(list(cursor))
         return jsonString
 

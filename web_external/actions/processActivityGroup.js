@@ -69,7 +69,7 @@ export default (folderId, activityGroupItemId) => {
             });
             dispatch({
                 type: LIMIT_FRAME,
-                payload: [activityTimespan[0], activityTimespan[1]]
+                payload: activityTimespan
             });
         });
     };

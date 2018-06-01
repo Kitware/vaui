@@ -32,7 +32,7 @@ class TypesResource(Resource):
         super(TypesResource, self).__init__()
 
         self.resourceName = 'types'
-        # self.route('GET', (':folderId',), self.getTypesOfFolder)
+        self.route('GET', (':assignmentId',), self.getTypes)
         # self.route('POST', (':folderId',), self.addTypesToFolder)
         # self.route('PUT', (':typesId',), self.updateTypes)
         # self.route('DELETE', (':typesId',), self.deleteTypes)
@@ -40,13 +40,13 @@ class TypesResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .modelParam('folderId', model=Folder, level=AccessType.READ)
+        .param('assignmentId', '')
         .errorResponse()
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.user
-    def getTypesOfFolder(self, folder, params):
-        cursor = Types().findByFolder(folder)
+    def getTypes(self, assignmentId, params):
+        cursor = Types().findByAssignmentId(assignmentId)
         return list(cursor)
 
     @autoDescribeRoute(

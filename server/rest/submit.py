@@ -38,6 +38,7 @@ class SubmitResource(Resource):
 
         self.resourceName = 'submit'
         self.route('POST', (), self.submit)
+        self.route('GET', (':assignmentId',), self.get)
 
     @autoDescribeRoute(
         Description('')
@@ -52,12 +53,7 @@ class SubmitResource(Resource):
         .errorResponse('Read access was denied on the item.', 403)
     )
     @access.public
-    def submit(self, folder, item, data, params):
-        assignmentId = params['assignmentId']
-        hitId = params['hitId']
-        workerId = params['workerId']
-        turkSubmitTo = params['turkSubmitTo']
-
+    def submit(self, folder, item, data, assignmentId, hitId, workerId, turkSubmitTo, params):
         Detection().removeWithQuery(query={'assignmentId': assignmentId})
         for detection in data['detections']:
             detection['assignmentId'] = assignmentId
@@ -78,10 +74,10 @@ class SubmitResource(Resource):
         adminUser = User().getAdmins().next()
         collection = Collection().createCollection('Refiner', creator=adminUser,
                                                    description='', public=True, reuseExisting=True)
-        folder = Folder().createFolder(
+        resultFolder = Folder().createFolder(
             collection, 'results', parentType='collection', public=False,
             creator=adminUser, reuseExisting=True)
-        item = Item().createItem(assignmentId, adminUser, folder, reuseExisting=True)
+        item = Item().createItem(assignmentId, adminUser, resultFolder, reuseExisting=True)
         Item().setMetadata(item, {
             'folderId': str(folder['_id']),
             'activityGroupItemId': str(item['_id']),
@@ -90,4 +86,23 @@ class SubmitResource(Resource):
             'workerId': workerId,
             'turkSubmitTo': turkSubmitTo,
             'feedback': feedback
+        })
+
+    @autoDescribeRoute(
+        Description('')
+        .param('assignmentId', '')
+        .errorResponse()
+        .errorResponse('Read access was denied on the item.', 403)
+    )
+    @access.public
+    def get(self, assignmentId, params):
+        adminUser = User().getAdmins().next()
+        collection = Collection().createCollection('Refiner', creator=adminUser,
+                                                   description='', public=True, reuseExisting=True)
+        folder = Folder().createFolder(
+            collection, 'results', parentType='collection', public=False,
+            creator=adminUser, reuseExisting=True)
+        return Item().findOne({
+            'folderId': folder['_id'],
+            'meta.assignmentId': assignmentId
         })
