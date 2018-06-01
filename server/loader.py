@@ -4,7 +4,7 @@
 import os
 from girder.utility.webroot import Webroot
 from rest import detection
-from rest import annotation, types, activities, interpolation, submit
+from rest import annotation, types, activities, interpolation, submit, log
 
 
 def load(info):
@@ -26,3 +26,4 @@ def load(info):
     info['apiRoot'].types = types.TypesResource()
     info['apiRoot'].interpolation = interpolation.Interpolation()
     info['apiRoot'].submit = submit.SubmitResource()
+    info['apiRoot'].log = log.LogResource()

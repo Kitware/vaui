@@ -19,8 +19,8 @@ externalQuestion = """<?xml version="1.0"?>
 
 response = client.create_hit(
     MaxAssignments=1,
-    LifetimeInSeconds=3600,
-    AssignmentDurationInSeconds=15 * 60,
+    LifetimeInSeconds=12 * 3600,
+    AssignmentDurationInSeconds=60 * 60,
     Reward='0.20',
     Title='Video annotation',
     Keywords='annotation,video,draw',
