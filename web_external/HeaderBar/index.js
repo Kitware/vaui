@@ -45,7 +45,7 @@ class HeaderBar extends PureComponent {
         });
         if (!this.state.devMode) {
             restRequest({
-                url: `/log/${this.state.previewMode ? 'preview' : 'accept'}/${this.queryParams.hitId}`,
+                url: `/log/${this.queryParams.hitId}/${this.state.previewMode ? 'preview' : 'accept'}`,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(this.queryParams)
@@ -95,7 +95,7 @@ class HeaderBar extends PureComponent {
                         var queryParams = qs.parse(location.search);
                         if (!this.dev) {
                             restRequest({
-                                url: `/log/submit/${queryParams.hitId}`,
+                                url: `/log/${queryParams.hitId}/submit`,
                                 method: 'POST',
                                 contentType: 'application/json',
                                 data: JSON.stringify(queryParams)
@@ -125,7 +125,7 @@ class HeaderBar extends PureComponent {
                     <Button onClick={() => { this.setState({ showReportProblem: false }); }}>Cancel</Button>
                     <Button bsStyle="primary" disabled={!this.state.problem} onClick={() => {
                         restRequest({
-                            url: `/log/problem/${this.queryParams.hitId}`,
+                            url: `/log/${this.queryParams.hitId}/problem`,
                             method: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify({

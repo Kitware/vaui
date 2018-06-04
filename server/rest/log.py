@@ -44,8 +44,8 @@ class LogResource(Resource):
 
     @autoDescribeRoute(
         Description('')
-        .param('type', '')
         .param('hitId', '')
+        .param('type', '')
         .jsonParam('data', '', paramType='body')
         .errorResponse()
         .errorResponse('', 403)
@@ -59,10 +59,11 @@ class LogResource(Resource):
             collection, 'log', parentType='collection', public=False,
             creator=adminUser, reuseExisting=True)
 
-        logItemName = hitId + '_' + str(int(time.time())) + '_' + \
+        logItemName = str(int(time.time())) + '_' + hitId + '_' + \
             type + '_' + str(uuid.uuid4().get_hex().upper()[0:4])
 
         item = Item().createItem(logItemName, adminUser, logFolder, reuseExisting=True)
+        data['type'] = type
         data['ip'] = cherrypy.request.remote.ip
         data['userAgent'] = cherrypy.request.headers.get("User-Agent")
         Item().setMetadata(item, data)
