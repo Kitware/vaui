@@ -198,9 +198,9 @@ class AnnotationDetectionContainer {
             // modify it in place
             let detectionToChange = this._frameMap.get(frame).get(trackId);
 
-            if (detectionToChange.src === 'ground-truth') {
-                return this.copy();
-            }
+            // if (detectionToChange.src === 'ground-truth') {
+            //     return this.copy();
+            // }
 
             Object.assign(detectionToChange, attributes);
 
