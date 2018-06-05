@@ -8,6 +8,7 @@ import _ from 'underscore';
 import { ANNOTATION_CLICKED, EDIT_TRACK, CHANGE_DETECTION, DELETE_DETECTION, GOTO_FRAME, SELECT_TRACK, NEW_TRACK, CURRENT_FRAME_CHANGE, MAX_FRAME_CHANGE, CREATE_ACTIVITY_START, CREATE_ACTIVITY_STOP, INTERPOLATE_SHOW, INTERPOLATE_HIDE } from '../actions/types';
 import ImageViewerWidgetWrapper from './ImageViewerWidgetWrapper';
 import SpinBox from '../SpinBox';
+import logger from '../util/logger';
 
 import './style.styl';
 import './slider.styl';
@@ -17,6 +18,12 @@ class Viewer extends PureComponent {
         super(props);
         this.getAnnotation = this.getAnnotation.bind(this);
         this.getTrackTrails = this.getTrackTrails.bind(this);
+        this.first = {
+            rectangleDrawn: false,
+            played: false,
+            detectionRightClick: false,
+            detectionLeftClick: false
+        }
         this.state = {
             playing: false,
             playbackRate: 1,
@@ -79,15 +86,9 @@ class Viewer extends PureComponent {
     _bindKeyboardShortcut() {
         mousetrap.bind('space', () => {
             if (this.state.playing) {
-                this.setState({
-                    playing: false,
-                    videoPlaying: false
-                });
+
             } else {
-                this.setState({
-                    playing: true,
-                    videoPlaying: true
-                });
+                this.play();
             }
         });
         mousetrap.bind('enter', () => {
@@ -133,6 +134,16 @@ class Viewer extends PureComponent {
     requestToFrame(frame) {
         this.setState({ playing: false, videoPlaying: false }, () => {
             this.setState({ videoCurrentFrame: Math.min(frame, this.state.videoMaxFrame) });
+        });
+    }
+    play() {
+        if (!this.first.played) {
+            this.first.played = true;
+            logger.log('played');
+        }
+        this.setState({
+            playing: true,
+            videoPlaying: true
         });
     }
     render() {
@@ -182,11 +193,21 @@ class Viewer extends PureComponent {
                                             ready: true
                                         });
                                     }}
-                                    detectionLeftClick={(annotation) => this.props.dispatch({
-                                        type: ANNOTATION_CLICKED,
-                                        payload: annotation
-                                    })}
+                                    detectionLeftClick={(annotation) => {
+                                        if (!this.first.detectionLeftClick) {
+                                            this.first.detectionLeftClick = true;
+                                            logger.log('detection-lclick');
+                                        }
+                                        this.props.dispatch({
+                                            type: ANNOTATION_CLICKED,
+                                            payload: annotation
+                                        });
+                                    }}
                                     detectionRightClick={(annotation) => {
+                                        if (!this.first.detectionRightClick) {
+                                            this.first.detectionRightClick = true;
+                                            logger.log('detection-rclick');
+                                        }
                                         this.setState({ drawingToZoom: false });
                                         this.props.dispatch({
                                             type: EDIT_TRACK,
@@ -213,6 +234,10 @@ class Viewer extends PureComponent {
                                         });
                                     }}
                                     rectangleDrawn={(g0) => {
+                                        if (!this.first.rectangleDrawn) {
+                                            this.first.rectangleDrawn = true;
+                                            logger.log('annotation-drawn');
+                                        }
                                         if (!this.drawingToZoom && this.props.editingTrackId !== null) {
                                             this.props.dispatch({
                                                 type: CHANGE_DETECTION,
@@ -276,9 +301,7 @@ class Viewer extends PureComponent {
                                             {!this.state.playing
                                                 ?
                                                 <button className='play btn btn-default'
-                                                    onClick={() => {
-                                                        this.setState({ playing: true, videoPlaying: true });
-                                                    }}
+                                                    onClick={() => this.play()}
                                                     disabled={playDisabled}
                                                     title='Play video (SPACE)'>
                                                     <span className='glyphicon glyphicon-play'></span>

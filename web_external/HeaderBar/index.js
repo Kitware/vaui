@@ -14,6 +14,7 @@ import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import submit from '../actions/submit';
 import processActivityGroup from '../actions/processActivityGroup';
 import Instruction from '../Instruction';
+import logger from '../util/logger';
 
 import './style.styl';
 
@@ -43,14 +44,11 @@ class HeaderBar extends PureComponent {
                 folder
             });
         });
-        if (!this.state.devMode) {
-            restRequest({
-                url: `/log/${this.queryParams.hitId}/${this.state.previewMode ? 'preview' : 'accept'}`,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(this.queryParams)
-            });
+        logger.setContexts(this.queryParams);
+        if (this.state.devMode) {
+            logger.disable(true);
         }
+        logger.log(this.state.previewMode ? 'preview' : 'accept');
         this.props.dispatch(processActivityGroup(folderId, activityGroupItemId));
     }
 
@@ -66,10 +64,13 @@ class HeaderBar extends PureComponent {
                     this.setState({ showInstruction: true });
                 }}>Instructions</button>
 
-                <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => this.setState({ showSubmitConfirm: true })}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
+                <button className='btn btn-primary btn-sm' disabled={!this.props.pendingSave || this.props.saving || this.state.previewMode} onClick={(e) => {
+                    this.setState({ showSubmitConfirm: true });
+                    logger.log('before-submit');
+                }}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
                 <button className='btn btn-link btn-sm' onClick={(e) => this.setState({ showReportProblem: true })}>Report problem</button>
             </div>
-            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction() }} bsSize="large" keyboard={false} backdrop={true}>
+            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction();logger.log('hide-instruction'); }} bsSize="large" keyboard={false} backdrop={true}>
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
@@ -93,14 +94,7 @@ class HeaderBar extends PureComponent {
                     <Button onClick={() => { this.setState({ showSubmitConfirm: false }); }}>Cancel</Button>
                     <Button bsStyle="primary" onClick={() => {
                         var queryParams = qs.parse(location.search);
-                        if (!this.dev) {
-                            restRequest({
-                                url: `/log/${queryParams.hitId}/submit`,
-                                method: 'POST',
-                                contentType: 'application/json',
-                                data: JSON.stringify(queryParams)
-                            });
-                        }
+                        logger.log('submit');
                         this.props.dispatch(submit(queryParams, this.state.feedback)).then(() => {
                             if (this.dev) {
                                 this.setState({ showSubmitConfirm: false });
@@ -124,19 +118,12 @@ class HeaderBar extends PureComponent {
                 <Modal.Footer>
                     <Button onClick={() => { this.setState({ showReportProblem: false }); }}>Cancel</Button>
                     <Button bsStyle="primary" disabled={!this.state.problem} onClick={() => {
-                        restRequest({
-                            url: `/log/${this.queryParams.hitId}/problem`,
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                problem: this.state.problem,
-                                ...this.queryParams
-                            })
-                        }).then(() => {
-                            this.setState({ showReportProblem: false });
-                            bootbox.alert('Thank you for your reporting!');
-                            return;
-                        });
+                        logger.log('problem', { problem: this.state.problem })
+                            .then(() => {
+                                this.setState({ showReportProblem: false });
+                                bootbox.alert('Thank you for your reporting!');
+                                return;
+                            });
                     }}>Send</Button>
                 </Modal.Footer>
             </Modal>

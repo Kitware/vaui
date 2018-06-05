@@ -33,7 +33,7 @@ class GeoJSViewer {
     }
 
     initialize() {
-        restRequest({
+        return restRequest({
             type: 'GET',
             url: 'item/',
             data: {
@@ -59,6 +59,15 @@ class GeoJSViewer {
 
             video.onsuspend = (e) => {
                 console.log('suspend');
+            };
+
+            video.onloadstart = (e) => {
+                console.log("loadstart");
+            };
+
+
+            video.oncanplay = (e) => {
+                console.log("canplay");
             };
 
             return new Promise((resolve, reject) => {

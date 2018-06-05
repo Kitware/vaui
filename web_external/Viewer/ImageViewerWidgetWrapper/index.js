@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import mousetrap from 'mousetrap';
 
 import GeoJSViewer from './GeoJSViewer';
+import logger from '../../util/logger';
 
 class ImageViewerWidgetWrapper extends Component {
     mode = 'add'
@@ -93,7 +94,9 @@ class ImageViewerWidgetWrapper extends Component {
         }).on('rectangleDrawn', (g0) => {
             this.props.rectangleDrawn(g0);
         });
-        this.geojsViewer.initialize();
+        this.geojsViewer.initialize().then(() => {
+            logger.log('video-initializing');
+        });
         mousetrap.bind(['del', 'backspace', 'd'], () => {
             if (this.props.editingTrackId !== null) {
                 this.props.deleteAnnotation();

@@ -24,7 +24,7 @@ response = client.create_hit(
     Reward='0.20',
     Title='Video annotation',
     Keywords='annotation,video,draw',
-    Description='Annotation objects on a video clip',
+    Description='Annotate objects on a video clip',
     Question=externalQuestion
 )
 

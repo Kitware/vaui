@@ -60,7 +60,8 @@ class LogResource(Resource):
             creator=adminUser, reuseExisting=True)
 
         logItemName = str(int(time.time())) + '_' + hitId + '_' + \
-            type + '_' + str(uuid.uuid4().get_hex().upper()[0:4])
+            (data['workerId'] + '_' if 'workerId' in data else '') + type + '_'  + \
+            str(uuid.uuid4().get_hex().upper()[0:4])
 
         item = Item().createItem(logItemName, adminUser, logFolder, reuseExisting=True)
         data['type'] = type
