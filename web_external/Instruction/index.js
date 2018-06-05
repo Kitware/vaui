@@ -12,7 +12,12 @@ class Instruction extends PureComponent {
     render() {
         return <div className='b-instruction'>
             <div className='container-fluid'>
-                <h4>Instructions</h4>
+                <h4>Task</h4>
+                <div><b>Improve</b> annotations of objects indicated in the video.</div>
+                <div><b>Only</b> objects that have been annotated needs improvement.</div>
+                <div>Commonly the objects will be one or two people.</div>
+                <br />
+                <h4>Note</h4>
                 <ul>
                     <li>There are 3 kinds of boxes.</li>
                     <li>Key boxes are shown with a thick border. You will draw key boxes and be able to delete them.</li>
@@ -23,7 +28,7 @@ class Instruction extends PureComponent {
                     <li>After making sure all boxes properly enclose the objects, click the submit button to submit. You will have an option to provide feedback before submitting.</li>
                 </ul>
                 <br />
-                <h4>Properly enclosing</h4>
+                {/* <h4>Properly enclosing</h4>
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_dont.jpg' />
@@ -36,19 +41,19 @@ class Instruction extends PureComponent {
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/presumelocation_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/presumelocation_dont.jpg' />
                 <p>Enclose all parts of the object, even if you can't see all of the parts of the object. Make a best estimate on where you think all parts of the object would be if you could see them.</p>
-                <br />
+                <br /> */}
                 <h4>Example video</h4>
-                <p>Here is an example showing refining a single track of an activity, &ldquo;sitting down&rdquo;.</p>
+                {/* <p>Here is an example showing refining a single track of an activity, &ldquo;sitting down&rdquo;.</p> */}
                 <Plyr
                     type="video"
                     url="https://s3.amazonaws.com/diva-mturk-apps-resources/instruction-video.mp4"
                     controls={['play-large', 'play', 'progress', 'current-time']}
                 />
-                <p>The worker watches the video one time to have a general idea and rewind to the start. Then the worker uses the RIGHT
+                {/* <p>The worker watches the video one time to have a general idea and rewind to the start. Then the worker uses the RIGHT
             arrow key to advance the video and draws key boxes. After that, the worker reviews the result and draws additional
             boxes to make sure all boxes are enclosing the object properly.</p>
                 <p>You do not need to follow this same workflow as the user in the video, but this video shows an example of how to
-            complete the task correctly and efficiently.</p>
+            complete the task correctly and efficiently.</p> */}
                 <br />
                 <h4>Controls</h4>
                 <div>
@@ -71,12 +76,12 @@ class Instruction extends PureComponent {
                 <br />
                 <h4>Approval</h4>
                 <p>Results will be approved manually.</p>
-                <br />
+                {/* <br />
                 <h4>Other</h4>
                 <h5>Track line</h5>
                 <p>The position of each tracked object over time will display as a line. Where a user has drawn a key box, there will be a small dot appearing on the track line. Clicking on these dots will jump to the frame where that box was created.</p>
                 <h5>Playback speed</h5>
-                <p>Additional playback speeds can be selected from the menu next to play button.</p>
+                <p>Additional playback speeds can be selected from the menu next to play button.</p> */}
             </div>
         </div>
     }

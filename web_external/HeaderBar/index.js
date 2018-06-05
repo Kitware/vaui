@@ -23,10 +23,11 @@ class HeaderBar extends PureComponent {
         super(props);
         var queryParams = qs.parse(location.search);
         this.queryParams = queryParams;
+        var previewMode = queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId || queryParams.assignmentId === 'null';
         this.state = {
-            previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId || queryParams.assignmentId === 'null',
+            previewMode,
             devMode: !queryParams.hitId || queryParams.hitId === 'null',
-            showInstruction: false,
+            showInstruction: !previewMode,
             showSubmitConfirm: false,
             showReportProblem: false,
             feedback: '',
