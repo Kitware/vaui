@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { staticRoot } from 'girder/rest';
 import Plyr from 'react-plyr';
 
+import logger from '../util/logger';
 import Dodont from './Dodont';
 
 import 'plyr/dist/plyr.css';
@@ -16,6 +17,7 @@ class Instruction extends PureComponent {
                 <div><b>Improve</b> annotations of objects indicated in the video.</div>
                 <div><b>Only</b> objects that have been annotated needs improvement.</div>
                 <div>Commonly the objects will be one or two people.</div>
+                <div>On average, you only need to draw 10 boxes to improve annotation of one person.</div>
                 <br />
                 <h4>Note</h4>
                 <ul>
@@ -48,6 +50,9 @@ class Instruction extends PureComponent {
                     type="video"
                     url="https://s3.amazonaws.com/diva-mturk-apps-resources/instruction-video.mp4"
                     controls={['play-large', 'play', 'progress', 'current-time']}
+                    onPlay={() => {
+                        logger.log('example-video-played');
+                    }}
                 />
                 {/* <p>The worker watches the video one time to have a general idea and rewind to the start. Then the worker uses the RIGHT
             arrow key to advance the video and draws key boxes. After that, the worker reviews the result and draws additional
@@ -73,9 +78,9 @@ class Instruction extends PureComponent {
                         </tbody>
                     </table>
                 </div>
-                <br />
+                {/* <br />
                 <h4>Approval</h4>
-                <p>Results will be approved manually.</p>
+                <p>Results will be approved manually.</p> */}
                 {/* <br />
                 <h4>Other</h4>
                 <h5>Track line</h5>

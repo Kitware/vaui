@@ -55,6 +55,7 @@ class AppContainer extends PureComponent {
                     }
                 }} />
                 <Route exact path="/submit" component={FormSubmitter} />
+                <Route exact path="/problem" component={FormSubmitter} />
                 <Route exact path="/result/:assignmentId" render={(props) => {
                     return <Fragment>
                         <Result />

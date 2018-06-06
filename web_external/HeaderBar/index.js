@@ -14,6 +14,7 @@ import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import submit from '../actions/submit';
 import processActivityGroup from '../actions/processActivityGroup';
 import Instruction from '../Instruction';
+import Problem from '../Problem';
 import logger from '../util/logger';
 
 import './style.styl';
@@ -23,11 +24,11 @@ class HeaderBar extends PureComponent {
         super(props);
         var queryParams = qs.parse(location.search);
         this.queryParams = queryParams;
-        var previewMode = queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId || queryParams.assignmentId === 'null';
+        var devMode = !queryParams.hitId || queryParams.hitId === 'null';
         this.state = {
-            previewMode,
-            devMode: !queryParams.hitId || queryParams.hitId === 'null',
-            showInstruction: !previewMode,
+            previewMode: queryParams.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE' || !queryParams.assignmentId || queryParams.assignmentId === 'null',
+            devMode,
+            showInstruction: !devMode,
             showSubmitConfirm: false,
             showReportProblem: false,
             feedback: '',
@@ -69,9 +70,12 @@ class HeaderBar extends PureComponent {
                     this.setState({ showSubmitConfirm: true });
                     logger.log('before-submit');
                 }}>{this.state.previewMode ? 'Preview mode' : (this.props.saving ? 'Saving' : 'Submit')}</button>
-                <button className='btn btn-link btn-sm' onClick={(e) => this.setState({ showReportProblem: true })}>Report problem</button>
+                <button className='btn btn-link btn-sm problem' onClick={(e) => {
+                    logger.log('report-problem-clicked');
+                    this.setState({ showReportProblem: true });
+                }}>Complete this HIT by give us a feedback instead</button>
             </div>
-            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction();logger.log('hide-instruction'); }} bsSize="large" keyboard={false} backdrop={true}>
+            <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction(); logger.log('hide-instruction'); }} bsSize="large" keyboard={false} backdrop={true}>
                 <Modal.Header closeButton>
                 </Modal.Header>
                 <Modal.Body>
@@ -109,23 +113,19 @@ class HeaderBar extends PureComponent {
             </Modal>
             <Modal show={this.state.showReportProblem} keyboard={false} backdrop={'static'}>
                 <Modal.Header>
-                    <Modal.Title>Report problem</Modal.Title>
+                    <Modal.Title>Provide feedback</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <div>Do you see the video? Can you play the video? Is there anything preventing you from completing the HIT?</div>
-                    <br />
-                    <textarea className="form-control form-control-sm" rows="3" value={this.state.problem} maxLength="240" onChange={(e) => { this.setState({ problem: e.target.value }); }}></textarea>
+                    <Problem ref={(problem) => { this.problem = problem; }} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => { this.setState({ showReportProblem: false }); }}>Cancel</Button>
-                    <Button bsStyle="primary" disabled={!this.state.problem} onClick={() => {
-                        logger.log('problem', { problem: this.state.problem })
-                            .then(() => {
-                                this.setState({ showReportProblem: false });
-                                bootbox.alert('Thank you for your reporting!');
-                                return;
+                    <Button bsStyle="primary"
+                        onClick={() => {
+                            this.problem.submit().then(() => {
+                                this.props.history.push(`/problem`);
                             });
-                    }}>Send</Button>
+                        }}>Submit</Button>
                 </Modal.Footer>
             </Modal>
         </div>;
