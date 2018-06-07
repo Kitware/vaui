@@ -39,6 +39,7 @@ class Problem extends PureComponent {
         if ((Object.values(this.state.trueFalseQuestions)).concat((Object.values(this.state.freeformQuestions))).filter(value => !value).length === 0) {
             return logger.log('problem', { ...this.state.trueFalseQuestions, ...this.state.freeformQuestions });
         }
+        return Promise.reject();
     }
 
     render() {

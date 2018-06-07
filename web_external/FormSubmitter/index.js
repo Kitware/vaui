@@ -8,7 +8,7 @@ class FormSubmitter extends PureComponent {
     }
 
     render() {
-        var result = this.props.match.path === 'submit' ? '1' : 'problem';
+        var result = this.props.match.path === '/submit' ? '1' : 'problem';
         var queryParams = qs.parse(location.search);
         return <form action={`${queryParams.turkSubmitTo}/mturk/externalSubmit`}
             ref={(form) => { this.form = form; }}>

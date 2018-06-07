@@ -22,7 +22,9 @@ class Viewer extends PureComponent {
             rectangleDrawn: false,
             played: false,
             detectionRightClick: false,
-            detectionLeftClick: false
+            detectionLeftClick: false,
+            sliderDragged: false,
+            rightArrowPressed: false
         }
         this.state = {
             playing: false,
@@ -381,6 +383,10 @@ class Viewer extends PureComponent {
                                             this.setState({
                                                 videoCurrentFrame: e.target.value
                                             });
+                                            if (!this.first.sliderDragged) {
+                                                this.first.sliderDragged = true;
+                                                logger.log('slider-dragged');
+                                            }
                                         }} />
                                     <SpinBox
                                         suffix={' / ' + (this.state.videoMaxFrame - this.props.frameLimit[0])}
@@ -639,6 +645,10 @@ class Viewer extends PureComponent {
     }
 
     _nextFrame() {
+        if (!this.first.rightArrowPressed) {
+            this.first.rightArrowPressed = true;
+            logger.log('right-arrow-pressed');
+        }
         if (!this.state.ready || this.props.loadingAnnotation) {
             return;
         }

@@ -122,9 +122,10 @@ class HeaderBar extends PureComponent {
                     <Button onClick={() => { this.setState({ showReportProblem: false }); }}>Cancel</Button>
                     <Button bsStyle="primary"
                         onClick={() => {
-                            this.problem.submit().then(() => {
-                                this.props.history.push(`/problem`);
-                            });
+                            this.problem.submit()
+                                .then(() => {
+                                    this.props.history.push(`/problem`);
+                                }).catch(() => { });
                         }}>Submit</Button>
                 </Modal.Footer>
             </Modal>
