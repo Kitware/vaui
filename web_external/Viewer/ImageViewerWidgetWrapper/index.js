@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import mousetrap from 'mousetrap';
 
 import GeoJSViewer from './GeoJSViewer';
 import logger from '../../util/logger';
@@ -25,9 +24,9 @@ class ImageViewerWidgetWrapper extends Component {
         if (this.props.currentFrame !== nextProps.currentFrame) {
             this.geojsViewer.setFrame(nextProps.currentFrame);
         }
-        if (this.props.editMode !== nextProps.editMode) {
-            this.geojsViewer.setEditMode(nextProps.editMode);
-        }
+        // if (this.props.editMode !== nextProps.editMode) {
+        //     this.geojsViewer.setEditMode(nextProps.editMode);
+        // }
         // redraw redrawAnnotation() to happen before call edit() because the latter uses the result of the former some time
         if (this.props.detectionContainer !== nextProps.detectionContainer ||
             this.props.annotationActivityContainer !== nextProps.annotationActivityContainer ||
@@ -36,15 +35,15 @@ class ImageViewerWidgetWrapper extends Component {
             this.props.editingTrackId !== nextProps.editingTrackId) {
             this.geojsViewer.redrawAnnotation();
         }
-        if (this.props.editingTrackId !== nextProps.editingTrackId) {
-            this.geojsViewer.edit(nextProps.editingTrackId !== null);
-        }
-        if (this.props.drawingToZoom !== nextProps.drawingToZoom) {
-            if (this.props.drawingToZoom) {
-                this.geojsViewer.setEditMode('draw');
-            }
-            this.geojsViewer.edit(nextProps.drawingToZoom);
-        }
+        // if (this.props.editingTrackId !== nextProps.editingTrackId) {
+        //     this.geojsViewer.edit(nextProps.editingTrackId !== null);
+        // }
+        // if (this.props.drawingToZoom !== nextProps.drawingToZoom) {
+            // if (this.props.drawingToZoom) {
+                // this.geojsViewer.setEditMode('draw');
+            // }
+            // this.geojsViewer.edit(nextProps.drawingToZoom);
+        // }
         if (this.props.zoomRegion !== nextProps.zoomRegion) {
             this.geojsViewer.zoomTo(nextProps.zoomRegion);
         }
@@ -79,16 +78,10 @@ class ImageViewerWidgetWrapper extends Component {
             }
         }).on('viewerLeftClick', (annotation) => {
             this.props.detectionLeftClick(null);
-        }).on('viewerRightClick', (annotation) => {
-            this.props.detectionRightClick(null);
         }).on('detectionLeftClick', (annotation) => {
             this.props.detectionLeftClick(annotation);
-        }).on('detectionRightClick', (annotation) => {
-            this.props.detectionRightClick(annotation);
         }).on('trackTrailClick', (trackId) => {
             this.props.trackTrailClick(trackId);
-        }).on('trackTrailRightClick', (trackId) => {
-            this.props.trackTrailRightClick(trackId);
         }).on('trackTrailTruthPointClick', (trackId, frame) => {
             this.props.trackTrailTruthPointClick(trackId, frame);
         }).on('rectangleDrawn', (g0) => {
@@ -97,16 +90,10 @@ class ImageViewerWidgetWrapper extends Component {
         this.geojsViewer.initialize().then(() => {
             logger.log('video-initializing');
         });
-        mousetrap.bind(['del', 'backspace', 'd'], () => {
-            if (this.props.editingTrackId !== null) {
-                this.props.deleteAnnotation();
-            }
-        });
     }
 
     componentWillUnmount() {
         this.geojsViewer.destroy();
-        mousetrap.unbind(['del', 'backspace', 'd']);
     }
 
     render() {

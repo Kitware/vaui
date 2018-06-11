@@ -14,7 +14,7 @@ import { SELECTED_FOLDER_CHANGE, SELECTED_ITEM_CHANGE } from '../actions/types';
 import submit from '../actions/submit';
 import processActivityGroup from '../actions/processActivityGroup';
 import Instruction from '../Instruction';
-import Problem from '../Problem';
+import Feedback from '../Feedback';
 import logger from '../util/logger';
 
 import './style.styl';
@@ -30,9 +30,7 @@ class HeaderBar extends PureComponent {
             devMode,
             showInstruction: !devMode,
             showSubmitConfirm: false,
-            showReportProblem: false,
-            feedback: '',
-            problem: ''
+            showReportProblem: false
         };
     }
 
@@ -92,15 +90,17 @@ class HeaderBar extends PureComponent {
                 <Modal.Body>
                     <div>Do you want to sumbit your result? This cannot be undone.</div>
                     <br />
-                    <div>(Optional) Feedback, what can we improve?</div>
-                    <textarea className="form-control form-control-sm" rows="3" value={this.state.feedback} maxLength="180" onChange={(e) => { this.setState({ feedback: e.target.value }); }}></textarea>
+                    <Feedback ref={(feedback) => { this.feedback = feedback; }} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => { this.setState({ showSubmitConfirm: false }); }}>Cancel</Button>
                     <Button bsStyle="primary" onClick={() => {
+                        var ps = [];
                         var queryParams = qs.parse(location.search);
-                        logger.log('submit');
-                        this.props.dispatch(submit(queryParams, this.state.feedback)).then(() => {
+                        ps.push(this.props.dispatch(submit(queryParams)));
+                        ps.push(this.feedback.submit());
+                        Promise.all(ps).then(() => {
+                            logger.log('submit');
                             if (this.dev) {
                                 this.setState({ showSubmitConfirm: false });
                                 bootbox.alert('Submitted successfully');
@@ -116,7 +116,7 @@ class HeaderBar extends PureComponent {
                     <Modal.Title>Provide feedback</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <Problem ref={(problem) => { this.problem = problem; }} />
+                    <Feedback problem={true} ref={(problem) => { this.problem = problem; }} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button onClick={() => { this.setState({ showReportProblem: false }); }}>Cancel</Button>

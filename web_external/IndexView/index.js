@@ -9,16 +9,18 @@ import './style.styl';
 class IndexView extends PureComponent {
     render() {
         return <div className='v-index clearbox'>
-            <div className='left-sidebar'>
-                <div className='treeview-container'>
-                    <Panel className='simple-panel'>
-                    <Panel.Heading>Tracks</Panel.Heading>
-                        <Panel.Body>
-                            <TrackPane />
-                        </Panel.Body>
-                    </Panel>
-                </div>
-            </div>
+            {this.props.annotationTypeContainer
+                && this.props.annotationTypeContainer.getAllItems().length > 1
+                && <div className='left-sidebar'>
+                    <div className='treeview-container'>
+                        <Panel className='simple-panel'>
+                            <Panel.Heading>Tracks</Panel.Heading>
+                            <Panel.Body>
+                                <TrackPane />
+                            </Panel.Body>
+                        </Panel>
+                    </div>
+                </div>}
             <Viewer className='main' />
         </div>;
     }
@@ -32,7 +34,9 @@ const mapStateToProps = (state, ownProps) => {
         selectedTrackId: state.selectedTrackId,
         selectedActivityId: state.selectedActivityId,
         selectedDetectionId: state.selectedDetectionId,
-        interpolationWidget: state.interpolationWidget
+        interpolationWidget: state.interpolationWidget,
+        annotationTypeContainer: state.annotationTypeContainer
+
     };
 };
 

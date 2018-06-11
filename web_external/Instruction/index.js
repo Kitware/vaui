@@ -16,9 +16,9 @@ class Instruction extends PureComponent {
                 <h4>Task</h4>
                 <div><b>Improve</b> annotations of objects indicated in the video.</div>
                 <div><b>Only</b> objects that have been annotated needs improvement.</div>
-                <div>Commonly the objects will be one or two people.</div>
-                <div>On average, you only need to draw 10 boxes to improve annotation of one person.</div>
-                <br />
+                <div>Make sure the annotations are properly enclosing the object.</div>
+                <div>Commonly the objects will be one or two people and you only need to draw 10 boxes to improve the annotations of one person.</div>
+                {/* <br />
                 <h4>Note</h4>
                 <ul>
                     <li>There are 3 kinds of boxes.</li>
@@ -28,32 +28,35 @@ class Instruction extends PureComponent {
                     <li>Fixed key boxes are shown like key boxes but are shaded and filled in. They are read-only. They are the boxes at the start and the end of a track.</li>
                     <li>At the beginning, the calculated boxes are commonly not enclosing the object properly. Your task is to refine this by drawing key boxes to make sure both key boxes and calculated boxes enclose the objects properly.</li>
                     <li>After making sure all boxes properly enclose the objects, click the submit button to submit. You will have an option to provide feedback before submitting.</li>
-                </ul>
+                </ul> */}
                 <br />
-                {/* <h4>Properly enclosing</h4>
+                <h4>Properly enclosing</h4>
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_dont.jpg' />
                 <p>Enclose all parts of the object.  Including small carried items for person tracks.</p>
+                <br />
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/extraspace_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/extraspace_dont.jpg' />
                 <p>Leave as little extra space as possible.</p>
+                <br />
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/presumelocation_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/presumelocation_dont.jpg' />
                 <p>Enclose all parts of the object, even if you can't see all of the parts of the object. Make a best estimate on where you think all parts of the object would be if you could see them.</p>
-                <br /> */}
+                <br />
                 <h4>Example video</h4>
                 {/* <p>Here is an example showing refining a single track of an activity, &ldquo;sitting down&rdquo;.</p> */}
-                <Plyr
+                {/* <Plyr
                     type="video"
                     url="https://s3.amazonaws.com/diva-mturk-apps-resources/instruction-video.mp4"
                     controls={['play-large', 'play', 'progress', 'current-time']}
                     onPlay={() => {
                         logger.log('example-video-played');
                     }}
-                />
+                /> */}
+                <div>VIDEO NEEDS TO BE RETAKEN</div>
                 {/* <p>The worker watches the video one time to have a general idea and rewind to the start. Then the worker uses the RIGHT
             arrow key to advance the video and draws key boxes. After that, the worker reviews the result and draws additional
             boxes to make sure all boxes are enclosing the object properly.</p>
@@ -65,16 +68,16 @@ class Instruction extends PureComponent {
                     <table className="table table-striped">
                         <thead><tr><th>Function</th><th>Description</th></tr></thead>
                         <tbody>
-                            <tr><td>Enter edit mode</td><td>right click on a track</td></tr>
-                            <tr><td>Exit edit mode</td><td>While in edit mode, right click on a blank space</td></tr>
-                            <tr><td>Draw a key box</td><td>While in edit mode, draw a box with the mouse</td></tr>
-                            <tr><td>Remove a key box</td><td>While in edit mode, press DELETE, BACKSPACE, or D key to remove current box if it is a key box.</td></tr>
-                            <tr><td>Advance/rewind the video by 1 frame</td><td>RIGHT/LEFT arrow key</td></tr>
-                            <tr><td>Continuously advance/rewind the video by frame</td><td>press and hold RIGHT/LEFT arrow key</td></tr>
-                            <tr><td>Rewind to start</td><td>Start button or S key</td></tr>
-                            <tr><td>Play video</td><td>Play button or SPACE key</td></tr>
-                            <tr><td>Pause video</td><td>Pause button or SPACE key</td></tr>
-                            <tr><td>Zoom</td><td>mouse scroll</td></tr>
+                            <tr><td>To edit</td><td>Click on a box</td></tr>
+                            {/* <tr><td>Exit edit mode</td><td>While in edit mode, right click on a blank space</td></tr> */}
+                            {/* <tr><td>Draw a key box</td><td>While in edit mode, draw a box with the mouse</td></tr> */}
+                            <tr><td>Remove a key box</td><td>press DELETE, BACKSPACE, or D key</td></tr>
+                            <tr><td>Forward/rewind by 1 frame</td><td>RIGHT/LEFT arrow key</td></tr>
+                            {/* <tr><td>Continuously advance/rewind the video by frame</td><td>press and hold RIGHT/LEFT arrow key</td></tr> */}
+                            {/* <tr><td>Rewind to start</td><td>Start button or S key</td></tr> */}
+                            {/* <tr><td>Play video</td><td>Play button or SPACE key</td></tr> */}
+                            {/* <tr><td>Pause video</td><td>Pause button or SPACE key</td></tr> */}
+                            {/* <tr><td>Zoom</td><td>mouse scroll</td></tr> */}
                         </tbody>
                     </table>
                 </div>

@@ -11,7 +11,7 @@
     "bootstrap-slider": "^9.9.0",
     "core-js": "^2.5.7",
     "eslint-plugin-react": "^7.4.0",
-    "geojs": "^0.16.0",
+    "geojs": "file:../geojs",
     "hammerjs": "^2.0.8",
     "mousetrap": "^1.6.1",
     "query-string": "^5.1.0",

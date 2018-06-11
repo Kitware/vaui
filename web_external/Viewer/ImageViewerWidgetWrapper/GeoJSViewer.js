@@ -53,21 +53,21 @@ class GeoJSViewer {
             video.src = `${getApiRoot()}/item/${videoItem._id}/download?contentDisposition=inline`;
 
             video.onstalled = (e) => {
-                console.log('stalled');
+                // console.log('stalled');
                 this.stop();
             };
 
             video.onsuspend = (e) => {
-                console.log('suspend');
+                // console.log('suspend');
             };
 
             video.onloadstart = (e) => {
-                console.log("loadstart");
+                // console.log("loadstart");
             };
 
 
             video.oncanplay = (e) => {
-                console.log("canplay");
+                // console.log("canplay");
             };
 
             return new Promise((resolve, reject) => {
@@ -93,6 +93,13 @@ class GeoJSViewer {
                     this.annotationLayer = this._viewer.createLayer('annotation', {
                         annotations: ['point', 'line', 'rectangle', 'polygon'],
                         showLabels: false
+                    });
+                    this.annotationLayer.geoOn(geo.event.annotation.edit_action, (e) => {
+                        if (e.action === geo.event.actionup) {
+                            setTimeout(() => {
+                                this._annotationChanged(e.annotation);
+                            }, 0);
+                        }
                     });
 
                     this.detectionFeature = this.featureLayer.createFeature('polygon', { selectionAPI: true }).geoOn(geo.event.feature.mouseclick, (e) => {
@@ -244,55 +251,63 @@ class GeoJSViewer {
         this.trigger('rectangleDrawn', g0);
     }
 
-    edit(enabled) {
-        if (this.editEnabled === enabled) {
-            return;
-        }
-        var layer = this.annotationLayer;
-        if (enabled) {
-            if (this.editMode === 'edit') {
-                layer.options('clickToEdit', true);
-                // If there is an detection for current frame, change it to edit mode directly
-                if (layer.annotations().length === 1) {
-                    layer.mode('edit', layer.annotations()[0]);
-                }
-                layer.geoOn(geo.event.annotation.state, (e) => {
-                    if (e.annotation.state() === 'done') {
-                        this._annotationChanged(e.annotation);
-                    }
-                });
-            } else if (this.editMode === 'draw') {
-                layer.mode('rectangle');
-                layer.annotations().slice(-1)[0].mouseClick = function () { };
-                layer.geoOn(geo.event.annotation.state, (e) => {
-                    this._annotationChanged(e.annotation);
-                });
-                layer.geoOn(geo.event.annotation.mode, (e) => {
-                    if (e.mode === null && e.oldMode === 'rectangle') {
-                        layer.mode('rectangle');
-                        layer.annotations().slice(-1)[0].mouseClick = function () { };
-                    }
-                });
-            }
-        } else {
-            layer.options('clickToEdit', false);
-            layer.geoOff(geo.event.annotation.state);
-            layer.geoOff(geo.event.annotation.mode);
-            layer.mode(null);
-        }
-        this.annotationLayer.draw();
-        this.editEnabled = enabled;
-    }
+    // edit(enabled) {
+    //     console.log('edit');
+    //     if (this.editEnabled === enabled) {
+    //         return;
+    //     }
+    //     var layer = this.annotationLayer;
+    //     if (enabled) {
+    //         if (this.editMode === 'edit') {
+    //             // layer.options('clickToEdit', true);
+    //             // If there is an detection for current frame, change it to edit mode directly
+    //             if (layer.annotations().length === 1) {
+    //                 layer.mode('edit', layer.annotations()[0]);
+    //             }
+    //             layer.geoOn(geo.event.annotation.state, (e) => {
+    //                 if (e.annotation.state() === 'done') {
+    //                     this._annotationChanged(e.annotation);
+    //                 }
+    //             });
+    //             layer.geoOn(geo.event.annotation.coordinates,
+    //                 function (evt) {
+    //                     console.log(evt.annotation.coordinates());
+    //                 });
+    //             layer.geoOn(geo.event.annotation.update, (e) => {
+    //                 console.log("geo.event.annotation.update");
+    //             });
+    //         } else if (this.editMode === 'draw') {
+    //             layer.mode('rectangle');
+    //             layer.annotations().slice(-1)[0].mouseClick = function () { };
+    //             layer.geoOn(geo.event.annotation.state, (e) => {
+    //                 this._annotationChanged(e.annotation);
+    //             });
+    //             layer.geoOn(geo.event.annotation.mode, (e) => {
+    //                 if (e.mode === null && e.oldMode === 'rectangle') {
+    //                     layer.mode('rectangle');
+    //                     layer.annotations().slice(-1)[0].mouseClick = function () { };
+    //                 }
+    //             });
+    //         }
+    //     } else {
+    //         layer.options('clickToEdit', false);
+    //         layer.geoOff(geo.event.annotation.state);
+    //         layer.geoOff(geo.event.annotation.mode);
+    //         layer.mode(null);
+    //     }
+    //     this.annotationLayer.draw();
+    //     this.editEnabled = enabled;
+    // }
 
-    setEditMode(mode) {
-        this.editMode = mode;
-        if (!this.editEnabled) {
-            return;
-        } else {
-            this.edit(false);
-            this.edit(true);
-        }
-    }
+    // setEditMode(mode) {
+    //     this.editMode = mode;
+    //     if (!this.editEnabled) {
+    //         return;
+    //     } else {
+    //         this.edit(false);
+    //         this.edit(true);
+    //     }
+    // }
 
     showTrackTrail(showTrackTrail) {
         this._showTrackTrail = showTrackTrail;
@@ -302,7 +317,9 @@ class GeoJSViewer {
     }
 
     _drawAnnotation(frame) {
+        // this.annotationLayer.geoOff(geo.event.annotation.edit_action);
         this.annotationLayer.removeAllAnnotations(true);
+        var existingAnnotationMode = this.annotationLayer.mode();
         this.annotationLayer.mode(null);
         var result = this.getAnnotation(frame);
         if (!result) {
@@ -332,11 +349,21 @@ class GeoJSViewer {
                 corners: [{ x: g0[0][0], y: g0[0][1] }, { x: g0[1][0], y: g0[0][1] }, { x: g0[1][0], y: g0[1][1] }, { x: g0[0][0], y: g0[1][1] }],
                 style: editingStyle,
                 editHandleStyle: {
-                    rotateHandleOffset: 99999
+                    handles: { edge: false, rotate: false, resize: false, center: false }
                 }
             });
             this.annotationLayer.addAnnotation(rect);
-            this.annotationLayer.draw();
+            if (record.detection.src !== 'ground-truth') {
+                // The follow is a quick fix
+                if (this._playing) {
+                    this.annotationLayer.mode('edit', rect);
+                    this.annotationLayer.draw();
+                }
+                this._viewer.scheduleAnimationFrame(() => {
+                    this.annotationLayer.mode('edit', rect);
+                    this.annotationLayer.draw();
+                });
+            }
         }
         if (this._showTrackTrail) {
             result = this.getTrackTrails(frame);

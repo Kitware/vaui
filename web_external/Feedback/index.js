@@ -6,21 +6,31 @@ import { FormGroup, FormControl, Radio, ControlLabel, HelpBlock } from 'react-bo
 import logger from '../util/logger';
 import './style.styl';
 
-class Problem extends PureComponent {
-    constructor() {
-        super();
+class Feedback extends PureComponent {
+    constructor(props) {
+        super(props);
         this.state = {
             trueFalseQuestions: {
-                "Were you able to annotate this video clip?": null,
                 "Was this HIT easy to understand?": null,
                 "Was this HIT a good value?": null
             },
             freeformQuestions: {
-                "Please describe any difficulty you had completing this task": '',
                 "Do you have any additional feedback to improve our HIT for MTurk?": ''
             },
             submitAttempted: false
         };
+        if (props.problem) {
+            this.state.trueFalseQuestions = {
+                ...{
+                    "Were you able to annotate this video clip?": null
+                }, ...this.state.trueFalseQuestions
+            };
+            this.state.freeformQuestions = {
+                ...{
+                    "Please describe any difficulty you had completing this task": ''
+                }, ...this.state.freeformQuestions
+            };
+        }
     }
 
     trueFalseQuestionAnswerChange(question, value) {
@@ -33,33 +43,31 @@ class Problem extends PureComponent {
     }
 
     submit() {
-        this.setState({
-            submitAttempted: true
-        });
-        if ((Object.values(this.state.trueFalseQuestions)).concat((Object.values(this.state.freeformQuestions))).filter(value => !value).length === 0) {
-            return logger.log('problem', { ...this.state.trueFalseQuestions, ...this.state.freeformQuestions });
+        if (this.props.problem) {
+            this.setState({
+                submitAttempted: true
+            });
+            if ((Object.values(this.state.trueFalseQuestions)).concat((Object.values(this.state.freeformQuestions))).filter(value => !value).length === 0) {
+                return logger.log('problem', { ...this.state.trueFalseQuestions, ...this.state.freeformQuestions });
+            }
+            return Promise.reject();
+        } else {
+            if ((Object.values(this.state.trueFalseQuestions)).concat((Object.values(this.state.freeformQuestions))).filter(value => value).length !== 0) {
+                return logger.log('feedback', { ...this.state.trueFalseQuestions, ...this.state.freeformQuestions });
+            }
+            return Promise.resolve();
         }
-        return Promise.reject();
     }
 
     render() {
-        return <div className='b-problem'>
-            {/*
-                Were you able to annotate this clip? If no, please describe why.
-                Was this HIT easy to understand?  If no, please suggest any improvements.
-                Were there any UI interactions that were unclear?
-                Are there any UI interactions that could make this task easier to complete?
-                Please describe any difficulty you had completing this task.
-                Was this HIT a good value?
-                Do you have any additional feedback to improve our HIT for MTurk?
-            */}
+        return <div className='b-feedback'>
             <div>
                 {Object.entries(this.state.trueFalseQuestions).map(([question, answer]) => {
                     var invalid = this.state.submitAttempted && !answer;
                     return <Fragment key={question}>
                         <FormGroup validationState={invalid ? 'error' : null}>
                             <div>
-                                <ControlLabel>{question}<span className='required-star'></span></ControlLabel>
+                                <ControlLabel>{question}{this.props.problem && <span className='required-star'></span>}</ControlLabel>
                             </div>
                             <Radio name={question}
                                 inline
@@ -85,10 +93,9 @@ class Problem extends PureComponent {
                         key={question}
                         controlId={question}
                         validationState={invalid ? 'error' : null}>
-                        <ControlLabel>{question}<span className='required-star'></span></ControlLabel>
+                        <ControlLabel>{question}{this.props.problem && <span className='required-star'></span>}</ControlLabel>
                         <FormControl
                             componentClass="textarea"
-                            placeholder="textarea"
                             value={answer}
                             onChange={(e) => {
                                 this.setState({
@@ -106,4 +113,4 @@ class Problem extends PureComponent {
     }
 }
 
-export default Problem;
+export default Feedback;

@@ -69,8 +69,6 @@ class SubmitResource(Resource):
             activity['assignmentId'] = assignmentId
             Activities().save(activity)
 
-        feedback = data['feedback']
-
         adminUser = User().getAdmins().next()
         collection = Collection().createCollection('Refiner', creator=adminUser,
                                                    description='', public=True, reuseExisting=True)
@@ -84,8 +82,7 @@ class SubmitResource(Resource):
             'assignmentId': assignmentId,
             'hitId': hitId,
             'workerId': workerId,
-            'turkSubmitTo': turkSubmitTo,
-            'feedback': feedback
+            'turkSubmitTo': turkSubmitTo
         })
 
     @autoDescribeRoute(

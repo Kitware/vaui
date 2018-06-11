@@ -1,7 +1,7 @@
 import _ from 'underscore';
 import { restRequest } from 'girder/rest';
 
-import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, GOTO_FRAME, LIMIT_FRAME } from '../actions/types';
+import { IMPORT_PROGRESS_CHANGE, LOAD_ANNOTATION, GOTO_FRAME, LIMIT_FRAME, EDIT_TRACK } from '../actions/types';
 import annotationDetectionParser, { AnnotationDetectionContainer } from '../util/annotationDetectionParser';
 import annotationActivityParser, { AnnotationActivityContainer } from '../util/annotationActivityParser';
 import annotationTypeParser, { AnnotationTypeContainer } from '../util/annotationTypeParser';
@@ -62,6 +62,10 @@ export default (folderId, activityGroupItemId) => {
             dispatch({
                 type: LOAD_ANNOTATION + '_FULFILLED',
                 payload: { annotationActivityContainer, annotationTypeContainer, annotationDetectionContainer }
+            });
+            dispatch({
+                type: EDIT_TRACK,
+                payload: annotationDetectionContainer.getAllItems()[0]
             });
             dispatch({
                 type: GOTO_FRAME,

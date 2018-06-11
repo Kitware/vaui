@@ -33,7 +33,7 @@ class Viewer extends PureComponent {
             videoCurrentFrame: Math.max(this.props.frameLimit[0], this.props.requestFrame.frame),
             videoMaxFrame: 100,
             ready: false,
-            editMode: 'draw',
+            editMode: null,
             drawingToZoom: false,
             zoomRegion: null,
             showTrackTrail: true
@@ -88,7 +88,10 @@ class Viewer extends PureComponent {
     _bindKeyboardShortcut() {
         mousetrap.bind('space', () => {
             if (this.state.playing) {
-
+                this.setState({
+                    playing: false,
+                    videoPlaying: false
+                });
             } else {
                 this.play();
             }
@@ -120,6 +123,17 @@ class Viewer extends PureComponent {
         mousetrap.bind('right', () => this._nextFrame());
         mousetrap.bind('up', () => this._skipBackward());
         mousetrap.bind('down', () => this._skipForward());
+        mousetrap.bind(['del', 'backspace', 'd'], () => {
+            if (this.props.editingTrackId !== null) {
+                this.props.dispatch({
+                    type: DELETE_DETECTION,
+                    payload: {
+                        frame: this.state.videoCurrentFrame,
+                        trackId: this.props.editingTrackId
+                    }
+                });
+            }
+        });
     }
     componentWillUnmount() {
         this._unbindKeyboardShortcut();
@@ -132,6 +146,7 @@ class Viewer extends PureComponent {
         mousetrap.unbind('right');
         mousetrap.unbind('up');
         mousetrap.unbind('down');
+        mousetrap.unbind(['del', 'backspace', 'd']);
     }
     requestToFrame(frame) {
         this.setState({ playing: false, videoPlaying: false }, () => {
@@ -200,16 +215,6 @@ class Viewer extends PureComponent {
                                             this.first.detectionLeftClick = true;
                                             logger.log('detection-lclick');
                                         }
-                                        this.props.dispatch({
-                                            type: ANNOTATION_CLICKED,
-                                            payload: annotation
-                                        });
-                                    }}
-                                    detectionRightClick={(annotation) => {
-                                        if (!this.first.detectionRightClick) {
-                                            this.first.detectionRightClick = true;
-                                            logger.log('detection-rclick');
-                                        }
                                         this.setState({ drawingToZoom: false });
                                         this.props.dispatch({
                                             type: EDIT_TRACK,
@@ -217,12 +222,6 @@ class Viewer extends PureComponent {
                                         });
                                     }}
                                     trackTrailClick={(trackId) => {
-                                        this.props.dispatch({
-                                            type: SELECT_TRACK,
-                                            payload: trackId
-                                        });
-                                    }}
-                                    trackTrailRightClick={(trackId) => {
                                         this.setState({ drawingToZoom: false });
                                         this.props.dispatch({
                                             type: EDIT_TRACK,
@@ -256,13 +255,6 @@ class Viewer extends PureComponent {
                                             });
                                         }
                                     }}
-                                    deleteAnnotation={() => this.props.dispatch({
-                                        type: DELETE_DETECTION,
-                                        payload: {
-                                            frame: this.state.videoCurrentFrame,
-                                            trackId: this.props.editingTrackId
-                                        }
-                                    })}
                                     key={this.props.selectedFolder._id} />
                             </div>,
                             message && <div className={message.classes} key='message'>
@@ -270,7 +262,7 @@ class Viewer extends PureComponent {
                             </div>,
                             <div className='control' key='control'>
                                 <div className='buttons'>
-                                    <div className='side btn-group btn-group-sm'>
+                                    {/* <div className='side btn-group btn-group-sm'>
                                         <button
                                             className='start btn btn-default'
                                             disabled={playDisabled}
@@ -282,7 +274,7 @@ class Viewer extends PureComponent {
                                                 });
                                             }}
                                             title="Go to start (S)">
-                                            Start
+                                            To start
                                         </button>
                                         <button
                                             className='end btn btn-default'
@@ -295,9 +287,9 @@ class Viewer extends PureComponent {
                                                 });
                                             }}
                                             title="Go to end">
-                                            End
+                                            To end
                                         </button>
-                                    </div>
+                                    </div> */}
                                     <div className='middle btn-group btn-group-sm'>
                                         <div className="btn-group btn-group-sm dropup">
                                             {!this.state.playing
@@ -305,7 +297,7 @@ class Viewer extends PureComponent {
                                                 <button className='play btn btn-default'
                                                     onClick={() => this.play()}
                                                     disabled={playDisabled}
-                                                    title='Play video (SPACE)'>
+                                                    title='Play video (SPACE Key)'>
                                                     <span className='glyphicon glyphicon-play'></span>
                                                     <span> {playbackRateDisplay}</span>
                                                 </button>
@@ -341,23 +333,23 @@ class Viewer extends PureComponent {
                                         <button className='previous-frame btn btn-default'
                                             disabled={playDisabled || this.state.videoCurrentFrame <= this.props.frameLimit[0]}
                                             onClick={() => this._previousFrame()}
-                                            title='go backward one frame (RIGHT)'>
+                                            title='go backward one frame (RIGHT Key)'>
                                             <span className='glyphicon glyphicon-step-backward'></span>
                                         </button>
                                         <button className='next-frame btn btn-default'
                                             disabled={playDisabled || this.state.videoCurrentFrame >= this.state.videoMaxFrame}
                                             onClick={() => this._nextFrame()}
-                                            title='go forward one frame (LEFT)'>
+                                            title='go forward one frame (LEFT Key)'>
                                             <span className='glyphicon glyphicon-step-forward'></span>
                                         </button>
                                         <button className='fast-backward btn btn-default' disabled={playDisabled}
                                             onClick={() => this._skipBackward()}
-                                            title='go backward 0.5 second (DOWN)'>
+                                            title='go backward 0.5 second (DOWN Key)'>
                                             <span className='glyphicon glyphicon-fast-backward'></span>
                                         </button>
                                         <button className='fast-forward btn btn-default' disabled={playDisabled}
                                             onClick={() => this._skipForward()}
-                                            title='go forward 0.5 second (UP)'>
+                                            title='go forward 0.5 second (UP Key)'>
                                             <span className='glyphicon glyphicon-fast-forward'></span>
                                         </button>
                                     </div>
