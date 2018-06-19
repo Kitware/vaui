@@ -71,7 +71,7 @@ class HeaderBar extends PureComponent {
                 <button className='btn btn-link btn-sm problem' onClick={(e) => {
                     logger.log('report-problem-clicked');
                     this.setState({ showReportProblem: true });
-                }}>Complete this HIT by give us a feedback instead</button>
+                }}>complete this HIT by giving us feedback instead</button>
             </div>
             <Modal show={this.state.showInstruction} onHide={() => { this.hideInstruction(); logger.log('hide-instruction'); }} bsSize="large" keyboard={false} backdrop={true}>
                 <Modal.Header closeButton>

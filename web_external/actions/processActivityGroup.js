@@ -44,7 +44,7 @@ export default (folderId, activityGroupItemId) => {
                 })
             }
             let activityFrames = activityGroup.detections.map((detection) => detection.ts0);
-            let activityTimespan = [_.min(activityFrames), _.max(activityFrames)];
+            let activityTimespan = [_.min(activityFrames) + 1, _.max(activityFrames) - 1];
             activity = {
                 id2: 1,
                 act2: { [activityGroup.type]: 1.0 },

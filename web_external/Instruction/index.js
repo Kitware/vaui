@@ -34,7 +34,7 @@ class Instruction extends PureComponent {
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_do.jpg'
                     src1='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/enclose_dont.jpg' />
-                <p>Enclose all parts of the object.  Including small carried items for person tracks.</p>
+                <p>Enclose all parts of the object. Including small carried items in the box when annotating people, for example, the newspaper in this screenshot.</p>
                 <br />
                 <Dodont
                     src0='https://s3.amazonaws.com/diva-mturk-apps-resources/do_dont/extraspace_do.jpg'
@@ -48,15 +48,14 @@ class Instruction extends PureComponent {
                 <br />
                 <h4>Example video</h4>
                 {/* <p>Here is an example showing refining a single track of an activity, &ldquo;sitting down&rdquo;.</p> */}
-                {/* <Plyr
+                <Plyr
                     type="video"
                     url="https://s3.amazonaws.com/diva-mturk-apps-resources/instruction-video.mp4"
                     controls={['play-large', 'play', 'progress', 'current-time']}
                     onPlay={() => {
                         logger.log('example-video-played');
                     }}
-                /> */}
-                <div>VIDEO NEEDS TO BE RETAKEN</div>
+                />
                 {/* <p>The worker watches the video one time to have a general idea and rewind to the start. Then the worker uses the RIGHT
             arrow key to advance the video and draws key boxes. After that, the worker reviews the result and draws additional
             boxes to make sure all boxes are enclosing the object properly.</p>
